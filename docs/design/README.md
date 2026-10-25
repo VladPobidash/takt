@@ -12,6 +12,7 @@ The visual language of Takt. Chosen on 2026-10-25 after comparing five direction
 4. **Readable from a music stand.** Assume 1–1.5 m viewing distance, quick glances, hands busy.
 5. **Two themes, both first-class.** Dark for the stage, light for daytime. Default follows the system setting.
 6. **Built for any language.** English by default, Ukrainian from day one, any language later (see [Localisation](#localisation)).
+7. **Every pixel of height counts.** No decorative air, no big hero titles, no bottom navigation. Chrome is as thin as touch targets allow; the song gets the rest.
 
 ## Typography
 
@@ -19,9 +20,9 @@ One family: **[Onest](https://fonts.google.com/specimen/Onest)** (has full Cyril
 
 | Role | Size / weight | Notes |
 | --- | --- | --- |
-| Song title (song screen) | 30 / 800, tracking −0.03em, line-height 1.05 | |
-| Screen title (setlist) | 40 / 800, tracking −0.03em | |
-| Chord root | 26 / 800, tracking −0.02em | phone; 28 on laptop |
+| Screen title in the top bar (section switcher) | 20 / 800, tracking −0.02em | |
+| Song title in the top bar | 17 / 800 (phone), 20 (laptop) | one line, ellipsis; meta line 11 / 600 caps under it |
+| Chord root | 25–26 / 800, tracking −0.02em | normal mode; 17 in compact mode |
 | Chord quality / slash bass | 15 / 700 | slash bass at 70% opacity |
 | Meta labels | 12 / 600, UPPERCASE, tracking 0.06em | values inline at 15 / 800 |
 | Section name | 16 / 700 | |
@@ -72,22 +73,25 @@ Blue vs orange (verse vs chorus) also differ in lightness, so they stay distingu
 | Form-timeline blocks | 3 px |
 | Beat dots | 0 (square) |
 
-- Touch targets ≥ 44 × 44 px; primary CTA 56 px tall.
-- Phone screen padding 16 px; section tiles 14 / 10 px inside; 6 px between tiles.
-- Bars per row: 4 on phone, 8 on laptop. Bar lines 2 px in the section's bar colour; the last bar of a line also gets a closing line.
+- Touch targets ≥ 44 × 44 px (40 px wide is acceptable inside a grouped control). No element taller than it needs to be: top bar 52 px, tabs 40 px, player toolbar 56 px.
+- Phone screen padding 10–12 px; section tiles 10 / 8 px inside (6 / 8 compact); 4–6 px between tiles; list rows 9–10 px vertical padding.
+- Bars per row: 4 on phone, 8 on laptop (normal mode); 4 per column in compact mode. Bar lines 2 px in the section's bar colour; the last bar of a line also gets a closing line.
 
 ## Key components
 
-- **Header** — back (icon button), position ("Song 2 of 6", uppercase meta), language toggle, theme toggle.
-- **Meta line** — `KEY D · 135 BPM · 4/4 · CAPO 2 → C`: uppercase labels, bold values.
-- **Form timeline** — one row of blocks, width proportional to bars × repeats (min 26 px), tile colour per section, abbreviation bottom-left; tap scrolls to the section. Always visible in the fixed header.
-- **Instrument tabs** — text tabs with a 3 px `signal` underline on the active one; scroll horizontally if labels are long.
+- **Top bar (52 px)** — on main screens: section switcher (logo square + section name + chevron → menu with Service / Library / Settings) and contextual icon actions. On the song screen: back, song title + meta line, compact-mode toggle, view-options button. **No bottom navigation.**
+- **Meta line** — `KEY D · 135 BPM · 4/4 · CAPO 2→C`: uppercase labels, bold values, one line.
+- **Form timeline** — one row of blocks (30 px), width proportional to bars × repeats (min 24 px), tile colour per section, abbreviation bottom-left; tap scrolls to the section. Always visible in the fixed header. While auto-scrolling: passed sections fade to 45%, the current one gets a 3 px `signal` underline.
+- **Instrument tabs** — text tabs (40 px) with a 3 px `signal` underline on the active one; scroll horizontally if labels are long.
 - **Capo control** (guitar view) — `−` / value / `+` plus suggested capos (`2 → C`, `7 → G`).
 - **Section tile** — badge (abbr) + name + tag (`яма`) + `×N` on the right; band notes; bar grid.
 - **Chord cell** — width ∝ beats; root large, quality and slash bass small; beat dots underneath; in guitar view shape large, sounding chord small below.
 - **Personal note** — yellow dot in the bar's corner + highlighted chip under the line.
-- **Bottom bar** — previous song · transposer (`−` key `+`, "original" / `+1`) · next song.
-- **Setlist row** — number, title, key, meta, mini form strip, "Tonight:" note; rows separated by lines, current song marked by `signal` number.
+- **Player toolbar (song screen, 56 px)** — previous (icon) · play/pause auto-scroll · status (section, "bar 2 of 4 · pass 3 of 4") · transposer (`−` key `+`) · next (icon).
+- **Auto-scroll** — driven by the metronome (tempo, time signature, optional one-bar count-in). It counts bars and repeats, **highlights and scrolls to the current section only** (3 px inset outline in the section ink + "Now" badge). Chords and beats are never highlighted — that would distract.
+- **Compact mode** — the whole song on one screen: chords 17 px, no beat dots, a 34 px label column (abbr, ×N, tag, "now" marker) instead of a header row. Phone: 1 column; laptop and tablets: 2–3 columns (CSS columns, sections never split).
+- **View options (sheet)** — opened from the song's sliders icon. Scope tabs: *This song · This setlist · Everywhere*. Values cascade song → setlist → everywhere; each row shows its source ("From this setlist", "Set for this song" in `signal`) and a Reset link for overrides. Options: beat dots, guitar sounding chords under shapes, band notes, notes for my instrument, personal notes, open in compact mode. The "Everywhere" layer is also editable in Settings.
+- **Setlist row** — number, title, key, meta + "tonight" note on one line, mini form strip (4 px); rows separated by lines, current song marked by `signal` number. "Start" is a compact button in the sub-header, not a full-width CTA.
 
 ## Choosing from options
 
@@ -122,8 +126,9 @@ Horizontal strips (tabs, chips) hide the scrollbar entirely (`scrollbar-width: n
 
 ## Layout
 
-- Phone: fixed header (title, meta, form timeline) + scrolling sections + fixed bottom bar. Only the middle scrolls.
-- Laptop: setlist sidebar (≈300 px) + song area, 8 bars per row.
+- Phone, song: fixed header (top bar, form timeline, instrument tabs ≈ 136 px) + scrolling sections + player toolbar (56 px). Only the middle scrolls.
+- Phone, other screens: top bar + content. No bottom navigation, no full-width footer bars unless the screen is a task flow (editor, review).
+- Laptop: setlist sidebar (≈300 px) + song area; normal mode 8 bars per row, compact mode 3 columns.
 
 ## Localisation
 

@@ -69,6 +69,13 @@ The core is a readable bar grid and the service map. Everything else is built ar
 - Form strip: `I V1 C I V2 C C Inst B C`. Each section type has its own color, consistent across all songs. Tapping jumps to the section.
 - Repeats (`x2`) and cues ("quiet", "dip", "powerful") shown as badges next to the line.
 - Lyrics can be toggled on and off.
+- **Auto-scroll with the metronome.** Press play: the app counts bars, beats and repeats at the song's tempo, highlights the current section and scrolls to it. Chords and beats are not highlighted, so nothing flickers in front of your eyes.
+- **Compact mode.** The whole structure and all chords on one screen without scrolling; 2–3 columns on large screens.
+
+**View customisation**
+
+- Beat dots on/off; guitar: shapes only or shapes + sounding chords; band notes, notes for my instrument and personal notes on/off; open in compact mode.
+- Every option exists on three levels — everywhere (default), per setlist, per song — and the most specific wins. Stored locally on the device (a small local database), not in the `.takt` file.
 
 **Per-instrument view**
 
