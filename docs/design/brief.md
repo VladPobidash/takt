@@ -1,5 +1,7 @@
 # Design brief (for Claude Design)
 
+> The visual direction is now decided — see [README.md](README.md). This brief stays as the original input; where they differ, README.md wins.
+
 Design starts with two screens: first the song in stage mode, then the service map. The other screens are supporting. The text below can be pasted into Claude Design as is. Design outputs (links, screenshots, exports) go into this folder.
 
 **Product.** Takt — bar-based chord charts for instrumentalists: one arrangement, a view for every instrument. Lyrics are optional.

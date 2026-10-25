@@ -23,5 +23,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 - [ ] Show repeats as `x4` or unroll them (for "where are we now")?
 - [ ] Lyrics: only a block under the section, or eventually aligned to bars?
 - [ ] PWA or native wrapper from the start?
-- [ ] Default UI language and default H/B notation.
+- [ ] Default H/B notation.
+- [x] UI language: English by default, Ukrainian from day one ([ADR 0002](decisions/0002-visual-direction.md)).
+- [x] Visual direction: "Swiss Blocks" in Onest ([ADR 0002](decisions/0002-visual-direction.md)).
 - [x] License: Apache-2.0. Repository is public.

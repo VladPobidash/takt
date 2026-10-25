@@ -23,3 +23,4 @@ What it gives us and what it costs.
 | # | Decision | Status |
 | --- | --- | --- |
 | [0001](0001-local-first.md) | Local-first, no server-side storage | accepted |
+| [0002](0002-visual-direction.md) | Visual direction: "Swiss Blocks" in Onest | accepted |

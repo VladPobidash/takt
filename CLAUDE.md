@@ -24,7 +24,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 
 ## Current state
 
-- No code yet. Design is in progress in Claude Design (`docs/design/`).
+- No code yet. Visual direction is decided — follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work. MVP screens are being designed in Claude Design.
 - Stack and app architecture are **not decided**. Do not scaffold frameworks or add dependencies before an ADR in `docs/decisions/` is accepted by the user.
 - Likely direction (to confirm in an ADR): the format is a standalone, dependency-free TypeScript library (`packages/format`: parser, transpose, capo, ChordPro export) separate from the app (`apps/web`), with storage behind an adapter interface.
 
@@ -48,7 +48,7 @@ docs/
   brief.md         product brief
   format.md        .takt format spec v0
   roadmap.md       stages + open questions
-  design/          design brief and design outputs
+  design/          design system (README.md), design brief, design outputs
   decisions/       ADRs
 examples/          sample .takt files (no copyrighted lyrics)
 ```
