@@ -11,7 +11,7 @@ Six Saturday services remain before the worship night (31.10 – 5.12). Each one
 5. **5 December.** Dress rehearsal at a service, then bug fixes only.
 6. **12 December.** Worship night.
 
-After the worship night: cloud sync, live session, tap-based editor, native wrapper.
+After the worship night: cloud sync, live session, tap-based editor, native wrapper, [change history and review](ideas/change-history.md).
 
 ## Open questions
 
@@ -23,6 +23,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 - [ ] Show repeats as `x4` or unroll them (for "where are we now")?
 - [ ] Lyrics: only a block under the section, or eventually aligned to bars?
 - [ ] PWA or native wrapper from the start?
+- [ ] Accept UI foundation: React + shadcn/ui (Base UI) + Tailwind ([ADR 0003](decisions/0003-ui-kit.md), proposed).
 - [ ] Default H/B notation.
 - [x] UI language: English by default, Ukrainian from day one ([ADR 0002](decisions/0002-visual-direction.md)).
 - [x] Visual direction: "Swiss Blocks" in Onest ([ADR 0002](decisions/0002-visual-direction.md)).

@@ -50,5 +50,6 @@ docs/
   roadmap.md       stages + open questions
   design/          design system (README.md), design brief, design outputs
   decisions/       ADRs
+  ideas/           future features, not in the MVP (e.g. change history)
 examples/          sample .takt files (no copyrighted lyrics)
 ```

@@ -89,6 +89,23 @@ Blue vs orange (verse vs chorus) also differ in lightness, so they stay distingu
 - **Bottom bar** — previous song · transposer (`−` key `+`, "original" / `+1`) · next song.
 - **Setlist row** — number, title, key, meta, mini form strip, "Tonight:" note; rows separated by lines, current song marked by `signal` number.
 
+## Choosing from options
+
+| Number of options | Control |
+| --- | --- |
+| 2–4, fixed (theme, H/B notation, Text / Preview) | Radio rows or underline tabs |
+| 5+ or a list that can grow (UI language, instrument, song, key) | **Searchable select** (combobox): a field showing the current value → opens a list with a search input on top, filtered as you type, current value marked |
+
+Never a long row of toggles or chips for many options.
+
+## Collaboration (future)
+
+Change history and review — see [docs/ideas/change-history.md](../ideas/change-history.md). Visual rules already fixed:
+
+- Authors are shown as square initials avatars (4 px radius) + name + role.
+- Diffs are bar-level: removed bar with `−` marker and strike-through on a light red tint, added bar with `+` marker on a light green tint — markers carry the meaning, colour only supports it.
+- No git words in the UI ("changes", "suggestion", "restore", "compare").
+
 ## Scrollbars
 
 Minimal and neutral from day one:
