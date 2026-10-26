@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Laptop — keys player</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.55)}
+</style>
+</helmet>
+<div style="--bg:#0B0B0C;--surface:#18181A;--line:#2A2A2E;--text:#F4F4F1;--muted:#A6A6AB;--signal:#FF6A3D; width: 1280px; height: 800px; box-sizing: border-box; display: flex; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; overflow: hidden">
+
+<aside aria-label="Setlist" style="width: 300px; flex: 0 0 300px; box-sizing: border-box; border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 12px 16px 12px 16px">
+<div style="display: flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 4px">
+<span aria-hidden="true" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: var(--text); color: var(--bg); font-size: 15px; font-weight: 800">T</span>
+<h2 style="flex: 1 1 auto; margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em">Service</h2>
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Sat, 31 Oct</span>
+</div>
+<ol style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line)">
+<sc-for list="{{songs}}" as="s" hint-placeholder-count="6">
+<li style="border-bottom: 1px solid var(--line)">
+<a href="Main.dc.html" style="display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 56px; padding: 8px 0; color: var(--text); text-decoration: none">
+<span style="font-size: 17px; font-weight: 800; color: {{s.numFg}}">{{s.n}}</span>
+<span style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<span style="font-size: 15px; font-weight: {{s.titleW}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.title}}</span>
+<span aria-hidden="true" style="display: flex; gap: 2px; height: 4px">
+<sc-for list="{{s.seg}}" as="g" hint-placeholder-count="6"><span style="flex: {{g.grow}} 1 0px; background: {{g.color}}"></span></sc-for>
+</span>
+</span>
+<span style="font-size: 17px; font-weight: 800">{{s.key}}</span>
+</a>
+</li>
+</sc-for>
+</ol>
+<p style="margin: 14px 0 0 0; font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--muted)">Pedal or ← → — previous / next song.<br>↑ ↓ — sections.</p>
+</aside>
+
+<div style="flex: 1 1 auto; min-width: 0; height: 800px">
+<dc-import name="Main" theme="dark" ui-lang="en" start-view="keys" layout="laptop" start-compact="true" start-playing="true" start-beat="60" hint-size="980px,800px"></dc-import>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const C = { I: '#3C3C4C', V: '#6FA6F5', P: '#5ED1A7', C: '#FFA95E', B: '#B596F5' };
+    const SONGS = [
+      { title: 'Могутній Бог', key: 'E', form: [['I', 4], ['V', 16], ['C', 16], ['V', 16], ['C', 16], ['C', 14], ['I', 4]] },
+      { title: 'Достойний Ти Один', key: 'D', current: true, form: [['I', 4], ['V', 9], ['C', 7], ['I', 4], ['V', 8], ['C', 16], ['I', 4], ['B', 16], ['C', 8], ['I', 1]] },
+      { title: 'Вдячність', key: 'F#', form: [['I', 2], ['V', 8], ['C', 16], ['I', 2], ['V', 8], ['C', 16], ['I', 4], ['B', 24], ['I', 5], ['C', 9]] },
+      { title: 'Маранафа', key: 'Hm', form: [['I', 4], ['V', 8], ['P', 8], ['C', 8], ['V', 8], ['P', 8], ['C', 8], ['I', 4], ['B', 8], ['C', 8], ['I', 1]] },
+      { title: 'Боже, я вдячний Тобі', key: 'D', form: [['I', 3], ['V', 12], ['C', 10], ['I', 1], ['V', 12], ['C', 20], ['I', 6], ['B', 28], ['C', 20]] },
+      { title: 'Краса Хреста', key: 'B', form: [['I', 4], ['V', 8], ['C', 8], ['I', 4], ['V', 8], ['C', 8], ['I', 6], ['V', 8], ['C', 18]] },
+    ];
+    return {
+      songs: SONGS.map((s, i) => ({
+        n: i + 1,
+        title: s.title,
+        key: s.key,
+        seg: s.form.map((x) => ({ grow: x[1], color: C[x[0]] })),
+        numFg: s.current ? 'var(--signal)' : 'var(--muted)',
+        titleW: s.current ? 800 : 600,
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

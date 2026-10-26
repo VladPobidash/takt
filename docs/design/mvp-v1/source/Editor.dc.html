@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Song editor</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.55)}
+</style>
+</helmet>
+<div style="--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E; width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="flex: 0 0 auto; display: flex; align-items: center; gap: 4px; min-height: 56px; padding: 6px 12px 0 6px">
+<a href="Library.dc.html" aria-label="{{t.back}}" style="flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--text); text-decoration: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+</a>
+<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.editing}}</span>
+<span style="font-size: 17px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Достойний Ти Один</span>
+</div>
+<button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="flex: 0 0 auto; min-width: 44px; height: 44px; padding: 0 6px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; cursor: pointer">{{langCode}}</button>
+<a href="History.dc.html" aria-label="{{t.history}}" style="flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--text); text-decoration: none">
+<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path><path d="M12 7v5l3 2"></path></svg>
+</a>
+<a href="Main.dc.html" style="flex: 0 0 auto; min-height: 44px; padding: 0 16px; display: flex; align-items: center; border-radius: 8px; background: var(--accent); color: var(--accentFg); text-decoration: none; font-size: 15px; font-weight: 800; white-space: nowrap">{{t.done}}</a>
+</header>
+
+<div role="tablist" aria-label="{{t.mode}}" style="flex: 0 0 auto; display: flex; margin: 4px 16px 0 16px; border-bottom: 1px solid var(--line)">
+<sc-for list="{{tabs}}" as="tb" hint-placeholder-count="2">
+<button type="button" role="tab" aria-selected="{{tb.sel}}" onClick="{{tb.pick}}" style="flex: 0 0 auto; height: 46px; margin: 0 18px -1px 0; padding: 0; border: 0; border-bottom: 3px solid {{tb.under}}; background: transparent; color: {{tb.fg}}; font-family: inherit; font-size: 15px; font-weight: {{tb.weight}}; white-space: nowrap; cursor: pointer">{{tb.label}}</button>
+</sc-for>
+</div>
+
+<div style="flex: 1 1 auto; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent">
+<sc-if value="{{showText}}" hint-placeholder-val="{{ true }}">
+<div role="textbox" aria-multiline="true" aria-label="{{t.source}}" style="min-width: max-content; padding: 10px 16px 24px 4px; font-size: 15px; line-height: 1.75; font-variant-numeric: tabular-nums">
+<sc-for list="{{lines}}" as="ln" hint-placeholder-count="20">
+<div style="display: flex; align-items: baseline; gap: 10px; padding-right: 12px; {{ln.row}}">
+<span aria-hidden="true" style="flex: 0 0 26px; text-align: right; font-size: 12px; font-weight: 600; color: {{ln.numFg}}">{{ln.n}}</span>
+<span style="white-space: pre"><sc-for list="{{ln.parts}}" as="pt" hint-placeholder-count="3"><span style="{{pt.s}}">{{pt.x}}</span></sc-for></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{showPreview}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px">
+<sc-for list="{{preview}}" as="sec" hint-placeholder-count="4">
+<section style="display: flex; flex-direction: column; gap: 8px; background: {{sec.tile}}; color: {{sec.ink}}; border-radius: 6px; padding: 12px 10px">
+<div style="display: flex; align-items: center; gap: 8px">
+<span style="height: 22px; padding: 0 6px; display: flex; align-items: center; border-radius: 4px; background: {{sec.ink}}; color: {{sec.tile}}; font-weight: 800; font-size: 12px">{{sec.abbr}}</span>
+<span style="flex: 1 1 auto; min-width: 0; font-size: 15px; font-weight: 700">{{sec.name}}</span>
+<sc-if value="{{sec.hasTag}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: #0B0B0C; color: #FFFFFF">{{sec.tag}}</span></sc-if>
+<sc-if value="{{sec.hasRep}}" hint-placeholder-val="{{ false }}"><span style="font-size: 15px; font-weight: 800">×{{sec.rep}}</span></sc-if>
+</div>
+<sc-for list="{{sec.lines}}" as="pl" hint-placeholder-count="1">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 6px">
+<sc-for list="{{pl.bars}}" as="b" hint-placeholder-count="4">
+<div style="display: flex; min-height: 34px; align-items: center; border-left: 2px solid {{sec.bar}}; {{b.edge}} {{b.warn}}">
+<sc-for list="{{b.chords}}" as="c" hint-placeholder-count="1"><span style="flex: {{c.grow}} 1 0px; min-width: max-content; padding: 0 5px; font-size: 17px; font-weight: 800; white-space: nowrap">{{c.label}}</span></sc-for>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</section>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div role="status" style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; margin: 0 12px 8px 12px; padding: 8px 8px 8px 12px; border-radius: 8px; background: #FFF1EB; color: #7A2400">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+<span style="flex: 1 1 auto; min-width: 0; font-size: 13px; font-weight: 600; line-height: 1.35">{{t.warn}}</span>
+<button type="button" onClick="{{showLine}}" style="flex: 0 0 auto; min-height: 36px; padding: 0 10px; border: 0; border-radius: 6px; background: rgba(122,36,0,0.1); color: #7A2400; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">{{t.show}}</button>
+</div>
+
+<div role="toolbar" aria-label="{{t.symbols}}" style="flex: 0 0 auto; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding: 8px 8px 16px 8px; border-top: 1px solid var(--line); background: var(--surface)">
+<sc-for list="{{keys}}" as="k" hint-placeholder-count="9">
+<button type="button" aria-label="{{k.aria}}" style="flex: 0 0 auto; min-width: 44px; height: 44px; padding: 0 10px; border: 0; border-radius: 6px; background: var(--bg); color: var(--text); font-family: inherit; font-size: 18px; font-weight: 800; cursor: pointer; box-shadow: 0 1px 0 var(--line)">{{k.k}}</button>
+</sc-for>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"uiLang":{"editor":"enum","options":["en","uk"],"default":"en"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: null, tab: 'text' };
+  }
+
+  renderVals() {
+    const lang = this.state.lang || this.props.uiLang || 'en';
+    const STR = {
+      en: {
+        back: 'Back to the library', editing: 'Editing', done: 'Done', history: 'Change history', mode: 'Editor mode', text: 'Text', preview: 'Preview', source: 'Song source in .takt format',
+        warn: 'Line 12: this bar has 5 beats in 4/4', show: 'Show', symbols: 'Quick symbols', langLabel: 'Language: English. Switch to Ukrainian',
+      },
+      uk: {
+        back: 'Назад до бібліотеки', editing: 'Редагування', done: 'Готово', history: 'Історія змін', mode: 'Режим редактора', text: 'Текст', preview: 'Перегляд', source: 'Текст пісні у форматі .takt',
+        warn: 'Рядок 12: у такті 5 долей при розмірі 4/4', show: 'Показати', symbols: 'Швидкі символи', langLabel: 'Мова: українська. Перемкнути на англійську',
+      },
+    };
+    const t = STR[lang] || STR.en;
+
+    const SRC = [
+      '# Достойний Ти Один',
+      'artist: Elevation Worship — Worthy',
+      'key: D',
+      'tempo: 135',
+      'time: 4/4',
+      '',
+      '## Intro x2',
+      '| Hm** D** | G** A** |',
+      '',
+      '## Verse 1',
+      '| D | A | D/F#** G** | Asus4* A*** |',
+      '| D | A | D/F#** G** | Asus4** A*** | A |',
+      '@bass | D | A | F#** G** | A |',
+      '> перший рядок — тільки клавішні',
+      '',
+      '## Chorus',
+      '| G*** Hm* | A | D/F# | Hm |',
+      '| G*** Hm* | A | D/F# |',
+      '@keys > права рука — мелодія октавою вище',
+      '',
+      '## Bridge [яма] x4',
+      '| G | Em | Hm | A** D/F#** |',
+    ];
+    const WARN_LINE = 12;
+
+    const SEC = {
+      verse: ['#0A3A8C', '#D9E8FF', 'rgba(10,58,140,0.28)'],
+      chorus: ['#743000', '#FFE0BF', 'rgba(116,48,0,0.28)'],
+      bridge: ['#461C9B', '#EADCFF', 'rgba(70,28,155,0.28)'],
+      pre: ['#08523E', '#CCF3E4', 'rgba(8,82,62,0.28)'],
+      inter: ['#33334A', '#ECECF2', 'rgba(51,51,74,0.24)'],
+    };
+    const typeOf = (name) => {
+      const n = name.toLowerCase();
+      if (/pre/.test(n) || /передприсп/.test(n)) return 'pre';
+      if (/chorus|приспів/.test(n)) return 'chorus';
+      if (/verse|куплет/.test(n)) return 'verse';
+      if (/bridge|брідж|бридж/.test(n)) return 'bridge';
+      return 'inter';
+    };
+
+    const S_BOLD = 'font-weight: 800; color: var(--text);';
+    const S_PIPE = 'font-weight: 500; color: #A0A0A6;';
+    const S_STAR = 'font-weight: 800; color: var(--signal);';
+    const S_MUTED = 'font-weight: 500; color: var(--muted);';
+    const tokBars = (s) => {
+      const out = [];
+      const re = /(\|)|(\*+)|(\s+)|([^|\s*]+)/g;
+      let m;
+      while ((m = re.exec(s)) !== null) {
+        if (m[1]) out.push({ x: m[1], s: S_PIPE });
+        else if (m[2]) out.push({ x: m[2], s: S_STAR });
+        else if (m[3]) out.push({ x: m[3], s: '' });
+        else out.push({ x: m[4], s: m[4] === '-' ? S_MUTED : S_BOLD });
+      }
+      return out;
+    };
+
+    const lines = SRC.map((src, i) => {
+      const n = i + 1;
+      let parts = [{ x: src || ' ', s: '' }];
+      let row = '';
+      if (src.indexOf('## ') === 0) {
+        const c = SEC[typeOf(src.slice(3))];
+        parts = [{ x: src, s: 'font-weight: 800; color: ' + c[0] + ';' }];
+        row = 'background: ' + c[1] + ';';
+      } else if (src.indexOf('# ') === 0) {
+        parts = [{ x: src, s: 'font-weight: 800; font-size: 17px;' }];
+      } else if (/^[a-z]+:/.test(src)) {
+        const k = src.indexOf(':');
+        parts = [{ x: src.slice(0, k + 1), s: S_MUTED }, { x: src.slice(k + 1), s: 'font-weight: 700;' }];
+      } else if (src.indexOf('@') === 0) {
+        const sp = src.indexOf(' ');
+        const head = { x: src.slice(0, sp), s: 'font-weight: 800; color: #461C9B; background: #EADCFF; border-radius: 3px; padding: 1px 4px;' };
+        const rest = src.slice(sp);
+        parts = [head].concat(rest.trim().indexOf('>') === 0 ? [{ x: rest, s: S_MUTED }] : tokBars(rest));
+      } else if (src.indexOf('>') === 0) {
+        parts = [{ x: src, s: S_MUTED }];
+      } else if (src.indexOf('|') === 0) {
+        parts = tokBars(src);
+      }
+      const warn = n === WARN_LINE;
+      if (warn) row = 'background: rgba(240,80,30,0.10); box-shadow: inset 3px 0 0 var(--signal);';
+      return { n: String(n), parts: parts, row: row, numFg: warn ? 'var(--signal)' : '#A0A0A6' };
+    });
+
+    const BPB = 4;
+    const parseBar = (s) => {
+      const toks = s.trim().split(/\s+/).filter((x) => x && x !== '-');
+      if (!toks.length) return { chords: [], total: BPB };
+      const items = toks.map((x) => {
+        const m = x.match(/\*+$/);
+        return { tok: m ? x.slice(0, x.length - m[0].length) : x, stars: m ? m[0].length : 0 };
+      });
+      const explicit = items.reduce((a, it) => a + it.stars, 0);
+      const free = items.filter((it) => !it.stars).length;
+      const rem = BPB - explicit;
+      items.forEach((it) => { it.beats = it.stars || (free ? Math.max(rem / free, 1) : 1); });
+      return { chords: items, total: items.reduce((a, it) => a + it.beats, 0) };
+    };
+
+    const preview = [];
+    let cur = null;
+    SRC.forEach((src) => {
+      if (src.indexOf('## ') === 0) {
+        let name = src.slice(3);
+        let rep = 1;
+        let tag = '';
+        const rm = name.match(/\s*x(\d+)\s*$/);
+        if (rm) { rep = parseInt(rm[1], 10); name = name.slice(0, rm.index); }
+        const tm = name.match(/\s*\[([^\]]+)\]\s*$/);
+        if (tm) { tag = tm[1]; name = name.slice(0, tm.index); }
+        const type = typeOf(name);
+        const c = SEC[type];
+        const abbr = type === 'inter' ? 'I' : (type === 'verse' ? 'V' : (type === 'chorus' ? 'C' : (type === 'bridge' ? 'B' : 'P'))) + (name.match(/\d+/) || [''])[0];
+        cur = { name: name, abbr: abbr, rep: rep, hasRep: rep > 1, tag: tag, hasTag: !!tag, ink: c[0], tile: c[1], bar: c[2], lines: [] };
+        preview.push(cur);
+      } else if (cur && src.indexOf('|') === 0) {
+        const bars = src.split('|').slice(1, -1).map(parseBar);
+        cur.lines.push({
+          bars: bars.map((b, bi) => ({
+            edge: (bi === bars.length - 1 || (bi + 1) % 4 === 0) ? 'border-right: 2px solid ' + cur.bar + ';' : '',
+            warn: b.total !== BPB ? 'outline: 2px solid var(--signal); outline-offset: -2px;' : '',
+            chords: b.chords.map((it) => ({ label: it.tok, grow: it.beats })),
+          })),
+        });
+      }
+    });
+
+    const tab = this.state.tab;
+    const mk = (id, label) => ({
+      label: label, sel: tab === id ? 'true' : 'false', under: tab === id ? 'var(--signal)' : 'transparent',
+      fg: tab === id ? 'var(--text)' : 'var(--muted)', weight: tab === id ? 800 : 600, pick: () => this.setState({ tab: id }),
+    });
+
+    return {
+      t: t,
+      langCode: lang === 'uk' ? 'UA' : 'EN',
+      toggleLang: () => this.setState({ lang: lang === 'uk' ? 'en' : 'uk' }),
+      tabs: [mk('text', t.text), mk('preview', t.preview)],
+      showText: tab === 'text',
+      showPreview: tab === 'preview',
+      showLine: () => this.setState({ tab: 'text' }),
+      lines: lines,
+      preview: preview,
+      keys: [
+        { k: '|', aria: 'Bar line' }, { k: '*', aria: 'Beat' }, { k: '#', aria: 'Sharp' }, { k: 'b', aria: 'Flat' },
+        { k: '/', aria: 'Slash bass' }, { k: '##', aria: 'New section' }, { k: '@', aria: 'Instrument part' },
+        { k: '>', aria: 'Note' }, { k: 'x2', aria: 'Repeat' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

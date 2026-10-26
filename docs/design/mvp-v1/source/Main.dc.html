@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Song — stage view</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="{{vars}} position: relative; width: {{d.w}}px; height: {{d.h}}px; box-sizing: border-box; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="flex: 0 0 auto; display: flex; flex-direction: column; border-bottom: 1px solid var(--line)">
+<div style="display: flex; align-items: center; gap: 2px; min-height: 52px; padding: 4px 4px 0 2px">
+<a href="Setlist.dc.html" aria-label="{{t.back}}" style="flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--text); text-decoration: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+</a>
+<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<h1 style="margin: 0; font-size: {{d.h1}}px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Достойний Ти Один</h1>
+<p style="margin: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.key}} <strong style="color: var(--text); font-weight: 800">{{keyName}}</strong> · <strong style="color: var(--text); font-weight: 800">135</strong> BPM · <strong style="color: var(--text); font-weight: 800">4/4</strong><sc-if value="{{isGuitar}}" hint-placeholder-val="{{ false }}"> · {{t.capo}} <strong style="color: var(--text); font-weight: 800">{{capo}}→{{shapeKeyName}}</strong></sc-if></p>
+</div>
+<button type="button" onClick="{{toggleCompact}}" aria-pressed="{{compactPressed}}" aria-label="{{t.compact}}" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: {{compactBg}}; color: {{compactFg}}; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16M4 15h16M9 4l3 3 3-3M9 20l3-3 3 3"></path></svg>
+</button>
+<button type="button" onClick="{{openSheet}}" aria-label="{{t.options}}" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+</button>
+</div>
+<nav aria-label="{{t.form}}" style="display: flex; gap: 2px; padding: 4px 12px 6px 12px">
+<sc-for list="{{sections}}" as="sec" hint-placeholder-count="10">
+<a href="#{{sec.id}}" style="flex: {{sec.len}} 1 0px; min-width: 24px; height: 30px; box-sizing: border-box; display: flex; align-items: flex-end; padding: 0 0 4px 4px; border-radius: 3px; background: {{sec.tile}}; color: {{sec.ink}}; box-shadow: {{sec.tlShadow}}; opacity: {{sec.tlOp}}; text-decoration: none; font-size: 10px; font-weight: 800; overflow: hidden; white-space: nowrap">{{sec.abbr}}</a>
+</sc-for>
+</nav>
+<div role="group" aria-label="{{t.instr}}" style="display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 12px">
+<sc-for list="{{views}}" as="v" hint-placeholder-count="4">
+<button type="button" onClick="{{v.pick}}" aria-pressed="{{v.pressed}}" style="flex: 0 0 auto; height: 40px; margin: 0 14px -1px 0; padding: 0; border: 0; border-bottom: 3px solid {{v.under}}; border-radius: 0; background: transparent; color: {{v.fg}}; font-family: inherit; font-size: 14px; font-weight: {{v.weight}}; white-space: nowrap; cursor: pointer">{{v.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div id="song-scroll" style="position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent">
+<sc-if value="{{isGuitar}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 6px 12px 0 12px">
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-right: 4px">{{t.capo}}</span>
+<button type="button" onClick="{{capoDown}}" aria-label="{{t.capoDown}}" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 18px; cursor: pointer">−</button>
+<span style="min-width: 20px; text-align: center; font-size: 16px; font-weight: 800">{{capo}}</span>
+<button type="button" onClick="{{capoUp}}" aria-label="{{t.capoUp}}" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 18px; cursor: pointer">+</button>
+<sc-for list="{{capoOpts}}" as="o" hint-placeholder-count="4">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 10px; border: 0; border-radius: 8px; background: {{o.bg}}; color: {{o.fg}}; font-family: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer">{{o.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+
+<main style="column-count: {{d.colCount}}; column-gap: 10px; padding: 8px 10px 16px 10px">
+<sc-for list="{{sections}}" as="sec" hint-placeholder-count="6">
+<section id="{{sec.id}}" aria-label="{{sec.name}}" aria-current="{{sec.ariaCurrent}}" style="break-inside: avoid; margin-bottom: {{d.secGap}}px; background: {{sec.tile}}; color: {{sec.ink}}; border-radius: 6px; padding: {{d.tilePad}}; box-shadow: {{sec.nowShadow}}">
+
+<sc-if value="{{isNormal}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px">
+<span style="height: 22px; padding: 0 6px; display: flex; align-items: center; border-radius: 4px; background: {{sec.ink}}; color: {{sec.tile}}; font-weight: 800; font-size: 12px">{{sec.abbr}}</span>
+<span style="flex: 1 1 auto; min-width: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.01em">{{sec.name}}</span>
+<sc-if value="{{sec.isNow}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--signal); color: #FFFFFF">{{sec.nowLabel}}</span></sc-if>
+<sc-if value="{{sec.hasTag}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 4px; background: var(--tagBg); color: var(--tagFg)">{{sec.tag}}</span></sc-if>
+<sc-if value="{{sec.hasRep}}" hint-placeholder-val="{{ false }}"><span style="font-size: 16px; font-weight: 800">×{{sec.rep}}</span></sc-if>
+</div>
+<sc-for list="{{sec.notes}}" as="n" hint-placeholder-count="0">
+<p style="margin: 0; font-size: 12px; line-height: 1.35"><span style="font-weight: 800">{{n.who}}:</span> {{n.text}}</p>
+</sc-for>
+<sc-for list="{{sec.lines}}" as="line" hint-placeholder-count="1">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: grid; grid-template-columns: repeat({{d.cols}}, minmax(0, 1fr)); row-gap: 4px">
+<sc-for list="{{line.bars}}" as="bar" hint-placeholder-count="4">
+<div style="position: relative; display: flex; min-height: {{d.barH}}px; padding: 3px 0; box-sizing: border-box; border-left: 2px solid {{bar.color}}; {{bar.edge}}">
+<sc-if value="{{bar.mine}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position: absolute; top: 2px; right: 3px; width: 8px; height: 8px; border-radius: 4px; background: var(--mineDot)"></span></sc-if>
+<sc-for list="{{bar.chords}}" as="ch" hint-placeholder-count="1">
+<div style="flex: {{ch.grow}} 1 0px; min-width: max-content; padding: 0 5px; display: flex; flex-direction: column; justify-content: center; gap: 3px">
+<div style="display: flex; align-items: baseline; white-space: nowrap"><span style="font-weight: 800; font-size: {{d.root}}px; line-height: 1; letter-spacing: -0.02em">{{ch.big}}</span><span style="font-weight: 700; font-size: {{d.q}}px">{{ch.q}}</span><span style="font-weight: 700; font-size: {{d.q}}px; opacity: 0.7">{{ch.slash}}</span></div>
+<sc-if value="{{showSub}}" hint-placeholder-val="{{ false }}"><div style="font-size: 11px; font-weight: 700; line-height: 1; min-height: 11px; opacity: 0.75; white-space: nowrap">{{ch.sub}}</div></sc-if>
+<sc-if value="{{showDots}}" hint-placeholder-val="{{ true }}"><div aria-hidden="true" style="display: flex"><sc-for list="{{ch.dots}}" as="dt" hint-placeholder-count="2"><span style="flex: 1 1 0px; display: flex"><span style="width: 5px; height: 5px; background: {{dt.c}}"></span></span></sc-for></div></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{line.mine}}" as="m" hint-placeholder-count="0">
+<p style="margin: 0; align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 4px; background: var(--mineBg); color: var(--mineFg); font-size: 12px; font-weight: 600"><span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 4px; background: var(--mineDot)"></span>{{m.text}}</p>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isCompact}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px; align-items: start">
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px">
+<span style="height: 20px; padding: 0 4px; display: flex; align-items: center; border-radius: 3px; background: {{sec.ink}}; color: {{sec.tile}}; font-weight: 800; font-size: 11px">{{sec.abbr}}</span>
+<sc-if value="{{sec.hasRep}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 800">×{{sec.rep}}</span></sc-if>
+<sc-if value="{{sec.hasTag}}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 800; padding: 1px 3px; border-radius: 3px; background: var(--tagBg); color: var(--tagFg)">{{sec.tag}}</span></sc-if>
+<sc-if value="{{sec.isNow}}" hint-placeholder-val="{{ false }}"><span aria-label="{{sec.nowLabel}}" style="width: 10px; height: 10px; margin-top: 2px; border-radius: 2px; background: var(--signal)"></span></sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<sc-for list="{{sec.lines}}" as="line" hint-placeholder-count="1">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 2px">
+<sc-for list="{{line.bars}}" as="bar" hint-placeholder-count="4">
+<div style="position: relative; display: flex; align-items: center; min-height: 30px; box-sizing: border-box; border-left: 2px solid {{bar.color}}; {{bar.edge}}">
+<sc-if value="{{bar.mine}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position: absolute; top: 1px; right: 2px; width: 6px; height: 6px; border-radius: 3px; background: var(--mineDot)"></span></sc-if>
+<sc-for list="{{bar.chords}}" as="ch" hint-placeholder-count="1">
+<span style="flex: {{ch.grow}} 1 0px; min-width: max-content; padding: 0 4px; white-space: nowrap; font-size: 17px; font-weight: 800; letter-spacing: -0.02em">{{ch.big}}<span style="font-size: 11px; font-weight: 700">{{ch.q}}</span><span style="font-size: 11px; font-weight: 700; opacity: 0.7">{{ch.slash}}</span></span>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<sc-for list="{{sec.notes}}" as="n" hint-placeholder-count="0">
+<p style="margin: 0; font-size: 11px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><span style="font-weight: 800">{{n.who}}:</span> {{n.text}}</p>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+</section>
+</sc-for>
+</main>
+</div>
+
+<div style="flex: 0 0 auto; display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--line); padding: 6px 6px 10px 6px; background: var(--bg)">
+<button type="button" aria-label="{{t.prev}}: Могутній Бог" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 20L9 12l10-8v16zM5 19V5"></path></svg>
+</button>
+<button type="button" onClick="{{togglePlay}}" aria-label="{{playLabel}}" aria-pressed="{{playPressed}}" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<sc-if value="{{isPlaying}}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg></sc-if>
+<sc-if value="{{isStopped}}" hint-placeholder-val="{{ true }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></sc-if>
+</button>
+<div role="status" style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 0 4px">
+<span style="font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{status1}}</span>
+<span style="font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums">{{status2}}</span>
+</div>
+<div role="group" aria-label="{{t.transpose}}" style="flex: 0 0 auto; display: flex; align-items: center">
+<button type="button" onClick="{{trDown}}" aria-label="{{t.down}}" style="width: 40px; height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 18px; cursor: pointer">−</button>
+<span style="min-width: 44px; display: flex; flex-direction: column; align-items: center">
+<span style="font-size: 16px; font-weight: 800; line-height: 1.1">{{keyName}}</span>
+<span style="font-size: 10px; font-weight: 600; color: var(--muted); white-space: nowrap">{{trLabel}}</span>
+</span>
+<button type="button" onClick="{{trUp}}" aria-label="{{t.up}}" style="width: 40px; height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 18px; cursor: pointer">+</button>
+</div>
+<button type="button" aria-label="{{t.next}}: Вдячність" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4l10 8-10 8V4zM19 5v14"></path></svg>
+</button>
+</div>
+
+<sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(0,0,0,0.45)">
+<button type="button" onClick="{{closeSheet}}" aria-label="{{t.close}}" style="flex: 1 1 auto; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="{{t.options}}" style="flex: 0 0 auto; max-height: 82%; display: flex; flex-direction: column; border-radius: 10px 10px 0 0; background: var(--bg); color: var(--text); overflow: hidden">
+<span aria-hidden="true" style="align-self: center; width: 36px; height: 4px; margin-top: 8px; border-radius: 2px; background: var(--line)"></span>
+<div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px 0 16px">
+<h2 style="flex: 1 1 auto; margin: 0; font-size: 17px; font-weight: 800">{{t.options}}</h2>
+<button type="button" onClick="{{closeSheet}}" aria-label="{{t.close}}" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div role="tablist" aria-label="{{t.applyTo}}" style="display: flex; margin: 0 16px; border-bottom: 1px solid var(--line)">
+<sc-for list="{{scopes}}" as="sc" hint-placeholder-count="3">
+<button type="button" role="tab" aria-selected="{{sc.sel}}" onClick="{{sc.pick}}" style="flex: 0 0 auto; height: 42px; margin: 0 16px -1px 0; padding: 0; border: 0; border-bottom: 3px solid {{sc.under}}; background: transparent; color: {{sc.fg}}; font-family: inherit; font-size: 14px; font-weight: {{sc.weight}}; white-space: nowrap; cursor: pointer">{{sc.label}}</button>
+</sc-for>
+</div>
+<p style="margin: 0; padding: 8px 16px 2px 16px; font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--muted)">{{scopeHint}}</p>
+<div style="overflow-y: auto; scrollbar-width: thin; padding: 0 16px 14px 16px">
+<sc-for list="{{optRows}}" as="r" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; {{r.sep}}">
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 15px; font-weight: 700; line-height: 1.25">{{r.label}}</span>
+<span style="font-size: 12px; font-weight: 500; color: {{r.srcFg}}">{{r.source}}</span>
+</span>
+<sc-if value="{{r.canReset}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{r.reset}}" style="min-height: 36px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-family: inherit; font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">{{t.reset}}</button></sc-if>
+<button type="button" role="switch" aria-checked="{{r.checked}}" aria-label="{{r.label}}" onClick="{{r.toggle}}" style="flex: 0 0 auto; width: 48px; height: 28px; box-sizing: border-box; padding: 3px; border: 0; border-radius: 6px; background: {{r.track}}; display: flex; justify-content: {{r.justify}}; cursor: pointer"><span style="width: 22px; height: 22px; border-radius: 4px; background: {{r.knob}}"></span></button>
+</div>
+</sc-for>
+<div style="display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line)">
+<button type="button" onClick="{{toggleTheme}}" style="flex: 1 1 0px; min-height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{themeLabel}}</button>
+<button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="flex: 1 1 0px; min-height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{t.langBtn}}</button>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["dark","light"],"default":"dark"},"uiLang":{"editor":"enum","options":["en","uk"],"default":"en"},"startView":{"editor":"enum","options":["base","guitar","bass","keys"],"default":"base"},"layout":{"editor":"enum","options":["phone","laptop"],"default":"phone"},"startCompact":{"editor":"boolean","default":false},"startPlaying":{"editor":"boolean","default":false},"startBeat":{"editor":"int","default":0,"min":0,"max":300},"startSheet":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const b = (v) => v === true || v === 'true';
+    this.state = {
+      view: null, capo: 2, tr: 0, theme: null, lang: null,
+      compact: b(props.startCompact), playing: false, beat: parseInt(props.startBeat || 0, 10) || 0,
+      sheet: b(props.startSheet), scope: 'song',
+      opts: {
+        global: { dots: true, sound: true, band: true, instr: true, mine: true, compactStart: false },
+        setlist: { dots: false },
+        song: {},
+      },
+    };
+    this.wantPlay = b(props.startPlaying);
+    this.timer = null;
+  }
+
+  componentDidMount() {
+    if (this.wantPlay) this.startPlay();
+  }
+
+  componentWillUnmount() {
+    if (this.timer) clearInterval(this.timer);
+  }
+
+  startPlay() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      this.setState((s) => (s.beat + 1 >= this.totalBeats ? { beat: 0, playing: false } : { beat: s.beat + 1 }), () => {
+        if (!this.state.playing && this.timer) { clearInterval(this.timer); this.timer = null; }
+      });
+    }, 60000 / 135);
+    this.setState({ playing: true });
+  }
+
+  stopPlay() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+    this.setState({ playing: false });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (!this.state.playing || this.state.compact) return;
+    const a = this.sectionAt(prevState.beat);
+    const b = this.sectionAt(this.state.beat);
+    if (a !== b || (!prevState.playing && this.state.playing)) {
+      const box = document.getElementById('song-scroll');
+      const el = document.getElementById('sec-' + b);
+      if (box && el && box.scrollTo) box.scrollTo({ top: Math.max(0, el.offsetTop - 6), behavior: 'smooth' });
+    }
+  }
+
+  sectionAt(beat) {
+    const starts = this.starts || [];
+    let idx = 0;
+    for (let i = 0; i < starts.length; i += 1) { if (beat >= starts[i]) idx = i; }
+    return idx;
+  }
+
+  renderVals() {
+    const p = this.props;
+    const st = this.state;
+    const lang = st.lang || p.uiLang || 'en';
+    const view = st.view || p.startView || 'base';
+    const capo = st.capo;
+    const tr = st.tr;
+    const theme = st.theme || p.theme || 'dark';
+    const dark = theme === 'dark';
+    const laptop = p.layout === 'laptop';
+    const compact = st.compact;
+
+    const STR = {
+      en: {
+        back: 'Back to the service', key: 'Key', capo: 'Capo', form: 'Song form', instr: 'Instrument', compact: 'Compact mode', options: 'View options', close: 'Close',
+        views: ['Harmony', 'Guitar', 'Bass', 'Keys'], band: 'Band', keysWho: 'Keys', bassWho: 'Bass', bassNote: 'own line in the first row',
+        original: 'original', transpose: 'Transpose', down: 'Down a semitone', up: 'Up a semitone', capoDown: 'Capo down', capoUp: 'Capo up',
+        prev: 'Previous song', next: 'Next song', play: 'Start auto-scroll', pause: 'Pause auto-scroll', now: 'Now',
+        ready: 'Auto-scroll', readyHint: '135 BPM · 1 bar count-in · follows the form', bar: 'bar', pass: 'pass', of: 'of',
+        applyTo: 'Apply to', sSong: 'This song', sSet: 'This setlist', sAll: 'Everywhere',
+        hSong: 'Only for «Достойний Ти Один». Overrides the setlist and global defaults.', hSet: 'For every song in «Saturday, 31 October».', hAll: 'Default for all songs and setlists on this device.',
+        fromSong: 'Set for this song', fromSet: 'From this setlist', fromAll: 'Default everywhere', reset: 'Reset',
+        oDots: 'Beat dots under chords', oSound: 'Guitar: sounding chords under shapes', oBand: 'Band notes', oInstr: 'Notes for my instrument', oMine: 'My personal notes', oCompact: 'Open in compact mode',
+        toLight: 'Theme: dark', toDark: 'Theme: light', langBtn: 'Language: English', langLabel: 'Language: English. Switch to Ukrainian',
+      },
+      uk: {
+        back: 'Назад до служіння', key: 'Тон.', capo: 'Капо', form: 'Форма пісні', instr: 'Інструмент', compact: 'Компактний режим', options: 'Налаштування вигляду', close: 'Закрити',
+        views: ['Гармонія', 'Гітара', 'Бас', 'Клавішні'], band: 'Гурт', keysWho: 'Клавішні', bassWho: 'Бас', bassNote: 'власна лінія в першому рядку',
+        original: 'оригінал', transpose: 'Транспонування', down: 'На пів тону нижче', up: 'На пів тону вище', capoDown: 'Капо нижче', capoUp: 'Капо вище',
+        prev: 'Попередня пісня', next: 'Наступна пісня', play: 'Увімкнути автоскрол', pause: 'Пауза автоскролу', now: 'Зараз',
+        ready: 'Автоскрол', readyHint: '135 BPM · відлік 1 такт · йде за формою', bar: 'такт', pass: 'прохід', of: 'з',
+        applyTo: 'Застосувати до', sSong: 'Ця пісня', sSet: 'Цей сетлист', sAll: 'Скрізь',
+        hSong: 'Лише для «Достойний Ти Один». Має пріоритет над сетлистом і загальними налаштуваннями.', hSet: 'Для всіх пісень у «Субота, 31 жовтня».', hAll: 'Типово для всіх пісень і сетлистів на цьому пристрої.',
+        fromSong: 'Задано для цієї пісні', fromSet: 'З цього сетлиста', fromAll: 'Типово скрізь', reset: 'Скинути',
+        oDots: 'Долі під акордами', oSound: 'Гітара: звучання під формами', oBand: 'Нотатки гурту', oInstr: 'Нотатки для мого інструмента', oMine: 'Мої особисті нотатки', oCompact: 'Відкривати компактно',
+        toLight: 'Тема: темна', toDark: 'Тема: світла', langBtn: 'Мова: українська', langLabel: 'Мова: українська. Перемкнути на англійську',
+      },
+    };
+    const t = STR[lang] || STR.en;
+
+    const O = st.opts;
+    const eff = (k) => (O.song[k] !== undefined ? O.song[k] : (O.setlist[k] !== undefined ? O.setlist[k] : O.global[k]));
+    const src = (k) => (O.song[k] !== undefined ? 'song' : (O.setlist[k] !== undefined ? 'setlist' : 'global'));
+
+    const vars = dark
+      ? '--bg:#0B0B0C;--surface:#18181A;--surface2:#222225;--line:#2A2A2E;--text:#F4F4F1;--muted:#A6A6AB;--accent:#F4F4F1;--accentFg:#0B0B0C;--signal:#FF6A3D;--tagBg:#F4F4F1;--tagFg:#0B0B0C;--mineDot:#FFC933;--mineBg:rgba(255,201,51,0.18);--mineFg:#FFDC85;'
+      : '--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E;--tagBg:#0B0B0C;--tagFg:#FFFFFF;--mineDot:#FFB000;--mineBg:#FFF0C2;--mineFg:#4F3600;';
+
+    const SEC = dark
+      ? { verse: ['#B3D2FF', '#162E4D', 'rgba(179,210,255,0.32)'], chorus: ['#FFC892', '#45270C', 'rgba(255,200,146,0.32)'], bridge: ['#DEC9FF', '#31204D', 'rgba(222,201,255,0.32)'], pre: ['#98EACB', '#103A2E', 'rgba(152,234,203,0.32)'], inter: ['#D2D2DE', '#23232D', 'rgba(210,210,222,0.26)'] }
+      : { verse: ['#0A3A8C', '#D9E8FF', 'rgba(10,58,140,0.28)'], chorus: ['#743000', '#FFE0BF', 'rgba(116,48,0,0.28)'], bridge: ['#461C9B', '#EADCFF', 'rgba(70,28,155,0.28)'], pre: ['#08523E', '#CCF3E4', 'rgba(8,82,62,0.28)'], inter: ['#33334A', '#ECECF2', 'rgba(51,51,74,0.24)'] };
+
+    const SH = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'B', 'H'];
+    const FL = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'B', 'H'];
+    const BASE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 10, H: 11 };
+    const FLAT_MAJ = [5, 10, 3, 8, 1, 6];
+    const mod = (n) => ((n % 12) + 12) % 12;
+    const idxOf = (r, a) => {
+      if (r === 'B' && a === 'b') return 10;
+      let i = BASE[r];
+      if (a === '#') i += 1;
+      if (a === 'b') i -= 1;
+      return mod(i);
+    };
+    const useFlats = (i) => FLAT_MAJ.indexOf(mod(i)) >= 0;
+    const nm = (i, flats) => (flats ? FL : SH)[mod(i)];
+
+    const KEY = 2;
+    const soundKey = mod(KEY + tr);
+    const soundFlats = useFlats(soundKey);
+    const shapeKey = mod(soundKey - capo);
+    const shapeFlats = useFlats(shapeKey);
+
+    const RE = /^([A-H])([#b]?)([^/]*)(?:\/([A-H])([#b]?))?$/;
+    const chordAt = (tok, shift, flats) => {
+      const m = tok.match(RE);
+      if (!m) return { root: tok, q: '', bass: '' };
+      return { root: nm(idxOf(m[1], m[2]) + shift, flats), q: m[3], bass: m[4] ? nm(idxOf(m[4], m[5]) + shift, flats) : '' };
+    };
+    const label = (c) => c.root + c.q + (c.bass ? '/' + c.bass : '');
+
+    const BPB = 4;
+    const parseBar = (s) => {
+      const toks = s.trim().split(/\s+/).filter((x) => x && x !== '-');
+      if (!toks.length) return null;
+      const items = toks.map((x) => {
+        const m = x.match(/\*+$/);
+        return { tok: m ? x.slice(0, x.length - m[0].length) : x, stars: m ? m[0].length : 0 };
+      });
+      const explicit = items.reduce((a, i) => a + i.stars, 0);
+      const free = items.filter((i) => !i.stars).length;
+      const rem = BPB - explicit;
+      items.forEach((i) => { i.beats = i.stars || (free ? Math.max(rem / free, 1) : 1); });
+      return items;
+    };
+    const parseLine = (line) => line.split('|').slice(1, -1).map(parseBar);
+
+    const SECS = [
+      { name: 'Intro', abbr: 'I', type: 'inter', rep: 2, lines: ['| Hm** D** | G** A** |'] },
+      { name: 'Verse 1', abbr: 'V1', type: 'verse', lines: ['| D | A | D/F#** G** | Asus4* A*** |', '| D | A | D/F#** G** | Asus4* A*** | A |'], bass: ['| D | A | F#** G** | A |'], notes: ['перший рядок — тільки клавішні'] },
+      { name: 'Chorus', abbr: 'C', type: 'chorus', lines: ['| G*** Hm* | A | D/F# | Hm |', '| G*** Hm* | A | D/F# |'], keysNotes: ['права рука — мелодія октавою вище'] },
+      { name: 'Interlude', abbr: 'I', type: 'inter', rep: 2, lines: ['| Hm** D** | G** A** |'] },
+      { name: 'Verse 2', abbr: 'V2', type: 'verse', rep: 2, lines: ['| D | A | D/F#** G** | Asus4* A*** |'] },
+      { name: 'Chorus 2', abbr: 'C2', type: 'chorus', rep: 2, lines: ['| G*** Hm* | A | D/F# | Hm |', '| G*** Hm* | A | D/F# | Hm** A** |'] },
+      { name: 'Instrumental', abbr: 'Inst', type: 'inter', lines: ['| G | Em | Hm | A** D/F#** |'] },
+      { name: 'Bridge', abbr: 'B', type: 'bridge', rep: 4, tag: 'яма', lines: ['| G | Em | Hm | A** D/F#** |'], mine: { line: 0, bar: 3, text: 'на 4-й раз — зупинка, далі разом' } },
+      { name: 'Chorus 3', abbr: 'C3', type: 'chorus', tag: 'потужно', lines: ['| G*** Hm* | A | D/F# | Hm*** A* |', '| G*** Hm* | A | D/F# | Hm** A** |'] },
+      { name: 'Outro', abbr: 'O', type: 'inter', lines: ['| G |'] },
+    ];
+
+    const parsedAll = SECS.map((s) => {
+      const lines = s.lines.slice();
+      if (view === 'bass' && s.bass) s.bass.forEach((l, i) => { lines[i] = l; });
+      return lines.map(parseLine);
+    });
+    const lens = parsedAll.map((pl, i) => pl.reduce((a, b) => a + b.length, 0) * (SECS[i].rep || 1));
+    const starts = [];
+    let acc = 0;
+    lens.forEach((l) => { starts.push(acc * BPB); acc += l; });
+    this.starts = starts;
+    this.totalBeats = acc * BPB;
+
+    const playing = st.playing;
+    const curIdx = this.sectionAt(st.beat);
+    const showProgress = playing || st.beat > 0;
+
+    const cols = laptop && !compact ? 8 : 4;
+    const showDots = !compact && eff('dots');
+    const showSub = !compact && ((view === 'guitar' && eff('sound')) || view === 'bass');
+
+    const sections = SECS.map((s, si) => {
+      const c = SEC[s.type];
+      const notes = [];
+      if (eff('band')) (s.notes || []).forEach((x) => notes.push({ who: t.band, text: x }));
+      if (eff('instr') && view === 'keys' && s.keysNotes) s.keysNotes.forEach((x) => notes.push({ who: t.keysWho, text: x }));
+      if (eff('instr') && view === 'bass' && s.bass) notes.push({ who: t.bassWho, text: t.bassNote });
+      const showMine = eff('mine');
+
+      const toChord = (it) => {
+        const snd = chordAt(it.tok, tr, soundFlats);
+        let big = snd.root;
+        let q = snd.q;
+        let slash = snd.bass ? '/' + snd.bass : '';
+        let sub = '';
+        if (view === 'guitar') {
+          const sh = chordAt(it.tok, tr - capo, shapeFlats);
+          big = sh.root;
+          q = sh.q;
+          slash = sh.bass ? '/' + sh.bass : '';
+          sub = capo ? label(snd) : '';
+        } else if (view === 'bass') {
+          big = snd.bass || snd.root;
+          q = '';
+          slash = '';
+          sub = (snd.q || snd.bass) ? label(snd) : '';
+        }
+        const n = Math.max(1, Math.round(it.beats));
+        return { big: big, q: q, slash: slash, sub: sub, grow: it.beats, dots: Array.from({ length: n }, () => ({ c: c[2] })) };
+      };
+
+      const isNow = showProgress && si === curIdx;
+      const passed = showProgress && si < curIdx;
+      return {
+        id: 'sec-' + si,
+        name: s.name,
+        abbr: s.abbr,
+        rep: s.rep || 1,
+        hasRep: !!s.rep,
+        tag: s.tag || '',
+        hasTag: !!s.tag,
+        len: lens[si],
+        tile: c[1],
+        ink: c[0],
+        isNow: isNow,
+        nowLabel: t.now,
+        ariaCurrent: isNow ? 'step' : 'false',
+        nowShadow: isNow ? 'inset 0 0 0 3px ' + c[0] : 'none',
+        tlShadow: isNow ? 'inset 0 -3px 0 var(--signal)' : 'none',
+        tlOp: passed ? '0.45' : '1',
+        notes: notes,
+        lines: parsedAll[si].map((bars, li) => ({
+          mine: showMine && s.mine && s.mine.line === li ? [{ text: s.mine.text }] : [],
+          bars: bars.map((items, bi) => ({
+            color: c[2],
+            mine: !!(showMine && s.mine && s.mine.line === li && s.mine.bar === bi),
+            edge: (bi === bars.length - 1 || (bi + 1) % cols === 0) ? 'border-right: 2px solid ' + c[2] + ';' : '',
+            chords: (items || []).map(toChord),
+          })),
+        })),
+      };
+    });
+
+    const IDS = ['base', 'guitar', 'bass', 'keys'];
+    const views = IDS.map((id, i) => {
+      const on = view === id;
+      return {
+        label: t.views[i], pressed: on ? 'true' : 'false', under: on ? 'var(--signal)' : 'transparent',
+        fg: on ? 'var(--text)' : 'var(--muted)', weight: on ? 800 : 600, pick: () => this.setState({ view: id }),
+      };
+    });
+
+    const OPEN = [0, 7, 2, 9, 4];
+    const capoOpts = [];
+    for (let c = 0; c <= 7; c += 1) {
+      const sk = mod(soundKey - c);
+      if (OPEN.indexOf(sk) >= 0) {
+        const on = c === capo;
+        capoOpts.push({
+          label: c + '→' + nm(sk, false), pressed: on ? 'true' : 'false',
+          bg: on ? 'var(--accent)' : 'var(--surface)', fg: on ? 'var(--accentFg)' : 'var(--text)', pick: () => this.setState({ capo: c }),
+        });
+      }
+    }
+
+    const curSec = SECS[curIdx];
+    const beatInSec = st.beat - starts[curIdx];
+    const barInSec = Math.floor(beatInSec / BPB);
+    const perPass = lens[curIdx] / (curSec.rep || 1);
+    const pass = Math.floor(barInSec / perPass) + 1;
+    const barInPass = (barInSec % perPass) + 1;
+    let status1 = t.ready;
+    let status2 = t.readyHint;
+    if (showProgress) {
+      status1 = curSec.name;
+      status2 = t.bar + ' ' + barInPass + ' ' + t.of + ' ' + perPass + ((curSec.rep || 1) > 1 ? ' · ' + t.pass + ' ' + pass + ' ' + t.of + ' ' + curSec.rep : '');
+    }
+
+    const scopeKey = st.scope;
+    const mkScope = (id, labelTxt) => ({
+      label: labelTxt, sel: scopeKey === id ? 'true' : 'false', under: scopeKey === id ? 'var(--signal)' : 'transparent',
+      fg: scopeKey === id ? 'var(--text)' : 'var(--muted)', weight: scopeKey === id ? 800 : 600, pick: () => this.setState({ scope: id }),
+    });
+    const SRC_LABEL = { song: t.fromSong, setlist: t.fromSet, global: t.fromAll };
+    const OPTS = [['dots', t.oDots], ['sound', t.oSound], ['band', t.oBand], ['instr', t.oInstr], ['mine', t.oMine], ['compactStart', t.oCompact]];
+    const scopeMap = { song: 'song', setlist: 'setlist', all: 'global' };
+    const layer = scopeMap[scopeKey];
+    const valueAt = (k) => {
+      if (layer === 'global') return O.global[k];
+      if (layer === 'setlist') return O.setlist[k] !== undefined ? O.setlist[k] : O.global[k];
+      return eff(k);
+    };
+    const setOpt = (k, v) => {
+      const next = { global: Object.assign({}, O.global), setlist: Object.assign({}, O.setlist), song: Object.assign({}, O.song) };
+      if (v === null) delete next[layer][k];
+      else next[layer][k] = v;
+      this.setState({ opts: next });
+    };
+    const optRows = OPTS.map((o, i) => {
+      const k = o[0];
+      const v = valueAt(k);
+      const s = src(k);
+      const overriddenHere = layer !== 'global' && O[layer][k] !== undefined;
+      return {
+        label: o[1],
+        source: SRC_LABEL[layer === 'global' ? 'global' : (layer === 'setlist' ? (O.setlist[k] !== undefined ? 'setlist' : 'global') : s)],
+        srcFg: overriddenHere ? 'var(--signal)' : 'var(--muted)',
+        canReset: overriddenHere,
+        reset: () => setOpt(k, null),
+        checked: v ? 'true' : 'false',
+        track: v ? 'var(--accent)' : 'var(--surface2)',
+        knob: v ? 'var(--accentFg)' : 'var(--bg)',
+        justify: v ? 'flex-end' : 'flex-start',
+        toggle: () => setOpt(k, !v),
+        sep: i > 0 ? 'border-top: 1px solid var(--line);' : '',
+      };
+    });
+
+    const d = laptop
+      ? (compact
+        ? { w: 980, h: 800, colCount: 3, cols: 4, barH: 30, root: 17, q: 11, h1: 20, secGap: 6, tilePad: '6px 8px 6px 6px' }
+        : { w: 980, h: 800, colCount: 1, cols: 8, barH: 56, root: 26, q: 15, h1: 20, secGap: 6, tilePad: '10px 8px' })
+      : (compact
+        ? { w: 390, h: 844, colCount: 1, cols: 4, barH: 30, root: 17, q: 11, h1: 17, secGap: 4, tilePad: '6px 8px 6px 6px' }
+        : { w: 390, h: 844, colCount: 1, cols: 4, barH: 52, root: 25, q: 14, h1: 17, secGap: 6, tilePad: '10px 8px' });
+
+    return {
+      t: t,
+      d: d,
+      vars: vars,
+      isNormal: !compact,
+      isCompact: compact,
+      compactPressed: compact ? 'true' : 'false',
+      compactBg: compact ? 'var(--accent)' : 'transparent',
+      compactFg: compact ? 'var(--accentFg)' : 'var(--text)',
+      toggleCompact: () => this.setState({ compact: !compact }),
+      sheetOpen: st.sheet,
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      scopes: [mkScope('song', t.sSong), mkScope('setlist', t.sSet), mkScope('all', t.sAll)],
+      scopeHint: scopeKey === 'song' ? t.hSong : (scopeKey === 'setlist' ? t.hSet : t.hAll),
+      optRows: optRows,
+      toggleLang: () => this.setState({ lang: lang === 'uk' ? 'en' : 'uk' }),
+      themeLabel: dark ? t.toLight : t.toDark,
+      toggleTheme: () => this.setState({ theme: dark ? 'light' : 'dark' }),
+      isGuitar: view === 'guitar',
+      showSub: showSub,
+      showDots: showDots,
+      capo: capo,
+      capoDown: () => this.setState({ capo: Math.max(0, capo - 1) }),
+      capoUp: () => this.setState({ capo: Math.min(11, capo + 1) }),
+      capoOpts: capoOpts,
+      keyName: nm(soundKey, soundFlats),
+      shapeKeyName: nm(shapeKey, shapeFlats),
+      trLabel: tr === 0 ? t.original : (tr > 0 ? '+' + tr : '−' + Math.abs(tr)),
+      trDown: () => this.setState({ tr: Math.max(-6, tr - 1) }),
+      trUp: () => this.setState({ tr: Math.min(6, tr + 1) }),
+      isPlaying: playing,
+      isStopped: !playing,
+      playPressed: playing ? 'true' : 'false',
+      playLabel: playing ? t.pause : t.play,
+      togglePlay: () => (playing ? this.stopPlay() : this.startPlay()),
+      status1: status1,
+      status2: status2,
+      views: views,
+      sections: sections,
+    };
+  }
+}
+</script>
+</body>
+</html>

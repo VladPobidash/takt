@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Takt UI kit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E;--delBg:#FDE8E4;--delFg:#8A1C0F;--addBg:#E2F4E6;--addFg:#145C2B; width: 1440px; height: 3500px; box-sizing: border-box; padding: 64px; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; gap: 32px; overflow: hidden">
+
+<header style="display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--line)">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Takt · UI kit v0 · Swiss Blocks</p>
+<h1 style="margin: 0; font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.035em">Components</h1>
+</div>
+<p style="margin: 0; max-width: 560px; font-size: 16px; font-weight: 500; line-height: 1.5; color: var(--muted)">Styled on top of shadcn/ui with Base UI primitives and Tailwind CSS (ADR 0003, proposed). Each card names the primitive it maps to. Tokens: docs/design/README.md.</p>
+</header>
+
+<section aria-label="Foundations" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">UI tokens · light / dark</h2>
+<sc-for list="{{tokens}}" as="tk" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: 40px 40px minmax(0, 1fr); align-items: center; gap: 10px">
+<span style="height: 32px; border-radius: 4px; background: {{tk.light}}; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08)"></span>
+<span style="height: 32px; border-radius: 4px; background: {{tk.dark}}; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08)"></span>
+<span style="font-size: 14px; font-weight: 700">{{tk.name}} <span style="font-weight: 500; color: var(--muted)">{{tk.light}} / {{tk.dark}}</span></span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Section tiles · light / dark</h2>
+<sc-for list="{{tiles}}" as="tl" hint-placeholder-count="5">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px">
+<span style="height: 48px; display: flex; align-items: center; padding: 0 14px; border-radius: 6px; background: {{tl.lt}}; color: {{tl.li}}; font-size: 16px; font-weight: 800">{{tl.name}}</span>
+<span style="height: 48px; display: flex; align-items: center; padding: 0 14px; border-radius: 6px; background: {{tl.dt}}; color: {{tl.di}}; font-size: 16px; font-weight: 800">{{tl.name}}</span>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Type · Onest</h2>
+<p style="margin: 0; font-size: 40px; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em">Service 40/800</p>
+<p style="margin: 0; font-size: 30px; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em">Достойний Ти Один 30</p>
+<p style="margin: 0; display: flex; align-items: baseline"><span style="font-size: 26px; font-weight: 800; letter-spacing: -0.02em">D</span><span style="font-size: 15px; font-weight: 700; opacity: 0.7">/F#</span><span style="width: 16px"></span><span style="font-size: 26px; font-weight: 800">A</span><span style="font-size: 15px; font-weight: 700">sus4</span><span style="margin-left: 12px; font-size: 13px; font-weight: 500; color: var(--muted)">chord 26/800 + 15/700</span></p>
+<p style="margin: 0; font-size: 16px; font-weight: 700">Section name 16/700</p>
+<p style="margin: 0; font-size: 15px; font-weight: 500; line-height: 1.45">Body 15/500 — notes, descriptions, comments.</p>
+<p style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Meta label 12/600 caps</p>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px">
+
+<section aria-label="Button" style="display: flex; flex-direction: column; gap: 20px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Button</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">shadcn/ui · Button</span></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<button type="button" style="min-height: 52px; padding: 0 20px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 15px; font-weight: 800">Primary</button>
+<button type="button" style="min-height: 52px; padding: 0 20px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 15px; font-weight: 700">Secondary</button>
+<button type="button" style="min-height: 52px; padding: 0 20px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--text); font-family: inherit; font-size: 15px; font-weight: 700">Outline</button>
+<button type="button" style="min-height: 52px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-family: inherit; font-size: 15px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px">Link</button>
+<button type="button" aria-label="Back" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+<button type="button" disabled style="min-height: 52px; padding: 0 20px; border: 0; border-radius: 8px; background: var(--surface); color: #A0A0A6; font-family: inherit; font-size: 15px; font-weight: 700">Disabled</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px">
+<button type="button" style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 14px; font-weight: 800">Small 44</button>
+<button type="button" style="min-height: 52px; padding: 0 18px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 15px; font-weight: 800">Default 52</button>
+<button type="button" style="min-height: 56px; padding: 0 24px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 16px; font-weight: 800">CTA 56 · Start the service</button>
+</div>
+<p style="margin: 0; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--muted)">Radius 8. Never pill-shaped. Long labels wrap or truncate; icon-only buttons always have aria-label.</p>
+</section>
+
+<section aria-label="Input" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Input · Search</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">shadcn/ui · Input, Field</span></div>
+<label style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">My name in the band</span>
+<input type="text" value="Влад" style="height: 52px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 16px; font-weight: 600; outline: none">
+</label>
+<label style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px; border-radius: 8px; background: var(--surface); color: var(--muted)">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<input type="search" placeholder="Search songs" aria-label="Search songs" style="flex: 1 1 auto; min-width: 0; height: 44px; border: 0; background: transparent; color: var(--text); font-family: inherit; font-size: 16px; font-weight: 500; outline: none">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Tempo</span>
+<input type="text" value="13S" style="height: 52px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 8px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--signal); color: var(--text); font-family: inherit; font-size: 16px; font-weight: 600; outline: none">
+<span style="font-size: 13px; font-weight: 600; color: #B23A0E">Use numbers only, e.g. 135.</span>
+</label>
+</section>
+
+<section aria-label="Combobox" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Searchable select</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Base UI · Combobox</span></div>
+<p style="margin: 0; font-size: 14px; font-weight: 500; color: var(--muted)">For 5+ options or lists that grow: language, instrument, key, song.</p>
+<button type="button" aria-haspopup="listbox" aria-expanded="true" style="min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 14px; border: 0; border-radius: 8px; background: var(--surface); box-shadow: inset 0 0 0 2px var(--text); color: var(--text); font-family: inherit; text-align: left">
+<span style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 800">Українська</span><span style="font-size: 13px; font-weight: 500; color: var(--muted)">Ukrainian</span></span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(180deg)"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<div style="border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 28px rgba(11,11,12,0.10); overflow: hidden">
+<div style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px; border-bottom: 1px solid var(--line); color: var(--muted)">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="font-size: 16px; font-weight: 600; color: var(--text)">ukr</span><span aria-hidden="true" style="width: 2px; height: 20px; background: var(--text)"></span>
+</div>
+<ul role="listbox" aria-label="Interface language" style="list-style: none; margin: 0; padding: 4px 0">
+<li role="option" aria-selected="true" style="min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 12px; background: var(--surface)"><span style="flex: 1 1 auto; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 800">Українська</span><span style="font-size: 12px; font-weight: 500; color: var(--muted)">Ukrainian</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></li>
+</ul>
+</div>
+</section>
+
+<section aria-label="Radio group, checkbox, switch" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Radio · Checkbox · Switch</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">RadioGroup · Checkbox · Switch</span></div>
+<div role="radiogroup" aria-label="Theme">
+<div role="radio" aria-checked="false" style="min-height: 52px; display: flex; align-items: center; gap: 12px"><span style="flex: 1 1 auto; font-size: 16px; font-weight: 600">Same as the system</span><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; box-shadow: inset 0 0 0 1.5px #B9B9BE"></span></div>
+<div role="radio" aria-checked="true" style="min-height: 52px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line)"><span style="flex: 1 1 auto; display: flex; flex-direction: column"><span style="font-size: 16px; font-weight: 800">Dark</span><span style="font-size: 13px; font-weight: 500; color: var(--muted)">Recommended on stage</span></span><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; box-shadow: inset 0 0 0 7px var(--accent)"></span></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 28px; padding-top: 4px">
+<label style="display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; font-weight: 600"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 4px; background: var(--accent); color: var(--accentFg); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span>Show lyrics</label>
+<label style="display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; font-weight: 600"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px #B9B9BE"></span>Show beat dots</label>
+<span style="display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; font-weight: 600"><span role="switch" aria-checked="true" aria-label="Keep screen awake" style="width: 48px; height: 28px; box-sizing: border-box; padding: 3px; border-radius: 6px; background: var(--accent); display: flex; justify-content: flex-end"><span style="width: 22px; height: 22px; border-radius: 4px; background: var(--accentFg)"></span></span>Keep screen awake</span>
+</div>
+</section>
+
+<section aria-label="Tabs and number field" style="display: flex; flex-direction: column; gap: 18px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Tabs · Number field</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Tabs · NumberField</span></div>
+<div role="tablist" aria-label="Instrument" style="display: flex; border-bottom: 1px solid var(--line)">
+<button type="button" role="tab" aria-selected="false" style="height: 48px; margin: 0 18px -1px 0; padding: 0; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600">Harmony</button>
+<button type="button" role="tab" aria-selected="true" style="height: 48px; margin: 0 18px -1px 0; padding: 0; border: 0; border-bottom: 3px solid var(--signal); background: transparent; color: var(--text); font-family: inherit; font-size: 15px; font-weight: 800">Guitar</button>
+<button type="button" role="tab" aria-selected="false" style="height: 48px; margin: 0 18px -1px 0; padding: 0; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600">Bass</button>
+<button type="button" role="tab" aria-selected="false" style="height: 48px; margin: 0 18px -1px 0; padding: 0; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600">Keys</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-right: 4px">Capo</span>
+<button type="button" aria-label="Capo down" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 20px">−</button>
+<span style="min-width: 24px; text-align: center; font-size: 18px; font-weight: 800">2</span>
+<button type="button" aria-label="Capo up" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 20px">+</button>
+<button type="button" style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700">0 → D</button>
+<button type="button" aria-pressed="true" style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 14px; font-weight: 700">2 → C</button>
+<button type="button" style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700">7 → G</button>
+</div>
+<div role="group" aria-label="Transpose" style="display: flex; align-items: center; gap: 2px; align-self: flex-start">
+<button type="button" aria-label="Down a semitone" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 20px">−</button>
+<span style="min-width: 70px; display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 19px; font-weight: 800; line-height: 1">D</span><span style="font-size: 11px; font-weight: 600; color: var(--muted)">original</span></span>
+<button type="button" aria-label="Up a semitone" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 20px">+</button>
+</div>
+</section>
+
+<section aria-label="Feedback" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Alert · Toast · Badge · Avatar</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Alert · Sonner · Badge · Avatar</span></div>
+<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: #FFF1EB; color: #7A2400; font-size: 14px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>Line 12: this bar has 5 beats in 4/4</div>
+<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--surface); color: var(--text); font-size: 14px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>Songs live only on this device. Export regularly.</div>
+<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--addBg); color: var(--addFg); font-size: 14px; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Suggestion accepted — the song is updated for everyone</div>
+<div style="display: flex; align-items: center; gap: 12px; align-self: flex-start; padding: 12px 12px 12px 16px; border-radius: 8px; background: var(--text); color: var(--bg); font-size: 14px; font-weight: 600; box-shadow: 0 10px 28px rgba(11,11,12,0.18)">Setlist exported · takt-31-oct.taktset<button type="button" style="min-height: 36px; padding: 0 10px; border: 0; border-radius: 6px; background: rgba(255,255,255,0.14); color: var(--bg); font-family: inherit; font-size: 13px; font-weight: 800">Share</button></div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<span style="font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: var(--accent); color: var(--accentFg)">яма</span>
+<span style="font-size: 13px; font-weight: 700; padding: 2px 8px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--line)">×4</span>
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--signal)">1 suggestion</span>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 4px; background: #FFF0C2; color: #4F3600"><span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 4px; background: #FFB000"></span>My note</span>
+<span aria-hidden="true" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #FFE0BF; color: #743000; font-size: 14px; font-weight: 800">В</span>
+<span aria-hidden="true" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #D9E8FF; color: #0A3A8C; font-size: 14px; font-weight: 800">А</span>
+<span aria-hidden="true" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #EADCFF; color: #461C9B; font-size: 14px; font-weight: 800">М</span>
+</div>
+</section>
+
+<section aria-label="Navigation" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Top bar · Section menu</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">custom · Menu</span></div>
+<div style="display: flex; align-items: center; gap: 4px; min-height: 56px; border-bottom: 1px solid var(--line)">
+<span aria-hidden="true" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></span>
+<span style="flex: 1 1 auto; display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: var(--accent); color: var(--accentFg); font-size: 15px; font-weight: 800">T</span><span style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em">Service</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span>
+<span style="min-width: 44px; text-align: center; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; color: var(--muted)">EN</span>
+<span aria-hidden="true" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></span>
+</div>
+<div role="menu" aria-label="Sections" style="align-self: flex-start; min-width: 240px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); box-shadow: 0 10px 28px rgba(11,11,12,0.14)">
+<span role="menuitem" style="min-height: 44px; display: flex; align-items: center; padding: 0 10px; border-radius: 6px; background: var(--surface); font-size: 15px; font-weight: 800"><span style="flex: 1 1 auto">Service</span><span style="font-size: 12px; font-weight: 600; color: var(--muted)">current</span></span>
+<span role="menuitem" style="min-height: 44px; display: flex; align-items: center; padding: 0 10px; font-size: 15px; font-weight: 600"><span style="flex: 1 1 auto">Library</span><span style="font-size: 12px; font-weight: 600; color: var(--muted)">6 songs</span></span>
+<span role="menuitem" style="min-height: 44px; display: flex; align-items: center; padding: 0 10px; font-size: 15px; font-weight: 600">Settings</span>
+</div>
+<p style="margin: 0; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--muted)">No bottom navigation: it costs ~60 px of every screen. Sections live in the switcher menu of the 52 px top bar.</p>
+</section>
+
+<section aria-label="Overlays" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Drawer · Dialog</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Drawer · AlertDialog</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; justify-content: flex-end; height: 240px; border-radius: 8px; background: rgba(11,11,12,0.35); overflow: hidden">
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 10px 16px 16px 16px; border-radius: 8px 8px 0 0; background: var(--bg)">
+<span aria-hidden="true" style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: var(--line)"></span>
+<span style="font-size: 17px; font-weight: 800">Bar 4 · Bridge</span>
+<span style="font-size: 14px; font-weight: 500; color: var(--muted)">Add a personal note to this bar</span>
+<span style="min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-size: 15px; font-weight: 800">Add note</span>
+</div>
+</div>
+<div style="display: flex; align-items: center; justify-content: center; height: 240px; border-radius: 8px; background: rgba(11,11,12,0.35); padding: 16px">
+<div role="alertdialog" aria-label="Restore this version?" style="display: flex; flex-direction: column; gap: 10px; width: 100%; padding: 16px; border-radius: 8px; background: var(--bg)">
+<span style="font-size: 17px; font-weight: 800">Restore this version?</span>
+<span style="font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--muted)">It becomes a new change. Nothing is lost.</span>
+<div style="display: flex; gap: 8px"><span style="flex: 1 1 auto; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--surface); font-size: 14px; font-weight: 700">Cancel</span><span style="flex: 1 1 auto; min-height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-size: 14px; font-weight: 800">Restore</span></div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+
+<section aria-label="Song view controls" style="display: flex; flex-direction: column; gap: 20px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Song view controls</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">custom · Toolbar, Drawer + Tabs + Switch</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px">
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Player toolbar · stopped / auto-scroll</span>
+<div style="display: flex; align-items: center; gap: 4px; padding: 6px; border: 1px solid var(--line); border-radius: 8px">
+<span aria-hidden="true" style="width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 20L9 12l10-8v16zM5 19V5"></path></svg></span>
+<span aria-hidden="true" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--accent); color: var(--accentFg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg></span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; padding: 0 4px"><span style="font-size: 13px; font-weight: 800">Auto-scroll</span><span style="font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">135 BPM · 1 bar count-in</span></span>
+<span style="font-size: 16px; font-weight: 800; padding: 0 6px">D</span>
+</div>
+<div style="display: flex; align-items: center; gap: 4px; padding: 6px; border: 1px solid var(--line); border-radius: 8px">
+<span aria-hidden="true" style="width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 20L9 12l10-8v16zM5 19V5"></path></svg></span>
+<span aria-hidden="true" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--accent); color: var(--accentFg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg></span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; padding: 0 4px"><span style="font-size: 13px; font-weight: 800">Bridge</span><span style="font-size: 11px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums">bar 2 of 4 · pass 3 of 4</span></span>
+<span style="font-size: 16px; font-weight: 800; padding: 0 6px">D</span>
+</div>
+<p style="margin: 0; font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--muted)">Follows the metronome bar by bar. Highlights and scrolls to the current section only — chords and beats are never highlighted.</p>
+<div style="display: flex; gap: 2px">
+<span style="flex: 4 1 0px; height: 30px; border-radius: 3px; background: #ECECF2; opacity: 0.45"></span>
+<span style="flex: 9 1 0px; height: 30px; border-radius: 3px; background: #D9E8FF; opacity: 0.45"></span>
+<span style="flex: 7 1 0px; height: 30px; border-radius: 3px; background: #FFE0BF; opacity: 0.45"></span>
+<span style="flex: 16 1 0px; height: 30px; border-radius: 3px; background: #EADCFF; box-shadow: inset 0 -3px 0 var(--signal)"></span>
+<span style="flex: 8 1 0px; height: 30px; border-radius: 3px; background: #FFE0BF"></span>
+</div>
+<span style="font-size: 12px; font-weight: 500; color: var(--muted)">Form timeline while playing: passed sections fade, current one underlined.</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">View options · layered scopes</span>
+<div role="tablist" aria-label="Apply to" style="display: flex; border-bottom: 1px solid var(--line)">
+<span role="tab" aria-selected="true" style="height: 40px; display: flex; align-items: center; margin-right: 16px; border-bottom: 3px solid var(--signal); font-size: 14px; font-weight: 800">This song</span>
+<span role="tab" aria-selected="false" style="height: 40px; display: flex; align-items: center; margin-right: 16px; font-size: 14px; font-weight: 600; color: var(--muted)">This setlist</span>
+<span role="tab" aria-selected="false" style="height: 40px; display: flex; align-items: center; font-size: 14px; font-weight: 600; color: var(--muted)">Everywhere</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; min-height: 52px">
+<span style="flex: 1 1 auto; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700">Beat dots under chords</span><span style="font-size: 12px; font-weight: 500; color: var(--muted)">From this setlist</span></span>
+<span role="switch" aria-checked="false" aria-label="Beat dots" style="width: 48px; height: 28px; box-sizing: border-box; padding: 3px; border-radius: 6px; background: var(--surface2); display: flex"><span style="width: 22px; height: 22px; border-radius: 4px; background: var(--bg)"></span></span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; min-height: 52px; border-top: 1px solid var(--line)">
+<span style="flex: 1 1 auto; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700">Guitar: sounding chords under shapes</span><span style="font-size: 12px; font-weight: 500; color: var(--signal)">Set for this song</span></span>
+<span style="font-size: 13px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px">Reset</span>
+<span role="switch" aria-checked="false" aria-label="Sounding chords" style="width: 48px; height: 28px; box-sizing: border-box; padding: 3px; border-radius: 6px; background: var(--surface2); display: flex"><span style="width: 22px; height: 22px; border-radius: 4px; background: var(--bg)"></span></span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; min-height: 52px; border-top: 1px solid var(--line)">
+<span style="flex: 1 1 auto; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700">Notes for my instrument</span><span style="font-size: 12px; font-weight: 500; color: var(--muted)">Default everywhere</span></span>
+<span role="switch" aria-checked="true" aria-label="Instrument notes" style="width: 48px; height: 28px; box-sizing: border-box; padding: 3px; border-radius: 6px; background: var(--accent); display: flex; justify-content: flex-end"><span style="width: 22px; height: 22px; border-radius: 4px; background: var(--accentFg)"></span></span>
+</div>
+<p style="margin: 0; font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--muted)">Song overrides setlist, setlist overrides everywhere. The source line shows where each value comes from; signal colour marks an override at the current level.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Compact tile · whole song on one screen</span>
+<div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px; padding: 6px 8px 6px 6px; border-radius: 6px; background: #D9E8FF; color: #0A3A8C">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="align-self: flex-start; height: 20px; padding: 0 4px; display: flex; align-items: center; border-radius: 3px; background: #0A3A8C; color: #D9E8FF; font-size: 11px; font-weight: 800">V1</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+<span style="min-height: 30px; display: flex; align-items: center; padding-left: 4px; border-left: 2px solid rgba(10,58,140,0.28); font-size: 17px; font-weight: 800">D</span>
+<span style="min-height: 30px; display: flex; align-items: center; padding-left: 4px; border-left: 2px solid rgba(10,58,140,0.28); font-size: 17px; font-weight: 800">A</span>
+<span style="min-height: 30px; display: flex; align-items: center; gap: 6px; padding-left: 4px; border-left: 2px solid rgba(10,58,140,0.28); font-size: 17px; font-weight: 800">D<span style="font-size: 11px; opacity: 0.7; margin-left: -6px">/F#</span> G</span>
+<span style="min-height: 30px; display: flex; align-items: center; gap: 4px; padding-left: 4px; border-left: 2px solid rgba(10,58,140,0.28); border-right: 2px solid rgba(10,58,140,0.28); font-size: 17px; font-weight: 800">A<span style="font-size: 11px; margin-left: -4px">sus4</span> A</span>
+</div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 6px; padding: 6px 8px 6px 6px; border-radius: 6px; background: #EADCFF; color: #461C9B; box-shadow: inset 0 0 0 3px #461C9B">
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px"><span style="height: 20px; padding: 0 4px; display: flex; align-items: center; border-radius: 3px; background: #461C9B; color: #EADCFF; font-size: 11px; font-weight: 800">B</span><span style="font-size: 12px; font-weight: 800">×4</span><span aria-label="Now" style="width: 10px; height: 10px; border-radius: 2px; background: var(--signal)"></span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+<span style="min-height: 30px; display: flex; align-items: center; padding-left: 4px; border-left: 2px solid rgba(70,28,155,0.28); font-size: 17px; font-weight: 800">G</span>
+<span style="min-height: 30px; display: flex; align-items: center; padding-left: 4px; border-left: 2px solid rgba(70,28,155,0.28); font-size: 17px; font-weight: 800">Em</span>
+<span style="min-height: 30px; display: flex; align-items: center; padding-left: 4px; border-left: 2px solid rgba(70,28,155,0.28); font-size: 17px; font-weight: 800">Hm</span>
+<span style="min-height: 30px; display: flex; align-items: center; gap: 6px; padding-left: 4px; border-left: 2px solid rgba(70,28,155,0.28); border-right: 2px solid rgba(70,28,155,0.28); font-size: 17px; font-weight: 800">A D<span style="font-size: 11px; opacity: 0.7; margin-left: -6px">/F#</span></span>
+</div>
+</div>
+<p style="margin: 0; font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--muted)">Chords 17 px, no beat dots, label column instead of a header row. Phone: 1 column; laptop: 2–3 columns depending on width.</p>
+</div>
+
+</div>
+</section>
+
+<section aria-label="Music components" style="display: flex; flex-direction: column; gap: 24px; padding: 28px; border: 1px solid var(--line); border-radius: 8px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h2 style="margin: 0; font-size: 22px; font-weight: 800">Music components</h2><span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">custom · built on our tokens</span></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">SectionTile + BarGrid + ChordCell</span>
+<div style="display: flex; flex-direction: column; gap: 10px; background: #D9E8FF; color: #0A3A8C; border-radius: 6px; padding: 14px 10px">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0 2px">
+<span style="height: 24px; padding: 0 7px; display: flex; align-items: center; border-radius: 4px; background: #0A3A8C; color: #D9E8FF; font-weight: 800; font-size: 13px">V1</span>
+<span style="flex: 1 1 auto; font-size: 16px; font-weight: 700">Verse 1</span>
+<span style="font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: var(--accent); color: var(--accentFg)">тихо</span>
+<span style="font-size: 17px; font-weight: 800">×2</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr))">
+<sc-for list="{{demoBars}}" as="bar" hint-placeholder-count="4">
+<div style="display: flex; min-height: 62px; padding: 4px 0; box-sizing: border-box; border-left: 2px solid rgba(10,58,140,0.28); {{bar.edge}}">
+<sc-for list="{{bar.chords}}" as="ch" hint-placeholder-count="1">
+<div style="flex: {{ch.grow}} 1 0px; min-width: max-content; padding: 0 6px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px">
+<div style="display: flex; align-items: baseline; white-space: nowrap"><span style="font-weight: 800; font-size: 26px; line-height: 1; letter-spacing: -0.02em">{{ch.root}}</span><span style="font-weight: 700; font-size: 15px">{{ch.q}}</span><span style="font-weight: 700; font-size: 15px; opacity: 0.7">{{ch.slash}}</span></div>
+<div aria-hidden="true" style="display: flex"><sc-for list="{{ch.dots}}" as="d" hint-placeholder-count="2"><span style="flex: 1 1 0px; display: flex"><span style="width: 6px; height: 6px; background: rgba(10,58,140,0.28)"></span></span></sc-for></div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 6px; background: #FFE0BF; color: #743000"><span style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase">Harmony</span><span style="display: flex; align-items: baseline"><span style="font-size: 26px; font-weight: 800">D</span><span style="font-size: 15px; font-weight: 700; opacity: 0.7">/F#</span></span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 6px; background: #FFE0BF; color: #743000"><span style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase">Guitar · capo 2</span><span style="display: flex; align-items: baseline"><span style="font-size: 26px; font-weight: 800">C</span><span style="font-size: 15px; font-weight: 700; opacity: 0.7">/E</span></span><span style="font-size: 12px; font-weight: 700; opacity: 0.75">D/F#</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 6px; background: #FFE0BF; color: #743000"><span style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase">Bass</span><span style="font-size: 26px; font-weight: 800">F#</span><span style="font-size: 12px; font-weight: 700; opacity: 0.75">D/F#</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">FormTimeline</span>
+<div style="display: flex; gap: 2px">
+<sc-for list="{{timeline}}" as="s" hint-placeholder-count="10"><span style="flex: {{s.len}} 1 0px; min-width: 26px; height: 40px; box-sizing: border-box; display: flex; align-items: flex-end; padding: 0 0 5px 5px; border-radius: 3px; background: {{s.tile}}; color: {{s.ink}}; font-size: 11px; font-weight: 800; overflow: hidden">{{s.abbr}}</span></sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">SetlistRow</span>
+<div style="display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line)">
+<span style="font-size: 22px; font-weight: 800; color: var(--signal)">2</span>
+<span style="display: flex; flex-direction: column; gap: 6px">
+<span style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 17px; font-weight: 800">Достойний Ти Один</span><span style="font-size: 22px; font-weight: 800">D</span></span>
+<span style="font-size: 13px; font-weight: 500; color: var(--muted)">135 BPM · 4/4 · capo 2 → C</span>
+<span aria-hidden="true" style="display: flex; gap: 2px; height: 6px"><sc-for list="{{strip}}" as="g" hint-placeholder-count="10"><span style="flex: {{g.len}} 1 0px; border-radius: 1px; background: {{g.c}}"></span></sc-for></span>
+</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">DiffBar (future)</span>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 17px; font-weight: 800">
+<span style="padding: 6px 10px; border-radius: 4px; background: var(--delBg); color: var(--delFg); text-decoration: line-through">− Hm A</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<span style="padding: 6px 10px; border-radius: 4px; background: var(--addBg); color: var(--addFg)">+ Hm</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tokens = [
+      ['bg', '#FFFFFF', '#0B0B0C'], ['surface', '#F3F3F1', '#18181A'], ['surface2', '#E9E9E6', '#222225'], ['line', '#E2E2DE', '#2A2A2E'],
+      ['text', '#0B0B0C', '#F4F4F1'], ['muted', '#5C5C61', '#A6A6AB'], ['signal', '#F0501E', '#FF6A3D'], ['mineDot', '#FFB000', '#FFC933'],
+    ].map((x) => ({ name: x[0], light: x[1], dark: x[2] }));
+    const tiles = [
+      ['Verse', '#0A3A8C', '#D9E8FF', '#B3D2FF', '#162E4D'], ['Chorus', '#743000', '#FFE0BF', '#FFC892', '#45270C'],
+      ['Bridge', '#461C9B', '#EADCFF', '#DEC9FF', '#31204D'], ['Pre-chorus', '#08523E', '#CCF3E4', '#98EACB', '#103A2E'],
+      ['Intro / interlude', '#33334A', '#ECECF2', '#D2D2DE', '#23232D'],
+    ].map((x) => ({ name: x[0], li: x[1], lt: x[2], di: x[3], dt: x[4] }));
+    const bar = (chords, edge) => ({
+      edge: edge ? 'border-right: 2px solid rgba(10,58,140,0.28);' : '',
+      chords: chords.map((c) => ({ root: c[0], q: c[1], slash: c[2], grow: c[3], dots: Array.from({ length: c[3] }, () => 0) })),
+    });
+    const T = {
+      I: ['#33334A', '#ECECF2'], V: ['#0A3A8C', '#D9E8FF'], C: ['#743000', '#FFE0BF'], B: ['#461C9B', '#EADCFF'],
+    };
+    const form = [['I', 'I', 4], ['V', 'V1', 9], ['C', 'C', 7], ['I', 'I', 4], ['V', 'V2', 8], ['C', 'C2', 16], ['I', 'Inst', 4], ['B', 'B', 16], ['C', 'C3', 8], ['I', 'O', 1]];
+    const S = { I: '#D3D3DE', V: '#4C8DF0', C: '#FF9A3D', B: '#9C74F0' };
+    return {
+      tokens: tokens,
+      tiles: tiles,
+      demoBars: [
+        bar([['D', '', '', 4]], false),
+        bar([['A', '', '', 4]], false),
+        bar([['D', '', '/F#', 2], ['G', '', '', 2]], false),
+        bar([['A', 'sus4', '', 1], ['A', '', '', 3]], true),
+      ],
+      timeline: form.map((f) => ({ abbr: f[1], len: f[2], ink: T[f[0]][0], tile: T[f[0]][1] })),
+      strip: form.map((f) => ({ len: f[2], c: S[f[0]] })),
+    };
+  }
+}
+</script>
+</body>
+</html>

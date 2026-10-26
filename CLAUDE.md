@@ -12,6 +12,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 2. `docs/format.md` — the `.takt` format v0 (the core of the product)
 3. `docs/roadmap.md` — current stage and open questions
 4. `docs/decisions/` — accepted decisions (ADR); do not contradict them silently
+5. `docs/tech-planning.md` — what still has to be decided before code
 
 ## Non-negotiable principles
 
@@ -24,7 +25,8 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 
 ## Current state
 
-- No code yet. Visual direction is decided — follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work. MVP screens are being designed in Claude Design.
+- No code yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
+- Next step: technical planning. Open decisions and questions are listed in `docs/tech-planning.md`; each answer becomes an ADR.
 - Stack and app architecture are **not decided**. Do not scaffold frameworks or add dependencies before an ADR in `docs/decisions/` is accepted by the user.
 - Likely direction (to confirm in an ADR): the format is a standalone, dependency-free TypeScript library (`packages/format`: parser, transpose, capo, ChordPro export) separate from the app (`apps/web`), with storage behind an adapter interface.
 
@@ -48,7 +50,9 @@ docs/
   brief.md         product brief
   format.md        .takt format spec v0
   roadmap.md       stages + open questions
-  design/          design system (README.md), design brief, design outputs
+  tech-planning.md technical decisions and questions to settle before code
+  design/          design system (README.md), design brief
+    mvp-v1/        accepted MVP screens: screenshots + Claude Design sources
   decisions/       ADRs
   ideas/           future features, not in the MVP (e.g. change history)
 examples/          sample .takt files (no copyrighted lyrics)

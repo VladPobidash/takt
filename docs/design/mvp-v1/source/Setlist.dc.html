@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Service map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.55)}
+</style>
+</helmet>
+<div style="--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E; position: relative; width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="position: relative; z-index: 5; flex: 0 0 auto; display: flex; align-items: center; gap: 2px; min-height: 52px; padding: 4px 4px 0 6px">
+<button type="button" onClick="{{toggleMenu}}" aria-haspopup="menu" aria-expanded="{{menuExp}}" style="flex: 0 1 auto; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 4px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-family: inherit; cursor: pointer">
+<span aria-hidden="true" style="flex: 0 0 auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: var(--accent); color: var(--accentFg); font-size: 15px; font-weight: 800">T</span>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.section}}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<span style="flex: 1 1 auto"></span>
+<button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="flex: 0 0 auto; min-width: 40px; height: 44px; padding: 0 6px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; cursor: pointer">{{langCode}}</button>
+<button type="button" aria-label="{{t.viewOpts}}" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+</button>
+<button type="button" aria-label="{{t.share}}" style="flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 8l5-5 5 5"></path><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"></path></svg>
+</button>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
+<div role="menu" aria-label="{{t.sections}}" style="position: absolute; top: 54px; left: 8px; min-width: 230px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); box-shadow: 0 10px 28px rgba(11,11,12,0.14)">
+<sc-for list="{{menu}}" as="mi" hint-placeholder-count="3">
+<a role="menuitem" href="{{mi.href}}" aria-current="{{mi.current}}" style="min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 6px; background: {{mi.bg}}; color: var(--text); text-decoration: none; font-size: 15px; font-weight: {{mi.weight}}"><span style="flex: 1 1 auto">{{mi.label}}</span><span style="font-size: 12px; font-weight: 600; color: var(--muted)">{{mi.hint}}</span></a>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px 14px; border-bottom: 1px solid var(--line)">
+<button type="button" aria-haspopup="listbox" style="flex: 1 1 auto; min-width: 0; min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: transparent; color: var(--muted); font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-align: left; cursor: pointer">
+<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.date}} · {{t.count}}</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<a href="Main.dc.html" style="flex: 0 0 auto; min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 8px; background: var(--accent); color: var(--accentFg); text-decoration: none; font-size: 14px; font-weight: 800; white-space: nowrap">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>{{t.start}}</a>
+</div>
+
+<ol style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; list-style: none; margin: 0; padding: 0 12px 8px 14px">
+<sc-for list="{{songs}}" as="s" hint-placeholder-count="6">
+<li style="{{s.sep}}">
+<a href="Main.dc.html" style="display: grid; grid-template-columns: 22px minmax(0, 1fr) 18px; gap: 10px; padding: 10px 0; color: var(--text); text-decoration: none; align-items: start">
+<span style="font-size: 18px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: {{s.numFg}}">{{s.n}}</span>
+<span style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px">
+<span style="font-size: 16px; font-weight: {{s.titleW}}; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.title}}</span>
+<span style="flex: 0 0 auto; font-size: 19px; font-weight: 800; line-height: 1; letter-spacing: -0.02em">{{s.key}}</span>
+</span>
+<span style="display: flex; align-items: center; gap: 8px; min-width: 0">
+<span style="flex: 0 1 auto; min-width: 0; font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.meta}}</span>
+<sc-if value="{{s.hasNote}}" hint-placeholder-val="{{ false }}"><span style="flex: 0 0 auto; font-size: 12px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--surface2)">{{s.note}}</span></sc-if>
+</span>
+<span aria-hidden="true" style="display: flex; gap: 2px; height: 4px">
+<sc-for list="{{s.seg}}" as="g" hint-placeholder-count="6"><span style="flex: {{g.grow}} 1 0px; background: {{g.color}}"></span></sc-for>
+</span>
+</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="color: #A0A0A6; margin-top: 2px"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg>
+</a>
+</li>
+</sc-for>
+<li style="border-top: 1px solid var(--line)">
+<a href="Library.dc.html" style="min-height: 44px; display: flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; font-size: 14px; font-weight: 700">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>{{t.add}}</a>
+</li>
+</ol>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"uiLang":{"editor":"enum","options":["en","uk"],"default":"en"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: null, menu: false };
+  }
+
+  renderVals() {
+    const lang = this.state.lang || this.props.uiLang || 'en';
+    const STR = {
+      en: {
+        section: 'Service', sections: 'Sections', date: 'Sat, 31 Oct', count: '6 songs', start: 'Start', share: 'Share the setlist file',
+        viewOpts: 'View options for this setlist', add: 'Add a song', capo: 'capo', langLabel: 'Language: English. Switch to Ukrainian',
+        mSet: 'Service', mLib: 'Library', mSet2: 'Settings', mSetHint: 'current', mLibHint: '6 songs',
+      },
+      uk: {
+        section: 'Служіння', sections: 'Розділи', date: 'Сб, 31 жовт', count: '6 пісень', start: 'Почати', share: 'Поділитися файлом сетлиста',
+        viewOpts: 'Вигляд для цього сетлиста', add: 'Додати пісню', capo: 'капо', langLabel: 'Мова: українська. Перемкнути на англійську',
+        mSet: 'Служіння', mLib: 'Бібліотека', mSet2: 'Налаштування', mSetHint: 'зараз', mLibHint: '6 пісень',
+      },
+    };
+    const t = STR[lang] || STR.en;
+    const C = { I: '#D3D3DE', V: '#4C8DF0', P: '#2EBF8E', C: '#FF9A3D', B: '#9C74F0' };
+    const SONGS = [
+      { title: 'Могутній Бог', key: 'E', bpm: 86, time: '4/4', note: 'без інтро', form: [['I', 4], ['V', 16], ['C', 16], ['V', 16], ['C', 16], ['C', 14], ['I', 4]] },
+      { title: 'Достойний Ти Один', key: 'D', bpm: 135, time: '4/4', capo: [2, 'C'], current: true, form: [['I', 4], ['V', 9], ['C', 7], ['I', 4], ['V', 8], ['C', 16], ['I', 4], ['B', 16], ['C', 8], ['I', 1]] },
+      { title: 'Вдячність', key: 'F#', bpm: 78, time: '6/8', capo: [2, 'E'], form: [['I', 2], ['V', 8], ['C', 16], ['I', 2], ['V', 8], ['C', 16], ['I', 4], ['B', 24], ['I', 5], ['C', 9]] },
+      { title: 'Маранафа', key: 'Hm', bpm: 75, time: '4/4', form: [['I', 4], ['V', 8], ['P', 8], ['C', 8], ['V', 8], ['P', 8], ['C', 8], ['I', 4], ['B', 8], ['C', 8], ['I', 1]] },
+      { title: 'Боже, я вдячний Тобі', key: 'D', bpm: 72, time: '4/4', form: [['I', 3], ['V', 12], ['C', 10], ['I', 1], ['V', 12], ['C', 20], ['I', 6], ['B', 28], ['C', 20]] },
+      { title: 'Краса Хреста', key: 'B', bpm: 69, capo: [1, 'A'], form: [['I', 4], ['V', 8], ['C', 8], ['I', 4], ['V', 8], ['C', 8], ['I', 6], ['V', 8], ['C', 18]] },
+    ];
+    const menuOpen = this.state.menu;
+    const mi = (href, label, hint, cur) => ({ href: href, label: label, hint: hint, current: cur ? 'page' : 'false', bg: cur ? 'var(--surface)' : 'transparent', weight: cur ? 800 : 600 });
+    return {
+      t: t,
+      langCode: lang === 'uk' ? 'UA' : 'EN',
+      toggleLang: () => this.setState({ lang: lang === 'uk' ? 'en' : 'uk' }),
+      menuOpen: menuOpen,
+      menuExp: menuOpen ? 'true' : 'false',
+      toggleMenu: () => this.setState({ menu: !menuOpen }),
+      menu: [mi('Setlist.dc.html', t.mSet, t.mSetHint, true), mi('Library.dc.html', t.mLib, t.mLibHint, false), mi('Settings.dc.html', t.mSet2, '', false)],
+      songs: SONGS.map((s, i) => {
+        const parts = [s.bpm + ' BPM'];
+        if (s.time) parts.push(s.time);
+        if (s.capo) parts.push(t.capo + ' ' + s.capo[0] + '→' + s.capo[1]);
+        const cur = !!s.current;
+        return {
+          n: i + 1, title: s.title, key: s.key, meta: parts.join(' · '), note: s.note || '', hasNote: !!s.note,
+          seg: s.form.map((x) => ({ grow: x[1], color: C[x[0]] })),
+          numFg: cur ? 'var(--signal)' : 'var(--muted)', titleW: cur ? 800 : 700,
+          sep: i > 0 ? 'border-top: 1px solid var(--line);' : '',
+        };
+      }),
+    };
+  }
+}
+</script>
+</body>
+</html>

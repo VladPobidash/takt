@@ -2,6 +2,8 @@
 
 The visual language of Takt. Chosen on 2026-10-25 after comparing five directions (see [Exploration history](#exploration-history)). Decision record: [ADR 0002](../decisions/0002-visual-direction.md).
 
+**Status:** MVP design v1 accepted on 2026-10-26 — screens and sources in [mvp-v1/](mvp-v1/README.md). This document stays the source of truth for tokens and rules.
+
 **In one line:** flat, editorial, high-contrast UI in **Onest**, where the only strong colour is the song itself — every section type has its own tile colour, consistent across all songs.
 
 ## Principles
@@ -139,4 +141,4 @@ Horizontal strips (tabs, chips) hide the scrollbar entirely (`scrollbar-width: n
 
 ## Exploration history
 
-Design canvases (private to the author): v1 prototype — "Takt — stage screens"; v2 — "Takt — design v2" with directions A · Warm Stage, B · Paper Chart, C · Color Pop, C1 · Expressive, C2 · Swiss Blocks (chosen) and font options (Onest chosen over Manrope, Jost, Unbounded + Onest).
+Design canvases (private to the author): v1 prototype — "Takt — stage screens"; v2 — "Takt — design v2" with directions A · Warm Stage, B · Paper Chart, C · Color Pop, C1 · Expressive, C2 · Swiss Blocks (chosen) and font options (Onest chosen over Manrope, Jost, Unbounded + Onest); MVP — "Takt — MVP design", 12 boards, accepted as v1 and exported to [mvp-v1/](mvp-v1/README.md).

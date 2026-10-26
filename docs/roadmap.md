@@ -4,7 +4,7 @@
 
 Six Saturday services remain before the worship night (31.10 – 5.12). Each one is a test: afterwards we write down what got in the way. Dates are a guide, not a commitment.
 
-1. **24–25 October.** Repository and docs. Design of the two main screens in Claude Design. First song written in `.takt` by hand. Parser and tests on real lines from the PDF.
+1. **24–26 October.** ✅ Repository and docs. ✅ Design system and MVP design v1 — accepted 26.10 ([screens](design/mvp-v1/README.md)). Next: technical planning ([questions](tech-planning.md)) → ADRs for stack and structure; first song written in `.takt` by hand; parser and tests on real lines from the PDF.
 2. **By 31 October.** Song view: grid, durations, form strip, transposition, capo, H/B. First demo to the band.
 3. **By 14 November.** Instrument parts, notes, service map, stage mode.
 4. **By 28 November.** Editor, import and export, offline (PWA). All worship-night songs entered; each member has added their part.
@@ -27,4 +27,5 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 - [ ] Default H/B notation.
 - [x] UI language: English by default, Ukrainian from day one ([ADR 0002](decisions/0002-visual-direction.md)).
 - [x] Visual direction: "Swiss Blocks" in Onest ([ADR 0002](decisions/0002-visual-direction.md)).
+- [x] MVP screens: design v1 accepted on 2026-10-26 ([mvp-v1](design/mvp-v1/README.md)).
 - [x] License: Apache-2.0. Repository is public.

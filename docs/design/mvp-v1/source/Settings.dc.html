@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.55)}
+</style>
+</helmet>
+<div style="--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E; width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="position: relative; z-index: 5; flex: 0 0 auto; display: flex; align-items: center; gap: 2px; min-height: 52px; padding: 4px 10px 0 6px; border-bottom: 1px solid var(--line)">
+<button type="button" onClick="{{toggleMenu}}" aria-haspopup="menu" aria-expanded="{{menuExp}}" style="flex: 0 1 auto; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 4px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font-family: inherit; cursor: pointer">
+<span aria-hidden="true" style="flex: 0 0 auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: var(--accent); color: var(--accentFg); font-size: 15px; font-weight: 800">T</span>
+<span style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.title}}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<span style="flex: 1 1 auto"></span>
+<span style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap">{{t.device}}</span>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
+<div role="menu" aria-label="{{t.sections}}" style="position: absolute; top: 54px; left: 8px; min-width: 230px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); box-shadow: 0 10px 28px rgba(11,11,12,0.14)">
+<sc-for list="{{menu}}" as="mi" hint-placeholder-count="3">
+<a role="menuitem" href="{{mi.href}}" aria-current="{{mi.current}}" style="min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 10px; border-radius: 6px; background: {{mi.bg}}; color: var(--text); text-decoration: none; font-size: 15px; font-weight: {{mi.weight}}"><span style="flex: 1 1 auto">{{mi.label}}</span><span style="font-size: 12px; font-weight: 600; color: var(--muted)">{{mi.hint}}</span></a>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; padding: 0 16px 24px 16px">
+
+<section aria-label="{{t.name}}" style="padding-top: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{t.name}}</span>
+<input type="text" value="Влад" style="height: 52px; box-sizing: border-box; padding: 0 14px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 16px; font-weight: 600; outline: none">
+<span style="font-size: 13px; font-weight: 500; color: var(--muted)">{{t.nameHint}}</span>
+</label>
+</section>
+
+<sc-for list="{{combos}}" as="c" hint-placeholder-count="2">
+<section aria-label="{{c.title}}" style="padding-top: 14px">
+<h2 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{c.title}}</h2>
+<button type="button" aria-haspopup="listbox" aria-expanded="{{c.expanded}}" onClick="{{c.toggle}}" style="width: 100%; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 14px; border: 0; border-radius: 8px; background: var(--surface); box-shadow: {{c.ring}}; color: var(--text); font-family: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.value}}</span>
+<sc-if value="{{c.hasValueSub}}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.valueSub}}</span></sc-if>
+</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto; transform: {{c.chevron}}"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{c.open}}" hint-placeholder-val="{{ false }}">
+<div style="margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); box-shadow: 0 10px 28px rgba(11,11,12,0.10); overflow: hidden">
+<label style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 12px; border-bottom: 1px solid var(--line); color: var(--muted)">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{c.searchLabel}}</span>
+<input type="search" value="{{c.query}}" onInput="{{c.onQuery}}" placeholder="{{c.searchLabel}}" style="flex: 1 1 auto; min-width: 0; height: 44px; border: 0; background: transparent; color: var(--text); font-family: inherit; font-size: 16px; font-weight: 500; outline: none">
+</label>
+<ul role="listbox" aria-label="{{c.title}}" style="list-style: none; margin: 0; padding: 4px 0; max-height: 264px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent">
+<sc-for list="{{c.items}}" as="it" hint-placeholder-count="5">
+<li role="option" aria-selected="{{it.sel}}" aria-disabled="{{it.disabled}}">
+<button type="button" onClick="{{it.pick}}" style="width: 100%; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 12px; border: 0; background: {{it.bg}}; color: {{it.fg}}; font-family: inherit; text-align: left; cursor: {{it.cursor}}">
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 15px; font-weight: {{it.weight}}">{{it.label}}</span>
+<sc-if value="{{it.hasSub}}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; font-weight: 500; color: var(--muted)">{{it.sub}}</span></sc-if>
+</span>
+<sc-if value="{{it.on}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+</button>
+</li>
+</sc-for>
+</ul>
+<sc-if value="{{c.empty}}" hint-placeholder-val="{{ false }}"><p style="margin: 0; padding: 14px 12px; font-size: 14px; color: var(--muted)">{{t.nothing}}</p></sc-if>
+</div>
+</sc-if>
+</section>
+</sc-for>
+
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<section aria-label="{{g.title}}" style="padding-top: 14px">
+<h2 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{g.title}}</h2>
+<div role="radiogroup" aria-label="{{g.title}}">
+<sc-for list="{{g.opts}}" as="o" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{o.checked}}" onClick="{{o.pick}}" style="width: 100%; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 8px 0; border: 0; border-top: {{o.sep}}; background: transparent; color: var(--text); font-family: inherit; text-align: left; cursor: pointer">
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 16px; font-weight: {{o.weight}}; line-height: 1.3">{{o.label}}</span>
+<sc-if value="{{o.hasSub}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; font-weight: 500; line-height: 1.35; color: var(--muted)">{{o.sub}}</span></sc-if>
+</span>
+<span aria-hidden="true" style="flex: 0 0 auto; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 12px; box-shadow: inset 0 0 0 {{o.ringW}} {{o.boxLine}}"></span>
+</button>
+</sc-for>
+</div>
+</section>
+</sc-for>
+
+<section aria-label="{{t.songView}}" style="padding-top: 14px">
+<h2 style="margin: 0 0 2px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{t.songView}}</h2>
+<p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--muted)">{{t.songViewHint}}</p>
+<sc-for list="{{switches}}" as="sw" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 48px; {{sw.sep}}">
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<span style="font-size: 15px; font-weight: 600; line-height: 1.25">{{sw.label}}</span>
+<sc-if value="{{sw.hasSub}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 500; color: var(--signal)">{{sw.sub}}</span></sc-if>
+</span>
+<button type="button" role="switch" aria-checked="{{sw.checked}}" aria-label="{{sw.label}}" onClick="{{sw.toggle}}" style="flex: 0 0 auto; width: 48px; height: 28px; box-sizing: border-box; padding: 3px; border: 0; border-radius: 6px; background: {{sw.track}}; display: flex; justify-content: {{sw.justify}}; cursor: pointer"><span style="width: 22px; height: 22px; border-radius: 4px; background: {{sw.knob}}"></span></button>
+</div>
+</sc-for>
+</section>
+
+<section aria-label="{{t.size}}" style="padding-top: 14px">
+<h2 style="margin: 0 0 10px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{t.size}}</h2>
+<div style="display: flex; align-items: center; gap: 12px">
+<button type="button" onClick="{{sizeDown}}" aria-label="{{t.smaller}}" style="width: 48px; height: 48px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">A−</button>
+<div style="flex: 1 1 auto; min-width: 0; height: 72px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: #D9E8FF; color: #0A3A8C; overflow: hidden">
+<span style="font-size: {{chordFs}}px; font-weight: 800; letter-spacing: -0.02em">D</span><span style="font-size: {{qFs}}px; font-weight: 700; opacity: 0.7">/F#</span>
+<span style="width: 18px"></span>
+<span style="font-size: {{chordFs}}px; font-weight: 800; letter-spacing: -0.02em">A</span><span style="font-size: {{qFs}}px; font-weight: 700">sus4</span>
+</div>
+<button type="button" onClick="{{sizeUp}}" aria-label="{{t.bigger}}" style="width: 48px; height: 48px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 19px; font-weight: 800; cursor: pointer">A+</button>
+</div>
+</section>
+
+<section aria-label="{{t.data}}" style="padding-top: 24px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0 0 2px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{t.data}}</h2>
+<p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--muted)">{{t.dataNote}}</p>
+<button type="button" style="min-height: 52px; padding: 8px 14px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 15px; font-weight: 800; text-align: center; cursor: pointer">{{t.export}}</button>
+<button type="button" style="min-height: 52px; padding: 8px 14px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 15px; font-weight: 700; text-align: center; cursor: pointer">{{t.import}}</button>
+</section>
+</div>
+
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"uiLang":{"editor":"enum","options":["en","uk"],"default":"uk"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      lang: null, instr: 'guitar', notation: 'H', theme: 'system', size: 1, open: 'lang', q: { lang: '', instr: '' }, menu: false,
+      sv: { dots: true, sound: true, band: true, instr: true, mine: true, compact: false, countIn: true },
+    };
+  }
+
+  renderVals() {
+    const lang = this.state.lang || this.props.uiLang || 'uk';
+    const STR = {
+      en: {
+        sections: 'Sections', mSet: 'Service', mLib: 'Library', mSet2: 'Settings', mSetHint: 'Sat, 31 Oct', mLibHint: '6 songs', mCur: 'current',
+        songView: 'Song view · defaults', songViewHint: 'Used everywhere unless a setlist or a song overrides it (sliders icon on the song screen).',
+        svDots: 'Beat dots under chords', svSound: 'Guitar: sounding chords under shapes', svBand: 'Band notes', svInstr: 'Notes for my instrument',
+        svMine: 'My personal notes', svCompact: 'Open songs in compact mode', svCount: 'Auto-scroll: one bar count-in', svOverride: 'Overridden in 2 songs',
+        device: 'This device', title: 'Settings', name: 'My name in the band', nameHint: 'Shown next to your changes and suggestions.',
+        instr: 'My instrument', notation: 'Chord names', language: 'Interface language', theme: 'Theme',
+        searchInstr: 'Search instruments', searchLang: 'Search languages', nothing: 'Nothing found.',
+        size: 'Chord size', smaller: 'Smaller chords', bigger: 'Bigger chords',
+        data: 'Your data', dataNote: 'Songs and setlists live only on this device. Export them regularly — cloud sync comes later.',
+        export: 'Export all songs (.takt)', import: 'Import files', soon: 'Coming later',
+        nav: 'Main', navSet: 'Setlist', navLib: 'Library', navSettings: 'Settings',
+        instruments: [
+          ['base', 'Harmony (all chords)', 'Every chord, no instrument-specific view'], ['guitar', 'Guitar', 'Capo shapes, sounding chords below'],
+          ['bass', 'Bass', 'Bass notes first, your own lines'], ['keys', 'Keys', 'Keys cues and parts'], ['drums', 'Drums / cajón', 'Form, dynamics and cues'],
+          ['ukulele', 'Ukulele', 'Shapes with capo'], ['violin', 'Violin / cello', 'Chords and melody cues'], ['winds', 'Winds in B♭ / E♭', 'Chords transposed for your instrument'],
+        ],
+        notations: [['H', 'H and B (German / Ukrainian)', 'H = B natural, B = B♭'], ['B', 'B and B♭ (English)', 'B = B natural']],
+        themes: [['system', 'Same as the system', ''], ['light', 'Light', ''], ['dark', 'Dark', 'Recommended on stage']],
+      },
+      uk: {
+        sections: 'Розділи', mSet: 'Служіння', mLib: 'Бібліотека', mSet2: 'Налаштування', mSetHint: 'Сб, 31 жовт', mLibHint: '6 пісень', mCur: 'зараз',
+        songView: 'Вигляд пісні · типово', songViewHint: 'Діє скрізь, якщо сетлист чи пісня не задають своє (іконка повзунків на екрані пісні).',
+        svDots: 'Долі під акордами', svSound: 'Гітара: звучання під формами', svBand: 'Нотатки гурту', svInstr: 'Нотатки для мого інструмента',
+        svMine: 'Мої особисті нотатки', svCompact: 'Відкривати пісні компактно', svCount: 'Автоскрол: відлік в один такт', svOverride: 'Змінено у 2 піснях',
+        device: 'Цей пристрій', title: 'Налаштування', name: 'Моє ім’я в гурті', nameHint: 'Показується поруч із вашими змінами й пропозиціями.',
+        instr: 'Мій інструмент', notation: 'Назви акордів', language: 'Мова інтерфейсу', theme: 'Тема',
+        searchInstr: 'Пошук інструмента', searchLang: 'Пошук мови', nothing: 'Нічого не знайдено.',
+        size: 'Розмір акордів', smaller: 'Менші акорди', bigger: 'Більші акорди',
+        data: 'Ваші дані', dataNote: 'Пісні й сетлисти зберігаються лише на цьому пристрої. Регулярно робіть експорт — синхронізація з хмарою з’явиться пізніше.',
+        export: 'Експортувати всі пісні (.takt)', import: 'Імпортувати файли', soon: 'Згодом',
+        nav: 'Головне', navSet: 'Сетлист', navLib: 'Бібліотека', navSettings: 'Налаштування',
+        instruments: [
+          ['base', 'Гармонія (усі акорди)', 'Усі акорди без вигляду під інструмент'], ['guitar', 'Гітара', 'Форми з капо, під ними — те, що звучить'],
+          ['bass', 'Бас', 'Спершу басові ноти, власні лінії'], ['keys', 'Клавішні', 'Підказки й партії клавішних'], ['drums', 'Барабани / кахон', 'Форма, динаміка й підказки'],
+          ['ukulele', 'Укулеле', 'Форми з капо'], ['violin', 'Скрипка / віолончель', 'Акорди й підказки мелодії'], ['winds', 'Духові в B♭ / E♭', 'Акорди транспоновані під ваш інструмент'],
+        ],
+        notations: [['H', 'H і B (німецька / українська)', 'H = сі, B = сі-бемоль'], ['B', 'B і B♭ (англійська)', 'B = сі']],
+        themes: [['system', 'Як у системі', ''], ['light', 'Світла', ''], ['dark', 'Темна', 'Рекомендовано для сцени']],
+      },
+    };
+    const t = STR[lang] || STR.en;
+    const st = this.state;
+
+    const LANGS = [
+      ['en', 'English', 'English', true], ['uk', 'Українська', 'Ukrainian', true], ['de', 'Deutsch', 'German', false],
+      ['es', 'Español', 'Spanish', false], ['fr', 'Français', 'French', false], ['pl', 'Polski', 'Polish', false], ['pt', 'Português', 'Portuguese', false],
+    ];
+
+    const combo = (key, title, searchLabel, options, value, onPick) => {
+      const open = st.open === key;
+      const q = (st.q[key] || '').trim().toLowerCase();
+      const items = options.filter((o) => !q || (o[1] + ' ' + o[2]).toLowerCase().indexOf(q) >= 0);
+      const cur = options.find((o) => o[0] === value) || options[0];
+      return {
+        title: title,
+        searchLabel: searchLabel,
+        open: open,
+        expanded: open ? 'true' : 'false',
+        ring: open ? 'inset 0 0 0 2px var(--text)' : 'none',
+        chevron: open ? 'rotate(180deg)' : 'none',
+        value: cur[1],
+        valueSub: cur[2],
+        hasValueSub: !!cur[2],
+        query: st.q[key] || '',
+        onQuery: (e) => {
+          const nq = Object.assign({}, st.q);
+          nq[key] = e && e.target ? e.target.value : '';
+          this.setState({ q: nq });
+        },
+        toggle: () => this.setState({ open: open ? null : key }),
+        empty: items.length === 0,
+        items: items.map((o) => {
+          const on = o[0] === value;
+          const enabled = o[3] !== false;
+          return {
+            label: o[1],
+            sub: enabled ? o[2] : o[2] + ' · ' + t.soon,
+            hasSub: !!o[2],
+            on: on,
+            sel: on ? 'true' : 'false',
+            disabled: enabled ? 'false' : 'true',
+            weight: on ? 800 : 600,
+            bg: on ? 'var(--surface)' : 'transparent',
+            fg: enabled ? 'var(--text)' : '#8E8E93',
+            cursor: enabled ? 'pointer' : 'default',
+            pick: () => { if (enabled) { onPick(o[0]); } },
+          };
+        }),
+      };
+    };
+
+    const radio = (title, key, opts, value) => ({
+      title: title,
+      opts: opts.map((o, i) => {
+        const on = value === o[0];
+        return {
+          label: o[1], sub: o[2], hasSub: !!o[2], checked: on ? 'true' : 'false', weight: on ? 800 : 600,
+          ringW: on ? '7px' : '1.5px', boxLine: on ? 'var(--accent)' : '#B9B9BE',
+          sep: i > 0 ? '1px solid var(--line)' : '0',
+          pick: () => { const patch = {}; patch[key] = o[0]; this.setState(patch); },
+        };
+      }),
+    });
+
+    const SIZES = [[22, 13], [26, 15], [30, 17], [34, 19]];
+    const sz = SIZES[st.size];
+    const SW = [['dots', t.svDots, t.svOverride], ['sound', t.svSound, ''], ['band', t.svBand, ''], ['instr', t.svInstr, ''], ['mine', t.svMine, ''], ['compact', t.svCompact, ''], ['countIn', t.svCount, '']];
+    const switches = SW.map((x, i) => {
+      const on = !!st.sv[x[0]];
+      return {
+        label: x[1], sub: x[2], hasSub: !!x[2], checked: on ? 'true' : 'false',
+        track: on ? 'var(--accent)' : 'var(--surface2)', knob: on ? 'var(--accentFg)' : 'var(--bg)', justify: on ? 'flex-end' : 'flex-start',
+        sep: i > 0 ? 'border-top: 1px solid var(--line);' : '',
+        toggle: () => { const nv = Object.assign({}, st.sv); nv[x[0]] = !on; this.setState({ sv: nv }); },
+      };
+    });
+    const mi = (href, label, hint, cur) => ({ href: href, label: label, hint: hint, current: cur ? 'page' : 'false', bg: cur ? 'var(--surface)' : 'transparent', weight: cur ? 800 : 600 });
+    return {
+      t: t,
+      switches: switches,
+      menuOpen: st.menu,
+      menuExp: st.menu ? 'true' : 'false',
+      toggleMenu: () => this.setState({ menu: !st.menu }),
+      menu: [mi('Setlist.dc.html', t.mSet, t.mSetHint, false), mi('Library.dc.html', t.mLib, t.mLibHint, false), mi('Settings.dc.html', t.mSet2, t.mCur, true)],
+      combos: [
+        combo('lang', t.language, t.searchLang, LANGS, lang, (v) => this.setState({ lang: v, open: null })),
+        combo('instr', t.instr, t.searchInstr, t.instruments, st.instr, (v) => this.setState({ instr: v, open: null })),
+      ],
+      groups: [radio(t.notation, 'notation', t.notations, st.notation), radio(t.theme, 'theme', t.themes, st.theme)],
+      chordFs: sz[0],
+      qFs: sz[1],
+      sizeDown: () => this.setState({ size: Math.max(0, st.size - 1) }),
+      sizeUp: () => this.setState({ size: Math.min(SIZES.length - 1, st.size + 1) }),
+    };
+  }
+}
+</script>
+</body>
+</html>

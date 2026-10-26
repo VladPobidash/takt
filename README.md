@@ -25,8 +25,8 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 - [Product brief](docs/brief.md) — problem, existing tools, vision, features
 - [`.takt` format v0](docs/format.md)
 - [Roadmap & open questions](docs/roadmap.md)
-- [Design system](docs/design/README.md) · [design brief](docs/design/brief.md)
-- [Decisions (ADR)](docs/decisions/)
+- [Design system](docs/design/README.md) · [MVP screens v1](docs/design/mvp-v1/README.md) · [design brief](docs/design/brief.md)
+- [Decisions (ADR)](docs/decisions/) · [technical planning](docs/tech-planning.md)
 
 ## License
 

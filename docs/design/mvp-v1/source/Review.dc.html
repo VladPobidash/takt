@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Review a suggestion</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.55)}
+</style>
+</helmet>
+<div style="--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E;--delBg:#FDE8E4;--delFg:#8A1C0F;--addBg:#E2F4E6;--addFg:#145C2B; width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 6px 16px 12px 6px; border-bottom: 1px solid var(--line)">
+<div style="display: flex; align-items: center; gap: 4px; min-height: 52px">
+<a href="History.dc.html" aria-label="{{t.back}}" style="flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--text); text-decoration: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+</a>
+<span style="flex: 1 1 auto; min-width: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.kicker}} · Достойний Ти Один</span>
+<button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="flex: 0 0 auto; min-width: 44px; height: 44px; padding: 0 6px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; cursor: pointer">{{langCode}}</button>
+</div>
+<h1 style="margin: 0 0 0 10px; font-size: 21px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em">{{t.title}}</h1>
+<div style="display: flex; align-items: center; gap: 10px; margin-left: 10px">
+<span aria-hidden="true" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #D9E8FF; color: #0A3A8C; font-size: 13px; font-weight: 800">А</span>
+<span style="font-size: 14px; font-weight: 700">Андрій <span style="font-weight: 500; color: var(--muted)">· {{t.bass}} · {{t.when}} · {{t.changes}}</span></span>
+</div>
+</header>
+
+<div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; padding: 14px 16px 20px 16px; display: flex; flex-direction: column; gap: 14px">
+
+<p style="margin: 0; padding: 12px; border-radius: 8px; background: var(--surface); font-size: 15px; font-weight: 500; line-height: 1.45">«Пропоную свою лінію в першому рядку куплету, щоб не дублювати клавішні. І в Chorus 2 закінчити на Hm без A.»</p>
+
+<sc-for list="{{changes}}" as="ch" hint-placeholder-count="2">
+<section aria-label="{{ch.title}}" style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{ch.title}}</h2>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 10px; border-radius: 6px; background: {{ch.tile}}; color: {{ch.ink}}">
+<div style="display: flex; align-items: center; gap: 8px">
+<span style="height: 22px; padding: 0 6px; display: flex; align-items: center; border-radius: 4px; background: {{ch.ink}}; color: {{ch.tile}}; font-weight: 800; font-size: 12px">{{ch.abbr}}</span>
+<span style="font-size: 15px; font-weight: 700">{{ch.section}}</span>
+</div>
+<sc-for list="{{ch.rows}}" as="r" hint-placeholder-count="2">
+<div style="display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: stretch; gap: 4px">
+<span aria-label="{{r.markLabel}}" style="display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: {{r.markFg}}">{{r.mark}}</span>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 4px">
+<sc-for list="{{r.bars}}" as="b" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; min-height: 40px; border-left: 2px solid {{ch.bar}}; {{b.edge}} background: {{b.bg}}; color: {{b.fg}}; opacity: {{b.op}}">
+<sc-for list="{{b.chords}}" as="c" hint-placeholder-count="1"><span style="flex: {{c.grow}} 1 0px; min-width: max-content; padding: 0 5px; font-size: 17px; font-weight: 800; white-space: nowrap; text-decoration: {{b.deco}}">{{c.label}}</span></sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+
+<section aria-label="{{t.discussion}}" style="display: flex; flex-direction: column; gap: 10px; padding-top: 4px">
+<h2 style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{t.discussion}}</h2>
+<div style="display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px">
+<span aria-hidden="true" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #FFE0BF; color: #743000; font-size: 13px; font-weight: 800">В</span>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 13px; font-weight: 800">Влад <span style="font-weight: 500; color: var(--muted)">· {{t.today}} 09:12</span></span>
+<p style="margin: 0; font-size: 15px; font-weight: 500; line-height: 1.4">Лінія класна. Chorus 2 спробуємо на репетиції в суботу.</p>
+</div>
+</div>
+<label style="display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 6px 0 12px; border-radius: 8px; background: var(--surface)">
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{t.comment}}</span>
+<input type="text" placeholder="{{t.comment}}" style="flex: 1 1 auto; min-width: 0; height: 44px; border: 0; background: transparent; color: var(--text); font-family: inherit; font-size: 16px; font-weight: 500; outline: none">
+<button type="button" aria-label="{{t.send}}" style="width: 40px; height: 40px; border: 0; border-radius: 6px; background: var(--accent); color: var(--accentFg); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+</button>
+</label>
+</section>
+</div>
+
+<sc-if value="{{pending}}" hint-placeholder-val="{{ true }}">
+<div style="flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 16px 16px; border-top: 1px solid var(--line)">
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{accept}}" style="flex: 1 1 auto; min-width: 0; min-height: 52px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accentFg); font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">{{t.accept}}</button>
+<button type="button" onClick="{{reject}}" style="flex: 1 1 auto; min-width: 0; min-height: 52px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">{{t.reject}}</button>
+</div>
+<button type="button" onClick="{{acceptFirst}}" style="min-height: 44px; border: 0; background: transparent; color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">{{t.partial}}</button>
+</div>
+</sc-if>
+<sc-if value="{{decided}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; margin: 0 16px 16px 16px; padding: 14px; border-radius: 8px; background: {{resultBg}}; color: {{resultFg}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+<span style="flex: 1 1 auto; font-size: 15px; font-weight: 700">{{result}}</span>
+<button type="button" onClick="{{undo}}" style="min-height: 40px; padding: 0 10px; border: 0; border-radius: 6px; background: rgba(0,0,0,0.06); color: inherit; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">{{t.undo}}</button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"uiLang":{"editor":"enum","options":["en","uk"],"default":"en"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: null, decision: null };
+  }
+
+  renderVals() {
+    const lang = this.state.lang || this.props.uiLang || 'en';
+    const STR = {
+      en: {
+        back: 'Back to history', kicker: 'Suggestion', title: 'Own bass line in Verse 1', bass: 'bass', when: 'Tue 20:14', changes: '2 changes',
+        langLabel: 'Language: English. Switch to Ukrainian', change1: 'Change 1 of 2 · added a bass line', change2: 'Change 2 of 2 · bar 4 of line 2',
+        added: 'Added', removed: 'Removed', unchanged: 'Unchanged', discussion: 'Discussion', today: 'today', comment: 'Write a comment', send: 'Send',
+        accept: 'Accept both', reject: 'Reject', partial: 'Accept only change 1', undo: 'Undo',
+        accepted: 'Accepted — the song is updated for everyone', acceptedOne: 'Change 1 accepted, change 2 rejected', rejected: 'Suggestion rejected',
+      },
+      uk: {
+        back: 'Назад до історії', kicker: 'Пропозиція', title: 'Власна басова лінія у Verse 1', bass: 'бас', when: 'Вт 20:14', changes: '2 зміни',
+        langLabel: 'Мова: українська. Перемкнути на англійську', change1: 'Зміна 1 з 2 · додано басову лінію', change2: 'Зміна 2 з 2 · такт 4 у рядку 2',
+        added: 'Додано', removed: 'Прибрано', unchanged: 'Без змін', discussion: 'Обговорення', today: 'сьогодні', comment: 'Написати коментар', send: 'Надіслати',
+        accept: 'Прийняти обидві', reject: 'Відхилити', partial: 'Прийняти лише зміну 1', undo: 'Скасувати',
+        accepted: 'Прийнято — пісня оновилась для всіх', acceptedOne: 'Зміну 1 прийнято, зміну 2 відхилено', rejected: 'Пропозицію відхилено',
+      },
+    };
+    const t = STR[lang] || STR.en;
+    const VERSE = ['#0A3A8C', '#D9E8FF', 'rgba(10,58,140,0.28)'];
+    const CHORUS = ['#743000', '#FFE0BF', 'rgba(116,48,0,0.28)'];
+
+    const parseBar = (s) => {
+      const toks = s.trim().split(/\s+/).filter((x) => x && x !== '-');
+      const items = toks.map((x) => {
+        const m = x.match(/\*+$/);
+        return { tok: m ? x.slice(0, x.length - m[0].length) : x, stars: m ? m[0].length : 0 };
+      });
+      const explicit = items.reduce((a, it) => a + it.stars, 0);
+      const free = items.filter((it) => !it.stars).length;
+      const rem = 4 - explicit;
+      return items.map((it) => ({ label: it.tok, grow: it.stars || (free ? Math.max(rem / free, 1) : 1) }));
+    };
+    const row = (line, kind, barColor, onlyBar) => {
+      const bars = line.split('|').slice(1, -1);
+      return {
+        mark: kind === 'add' ? '+' : (kind === 'del' ? '−' : ''),
+        markLabel: kind === 'add' ? t.added : (kind === 'del' ? t.removed : t.unchanged),
+        markFg: kind === 'add' ? 'var(--addFg)' : (kind === 'del' ? 'var(--delFg)' : 'transparent'),
+        bars: bars.map((b, bi) => {
+          const hit = kind !== 'same' && (onlyBar == null || onlyBar === bi);
+          return {
+            chords: parseBar(b),
+            edge: (bi === bars.length - 1 || (bi + 1) % 4 === 0) ? 'border-right: 2px solid ' + barColor + ';' : '',
+            bg: hit ? (kind === 'add' ? 'var(--addBg)' : 'var(--delBg)') : 'transparent',
+            fg: hit ? (kind === 'add' ? 'var(--addFg)' : 'var(--delFg)') : 'inherit',
+            deco: hit && kind === 'del' ? 'line-through' : 'none',
+            op: kind !== 'same' && !hit ? '0.45' : '1',
+          };
+        }),
+      };
+    };
+
+    const d = this.state.decision;
+    const RESULT = {
+      all: [t.accepted, 'var(--addBg)', 'var(--addFg)'],
+      one: [t.acceptedOne, 'var(--addBg)', 'var(--addFg)'],
+      none: [t.rejected, 'var(--surface)', 'var(--text)'],
+    };
+    const res = d ? RESULT[d] : null;
+
+    return {
+      t: t,
+      langCode: lang === 'uk' ? 'UA' : 'EN',
+      toggleLang: () => this.setState({ lang: lang === 'uk' ? 'en' : 'uk' }),
+      changes: [
+        {
+          title: t.change1, abbr: 'V1', section: 'Verse 1', ink: VERSE[0], tile: VERSE[1], bar: VERSE[2],
+          rows: [
+            row('| D | A | D/F#** G** | Asus4* A*** |', 'same', VERSE[2]),
+            row('| D | A | F#** G** | A |', 'add', VERSE[2]),
+          ],
+        },
+        {
+          title: t.change2, abbr: 'C2', section: 'Chorus 2', ink: CHORUS[0], tile: CHORUS[1], bar: CHORUS[2],
+          rows: [
+            row('| G*** Hm* | A | D/F# | Hm** A** |', 'del', CHORUS[2], 3),
+            row('| G*** Hm* | A | D/F# | Hm |', 'add', CHORUS[2], 3),
+          ],
+        },
+      ],
+      pending: !d,
+      decided: !!d,
+      result: res ? res[0] : '',
+      resultBg: res ? res[1] : 'transparent',
+      resultFg: res ? res[2] : 'inherit',
+      accept: () => this.setState({ decision: 'all' }),
+      acceptFirst: () => this.setState({ decision: 'one' }),
+      reject: () => this.setState({ decision: 'none' }),
+      undo: () => this.setState({ decision: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>

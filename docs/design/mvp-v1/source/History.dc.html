@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Change history</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.35);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(128,128,128,0.55)}
+</style>
+</helmet>
+<div style="--bg:#FFFFFF;--surface:#F3F3F1;--surface2:#E9E9E6;--line:#E2E2DE;--text:#0B0B0C;--muted:#5C5C61;--accent:#0B0B0C;--accentFg:#FFFFFF;--signal:#F0501E;--delBg:#FDE8E4;--delFg:#8A1C0F;--addBg:#E2F4E6;--addFg:#145C2B; width: 390px; height: 844px; box-sizing: border-box; background: var(--bg); color: var(--text); font-family: 'Onest', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; padding: 6px 16px 0 6px">
+<div style="display: flex; align-items: center; gap: 4px; min-height: 52px">
+<a href="Editor.dc.html" aria-label="{{t.back}}" style="flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--text); text-decoration: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+</a>
+<span style="flex: 1 1 auto; min-width: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{t.kicker}}</span>
+<button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="flex: 0 0 auto; min-width: 44px; height: 44px; padding: 0 6px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; cursor: pointer">{{langCode}}</button>
+</div>
+<h1 style="margin: 0 0 0 10px; font-size: 22px; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em">Достойний Ти Один</h1>
+<div style="display: flex; align-items: center; gap: 8px; margin-left: 10px">
+<button type="button" aria-haspopup="listbox" style="min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 10px 0 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">
+<span style="white-space: nowrap">{{t.everyone}}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<span style="font-size: 13px; font-weight: 500; color: var(--muted)">{{t.count}}</span>
+</div>
+</header>
+
+<div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.35) transparent; padding: 10px 16px 20px 16px; border-top: 1px solid var(--line); margin-top: 8px">
+
+<a href="Review.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; background: var(--surface); box-shadow: inset 0 3px 0 var(--signal); color: var(--text); text-decoration: none">
+<span aria-hidden="true" style="flex: 0 0 auto; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #D9E8FF; color: #0A3A8C; font-size: 14px; font-weight: 800">А</span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--signal)">{{t.waiting}}</span>
+<span style="font-size: 15px; font-weight: 800">{{t.suggTitle}}</span>
+<span style="font-size: 13px; font-weight: 500; color: var(--muted)">Андрій · {{t.bass}} · {{t.tue}} 20:14</span>
+</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto"><path d="M9 6l6 6-6 6"></path></svg>
+</a>
+
+<sc-for list="{{days}}" as="day" hint-placeholder-count="3">
+<section aria-label="{{day.label}}" style="padding-top: 18px">
+<h2 style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{day.label}}</h2>
+<ol style="list-style: none; margin: 0; padding: 0">
+<sc-for list="{{day.items}}" as="c" hint-placeholder-count="2">
+<li style="display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding: 12px 0; {{c.sep}}">
+<span aria-hidden="true" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: {{c.avBg}}; color: {{c.avFg}}; font-size: 14px; font-weight: 800">{{c.initial}}</span>
+<div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px">
+<span style="min-width: 0; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.who}} <span style="font-weight: 500; color: var(--muted)">· {{c.role}}</span></span>
+<span style="flex: 0 0 auto; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums">{{c.time}}</span>
+</div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; line-height: 1.35">{{c.summary}}</p>
+<sc-if value="{{c.hasDiff}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 14px; font-weight: 800">
+<span style="padding: 3px 8px; border-radius: 4px; background: var(--delBg); color: var(--delFg); text-decoration: line-through">− {{c.from}}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--muted)"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<span style="padding: 3px 8px; border-radius: 4px; background: var(--addBg); color: var(--addFg)">+ {{c.to}}</span>
+</div>
+</sc-if>
+<sc-if value="{{c.hasTag}}" hint-placeholder-val="{{ false }}"><span style="align-self: flex-start; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; background: var(--accent); color: var(--accentFg)">{{c.tag}}</span></sc-if>
+<sc-if value="{{c.expanded}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; gap: 8px; padding-top: 2px">
+<button type="button" style="min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{t.compare}}</button>
+<button type="button" style="min-height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">{{t.restore}}</button>
+</div>
+</sc-if>
+</div>
+</li>
+</sc-for>
+</ol>
+</section>
+</sc-for>
+<p style="margin: 18px 0 0 0; font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--muted)">{{t.footnote}}</p>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"uiLang":{"editor":"enum","options":["en","uk"],"default":"en"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { lang: null };
+  }
+
+  renderVals() {
+    const lang = this.state.lang || this.props.uiLang || 'en';
+    const STR = {
+      en: {
+        back: 'Back to the editor', kicker: 'Change history', everyone: 'Everyone', count: '6 changes', langLabel: 'Language: English. Switch to Ukrainian',
+        waiting: '1 suggestion to review', suggTitle: 'Own bass line in Verse 1', bass: 'bass', guitar: 'guitar', keys: 'keys', tue: 'Tue',
+        compare: 'Compare', restore: 'Restore this version',
+        today: 'Today', tuesday: 'Tuesday, 27 October', saturday: 'Saturday, 24 October',
+        c1: 'Bridge: added the cue «яма»', c2: 'Chorus: keys note added', c3: 'Chorus 3, bar 4', c4: 'Tempo', c5: 'Created the song from the band PDF',
+        played: 'Played on 24 Oct',
+        footnote: 'History is stored next to the song in your own folder. Each device writes its own log, so nothing conflicts when files sync.',
+      },
+      uk: {
+        back: 'Назад до редактора', kicker: 'Історія змін', everyone: 'Усі учасники', count: '6 змін', langLabel: 'Мова: українська. Перемкнути на англійську',
+        waiting: '1 пропозиція чекає перегляду', suggTitle: 'Власна басова лінія в Verse 1', bass: 'бас', guitar: 'гітара', keys: 'клавішні', tue: 'Вт',
+        compare: 'Порівняти', restore: 'Відновити цю версію',
+        today: 'Сьогодні', tuesday: 'Вівторок, 27 жовтня', saturday: 'Субота, 24 жовтня',
+        c1: 'Bridge: додано підказку «яма»', c2: 'Chorus: нотатка для клавішних', c3: 'Chorus 3, такт 4', c4: 'Темп', c5: 'Пісню створено з PDF гурту',
+        played: 'Зіграно 24 жовтня',
+        footnote: 'Історія зберігається поруч із піснею у вашій власній папці. Кожен пристрій пише свій журнал, тому під час синхронізації нічого не конфліктує.',
+      },
+    };
+    const t = STR[lang] || STR.en;
+    const P = {
+      vlad: { who: 'Влад', role: t.guitar, initial: 'В', avBg: '#FFE0BF', avFg: '#743000' },
+      maria: { who: 'Марія', role: t.keys, initial: 'М', avBg: '#EADCFF', avFg: '#461C9B' },
+    };
+    const item = (p, time, summary, extra, i) => Object.assign({}, P[p], {
+      time: time, summary: summary, sep: i > 0 ? 'border-top: 1px solid var(--line);' : '',
+      hasDiff: !!(extra && extra.from), from: extra && extra.from || '', to: extra && extra.to || '',
+      hasTag: !!(extra && extra.tag), tag: extra && extra.tag || '', expanded: !!(extra && extra.expanded),
+    });
+    return {
+      t: t,
+      langCode: lang === 'uk' ? 'UA' : 'EN',
+      toggleLang: () => this.setState({ lang: lang === 'uk' ? 'en' : 'uk' }),
+      days: [
+        { label: t.today, items: [
+          item('vlad', '21:40', t.c1, { expanded: true }, 0),
+          item('maria', '19:05', t.c2, null, 1),
+        ] },
+        { label: t.tuesday, items: [
+          item('vlad', '20:30', t.c3, { from: 'Hm** A**', to: 'Hm*** A*' }, 0),
+        ] },
+        { label: t.saturday, items: [
+          item('vlad', '18:30', t.c4, { from: '130', to: '135', tag: t.played }, 0),
+          item('vlad', '12:02', t.c5, null, 1),
+        ] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
