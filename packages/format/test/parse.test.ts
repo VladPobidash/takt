@@ -33,11 +33,11 @@ describe("the example from docs/format.md", () => {
   test("sections: name, tag, repeat, reference", () => {
     expect(doc.sections.map((s) => [s.name, s.tag, s.repeat, s.ref])).toEqual([
       ["Intro", null, 2, null],
-      ["Verse 1", null, 1, null],
-      ["Chorus", null, 1, null],
-      ["Interlude", null, 1, "Intro"],
+      ["Verse 1", null, null, null],
+      ["Chorus", null, null, null],
+      ["Interlude", null, null, "Intro"],
       ["Verse 2", null, 2, null],
-      ["Chorus", null, 1, null],
+      ["Chorus", null, null, null],
       ["Bridge", "яма", 4, null],
     ]);
   });
@@ -78,7 +78,8 @@ describe("section headers", () => {
     expect(section("## Bridge [яма] x4")).toMatchObject({ name: "Bridge", tag: "яма", repeat: 4 });
     expect(section("## Verse 2 (2x)")).toMatchObject({ name: "Verse 2", repeat: 2 });
     expect(section("## Outro 2x")).toMatchObject({ name: "Outro", repeat: 2 });
-    expect(section("##Chorus")).toMatchObject({ name: "Chorus", repeat: 1, tag: null });
+    expect(section("##Chorus")).toMatchObject({ name: "Chorus", repeat: null, tag: null });
+    expect(section("## Chorus x1")).toMatchObject({ name: "Chorus", repeat: 1 });
     expect(section("## Chorus [quiet] [a cappella]")).toMatchObject({
       name: "Chorus",
       tag: "quiet, a cappella",

@@ -148,7 +148,8 @@ export interface MetaEntry {
 export interface Section {
   name: string;
   tag: string | null;
-  repeat: number;
+  /** Repeat written in the header (`x2`), null if none. */
+  repeat: number | null;
   /** Name of the section referenced with `## A = B`. */
   ref: string | null;
   /** Span of the `##` header line. */
@@ -159,6 +160,8 @@ export interface Section {
 /** The document: a tree that mirrors the file. */
 export interface SongDoc {
   title: string | null;
+  /** Span of the `# Title` line, null if the file has none. */
+  titleSpan: Span | null;
   meta: MetaEntry[];
   /** Notes and comments written in the header, before the first section. */
   headerLines: Line[];
@@ -176,4 +179,79 @@ export interface ParseOptions {
 export interface ParseResult {
   doc: SongDoc;
   diagnostics: Diagnostic[];
+}
+
+export type SectionType =
+  | "intro"
+  | "verse"
+  | "pre-chorus"
+  | "chorus"
+  | "bridge"
+  | "interlude"
+  | "instrumental"
+  | "outro"
+  | "other";
+
+export interface ResolvedLine {
+  bars: Bar[];
+  label: string | null;
+  cue: string | null;
+  repeat: number;
+  /** `part`: this line comes from the instrument's own `@instrument` line. */
+  source: "base" | "part";
+}
+
+export interface ResolvedNote {
+  text: string;
+  /** Null for a band note; otherwise the instrument the cue is for. */
+  instrument: string | null;
+  instrumentName: string | null;
+}
+
+export interface ResolvedSection {
+  /** Index of the section in the document. */
+  index: number;
+  name: string;
+  type: SectionType;
+  /** Short label for the form timeline: `V1`, `C2`, `Inst`. */
+  abbr: string;
+  tag: string | null;
+  repeat: number;
+  /** Index of the section whose bars are reused, null if the bars are its own. */
+  reusedFrom: number | null;
+  lines: ResolvedLine[];
+  notes: ResolvedNote[];
+  lyrics: string[];
+  /** Bars played in one pass, line repeats included. */
+  bars: number;
+}
+
+export interface FormItem {
+  /** Index into `ResolvedSong.sections`. */
+  section: number;
+  type: SectionType;
+  abbr: string;
+  bars: number;
+  repeat: number;
+}
+
+/** A song as one instrument sees it. */
+export interface ResolvedSong {
+  title: string | null;
+  artist: string | null;
+  link: string | null;
+  key: Key | null;
+  tempo: number | null;
+  capo: number | null;
+  time: TimeSignature;
+  notation: Notation;
+  /** Instruments that have lines of their own in the file, in order of appearance. */
+  instruments: string[];
+  sections: ResolvedSection[];
+  form: FormItem[];
+}
+
+export interface ResolveOptions {
+  /** Instrument id (`guitar`, `bass`, `keys`, `drums`, …); null or missing for the base harmony. */
+  instrument?: string | null;
 }

@@ -87,7 +87,7 @@ function parseSectionHeader(body: string, span: Span): Section {
   return {
     name: left.rest.replace(/\s+/g, " "),
     tag: tags.length > 0 ? tags.join(", ") : null,
-    repeat: left.repeat !== 1 ? left.repeat : (right?.repeat ?? 1),
+    repeat: left.repeat ?? right?.repeat ?? null,
     ref: right?.rest ? right.rest.replace(/\s+/g, " ") : null,
     span,
     lines: [],
@@ -136,7 +136,7 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
 
   // Pass 2: the tree.
   let title: string | null = null;
-  let titleSeen = false;
+  let titleSpan: Span | null = null;
   const meta: MetaEntry[] = [];
   const headerLines: Line[] = [];
   const sections: Section[] = [];
@@ -197,8 +197,8 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
     }
     // Still in the header.
     const titleMatch = TITLE.exec(line.text);
-    if (titleMatch && !titleSeen) {
-      titleSeen = true;
+    if (titleMatch && !titleSpan) {
+      titleSpan = spanOf(line);
       title = (titleMatch[1] as string).trim() || null;
       continue;
     }
@@ -218,7 +218,7 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
     if (parsed.kind === "bars") {
       // A quick chart without section headers: the bars start an unnamed section.
       const at = spanOf(line, 0, 0);
-      section = { name: "", tag: null, repeat: 1, ref: null, span: at, lines: [parsed] };
+      section = { name: "", tag: null, repeat: null, ref: null, span: at, lines: [parsed] };
       sections.push(section);
       continue;
     }
@@ -237,7 +237,7 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
 
   diagnostics.sort((a, b) => a.span.start.offset - b.span.start.offset);
   return {
-    doc: { title, meta, headerLines, notation, notationSource, time, sections },
+    doc: { title, titleSpan, meta, headerLines, notation, notationSource, time, sections },
     diagnostics,
   };
 }
