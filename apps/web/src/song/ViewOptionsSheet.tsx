@@ -44,6 +44,8 @@ export function ViewOptionsSheet(props: {
   songTitle: string;
   /** Set when the song was opened from a setlist. */
   setlistId: string | null;
+  /** The wake lock was refused: say so and suggest the system setting. */
+  screenMayTurnOff?: boolean;
 }) {
   const { settings, viewOverrides, data, t } = useApp();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -106,6 +108,14 @@ export function ViewOptionsSheet(props: {
             <CloseIcon />
           </IconButton>
         </div>
+        {props.screenMayTurnOff && (
+          <p
+            role="note"
+            className="mb-2 rounded-control bg-mine-bg px-3 py-2 text-[13px] font-semibold text-mine-fg"
+          >
+            {t("view.screenMayTurnOff")}
+          </p>
+        )}
         <div role="tablist" className="flex gap-4 border-b border-line">
           {scopes.map((value) => (
             <button

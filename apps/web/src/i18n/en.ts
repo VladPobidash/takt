@@ -190,6 +190,18 @@ export const en = {
   "notes.save": "Save",
   "notes.delete": "Delete",
 
+  "view.screenMayTurnOff":
+    "The screen may turn off: this browser did not let the app keep it awake. While you play, set the phone's auto-lock to “Never”, and on iPhone or iPad install Takt to the Home Screen (iOS 18.4 or newer).",
+
+  "install.title": "Install Takt",
+  "install.ios":
+    "To use Takt without a network, tap Share in Safari and choose “Add to Home Screen”.",
+  "install.other":
+    "To use Takt without a network, install it: open the browser menu and choose “Install app” or “Add to Home screen”.",
+  "install.prompt": "Takt works without a network once it is installed.",
+  "install.install": "Install",
+  "install.dismiss": "Not now",
+
   "update.available": "A new version of Takt is ready.",
   "update.apply": "Update now",
 } as const;

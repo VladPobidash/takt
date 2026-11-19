@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App.tsx";
-import { registerServiceWorker } from "./pwa.ts";
+import { listenForInstallPrompt, registerServiceWorker } from "./pwa.ts";
 import { SEED_SONGS } from "./seed.ts";
 import { AppData } from "./storage/app-state.ts";
 import { openIdbStore } from "./storage/idb.ts";
@@ -25,4 +25,5 @@ async function start() {
 }
 
 registerServiceWorker();
+listenForInstallPrompt();
 void start();
