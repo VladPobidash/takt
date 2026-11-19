@@ -427,7 +427,12 @@ test.describe("install and screen hints", () => {
     await expect(hint).toContainText("without a network");
     await hint.getByRole("button", { name: "Not now" }).click();
     await expect(hint).toHaveCount(0);
-    await expect.poll(() => page.reload().then(() => hint.count())).toBe(0);
+    // Use the app for a moment, as a person would, then restart: the hint stays away.
+    await page.getByRole("link", { name: /Silent Night/ }).click();
+    await page.getByRole("link", { name: "Back" }).click();
+    await page.reload();
+    await expect(page.getByRole("link", { name: /Silent Night/ })).toBeVisible();
+    await expect(hint).toHaveCount(0);
   });
 
   test("when the browser refuses to keep the screen awake, the view options say so", async ({
