@@ -42,6 +42,56 @@ test.describe("English UI", () => {
   });
 });
 
+test.describe("auto-scroll", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("follows the song section by section and stops on request", async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.clock.install();
+    await page.goto("/songs/dostoinyi-ty-odyn");
+    const status = page.getByRole("contentinfo").getByRole("status");
+    await expect(status).toContainText("135 BPM");
+
+    await page.getByRole("button", { name: "Start auto-scroll" }).click();
+    await expect(status).toContainText("Count-in");
+    // 135 BPM in 4/4: a bar lasts 1.78 s. One bar of count-in, then the intro.
+    await page.clock.runFor(2500);
+    await expect(status).toContainText("Intro");
+    await expect(status).toContainText("bar 1 of 2 · pass 1 of 2");
+    await expect(page.getByRole("region", { name: "Intro" })).toHaveAttribute(
+      "aria-current",
+      "step",
+    );
+
+    // The intro is 2 bars × 2; ten seconds later the first verse is playing.
+    await page.clock.runFor(8000);
+    await expect(status).toContainText("Verse 1");
+    await expect(page.getByRole("region", { name: "Verse 1" })).toHaveAttribute(
+      "aria-current",
+      "step",
+    );
+    await expect(page.getByRole("region", { name: "Intro" })).not.toHaveAttribute(
+      "aria-current",
+      "step",
+    );
+
+    // Tapping the timeline while playing continues from that section.
+    await page
+      .getByRole("navigation", { name: "Song form" })
+      .getByRole("button", { name: "Bridge" })
+      .click();
+    await page.clock.runFor(300);
+    await expect(status).toContainText("Bridge");
+    await expect(status).toContainText("pass 1 of 4");
+    await page.screenshot({ path: test.info().outputPath("auto-scroll.png") });
+
+    await page.getByRole("button", { name: "Stop auto-scroll" }).click();
+    await expect(status).toContainText("Auto-scroll");
+    await expect(page.locator('section[aria-current="step"]')).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("settings", () => {
   test.use({ locale: "en-US" });
 

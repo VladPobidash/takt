@@ -70,6 +70,14 @@ export const en = {
   "library.newTitle": "New song",
 
   "song.edit": "Edit",
+  "song.play": "Start auto-scroll",
+  "song.pause": "Stop auto-scroll",
+  "song.autoScroll": "Auto-scroll",
+  "song.countIn": "Count-in…",
+  "song.noTempo": "No tempo in this song",
+  "song.barOf": "bar {bar} of {bars}",
+  "song.passOf": "pass {pass} of {passes}",
+  "song.now": "Now",
   "song.compact": "Compact mode",
   "settings.compact": "Open songs in compact mode",
 

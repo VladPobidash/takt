@@ -95,6 +95,11 @@ export const CompactIcon = () => (
     <path d="M4 12h16M12 3v5M9 6l3 3 3-3M12 21v-5M9 18l3-3 3 3" />
   </Icon>
 );
+export const PauseIcon = () => (
+  <Icon>
+    <path d="M8 5v14M16 5v14" strokeWidth="3.5" />
+  </Icon>
+);
 export const SearchIcon = () => (
   <Icon>
     <circle cx="11" cy="11" r="6.5" />

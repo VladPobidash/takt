@@ -16,9 +16,12 @@ export const sectionAnchor = (index: number) => `s${index + 1}`;
 export function SectionTile({
   section,
   options,
+  now = false,
 }: {
   section: ResolvedSection;
   options: BarGridOptions;
+  /** Auto-scroll is playing this section: it gets an outline, never the chords or beats. */
+  now?: boolean;
 }) {
   const { t } = useApp();
   const notes = section.notes.map((note) => {
@@ -53,12 +56,20 @@ export function SectionTile({
         id={sectionAnchor(section.index)}
         data-section={section.type}
         aria-label={section.name}
-        className="mb-1 flex break-inside-avoid gap-1.5 rounded-tile bg-tile px-1.5 py-1.5 text-ink"
+        aria-current={now ? "step" : undefined}
+        className={`mb-1 flex break-inside-avoid gap-1.5 rounded-tile bg-tile px-1.5 py-1.5 text-ink ${now ? "shadow-[inset_0_0_0_3px_var(--ink)]" : ""}`}
       >
         <div className="flex w-[34px] shrink-0 flex-col items-start gap-0.5">
           {badge}
           {section.repeat > 1 && (
             <span className="text-[12px] font-extrabold">×{section.repeat}</span>
+          )}
+          {now && (
+            <span
+              role="img"
+              aria-label={t("song.now")}
+              className="mt-0.5 block size-2.5 bg-signal"
+            />
           )}
           {section.tag && (
             <span className="max-w-full break-words rounded-badge bg-ink px-1 text-[10px] font-bold leading-tight text-tile">
@@ -79,7 +90,8 @@ export function SectionTile({
       id={sectionAnchor(section.index)}
       data-section={section.type}
       aria-label={section.name}
-      className="scroll-mt-1 rounded-tile bg-tile px-2 py-2.5 text-ink"
+      aria-current={now ? "step" : undefined}
+      className={`scroll-mt-1 rounded-tile bg-tile px-2 py-2.5 text-ink ${now ? "shadow-[inset_0_0_0_3px_var(--ink)]" : ""}`}
     >
       <header className="mb-2 flex items-center gap-2">
         {badge}
@@ -87,6 +99,11 @@ export function SectionTile({
         {section.tag && (
           <span className="shrink-0 rounded-badge bg-ink px-1.5 py-0.5 text-[12px] font-bold text-tile">
             {section.tag}
+          </span>
+        )}
+        {now && (
+          <span className="shrink-0 rounded-badge bg-ink px-1.5 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.06em] text-tile">
+            {t("song.now")}
           </span>
         )}
         {section.repeat > 1 && (

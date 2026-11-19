@@ -86,6 +86,14 @@ export const uk: Messages = {
   "library.newTitle": "Нова пісня",
 
   "song.edit": "Редагувати",
+  "song.play": "Увімкнути автоскрол",
+  "song.pause": "Зупинити автоскрол",
+  "song.autoScroll": "Автоскрол",
+  "song.countIn": "Відлік…",
+  "song.noTempo": "У пісні не вказано темп",
+  "song.barOf": "такт {bar} з {bars}",
+  "song.passOf": "прохід {pass} з {passes}",
+  "song.now": "Зараз",
   "song.compact": "Компактний режим",
   "settings.compact": "Відкривати пісні в компактному режимі",
 

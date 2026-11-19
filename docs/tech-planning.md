@@ -1,6 +1,6 @@
 # Technical planning — decisions and questions
 
-Status: **in progress** (started 2026-10-26; planning session 2026-11-19: blocks 1–8 and 11 decided; the author delegated the remaining decisions). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
+Status: **in progress** (started 2026-10-26; planning session 2026-11-19: blocks 1–9 and 11 decided; the author delegated the remaining decisions). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
 
 ## Fixed inputs
 
@@ -99,6 +99,8 @@ These are already decided and constrain every answer below:
 - Song content is never translated — make sure the tooling cannot touch it.
 
 ### 9. Timing: metronome and auto-scroll
+
+> **Decided 2026-11-19:** [ADR 0012](decisions/0012-timing.md).
 
 - Clock source: Web Audio clock, `performance.now()` + `requestAnimationFrame`, or a worker? The prototype's `setInterval` drifts.
 - Model: tempo, time signature, count-in, bars, repeats (`x2`), sections reused by reference; what "current section" means at each beat.
