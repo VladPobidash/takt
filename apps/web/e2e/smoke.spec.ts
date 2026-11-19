@@ -42,6 +42,43 @@ test.describe("English UI", () => {
   });
 });
 
+test.describe("view options", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("an option set for one song overrides the default and can be reset", async ({ page }) => {
+    await page.goto("/songs/dostoinyi-ty-odyn");
+    const dots = page.locator("[data-beat-dots]");
+    await expect(dots.first()).toBeVisible();
+
+    await page.getByRole("button", { name: "View options" }).click();
+    const sheet = page.getByRole("dialog", { name: "View options" });
+    await expect(sheet.getByText("Default everywhere").first()).toBeVisible();
+    await sheet.getByRole("switch", { name: /Beat dots under chords/ }).uncheck();
+    await expect(sheet.getByText("Set for this song")).toBeVisible();
+    await expect(dots).toHaveCount(0);
+    await page.screenshot({ path: test.info().outputPath("view-options.png") });
+    await sheet.getByRole("button", { name: "Close" }).click();
+
+    // Another song still has its dots.
+    await page.getByRole("link", { name: "Back" }).click();
+    await page.getByRole("link", { name: /Silent Night/ }).click();
+    await expect(dots.first()).toBeVisible();
+
+    // Reset brings the inherited value back.
+    await page.getByRole("link", { name: "Back" }).click();
+    await page.getByRole("link", { name: /Достойний Ти Один/ }).click();
+    await expect(dots).toHaveCount(0);
+    await page.getByRole("button", { name: "View options" }).click();
+    await sheet.getByRole("button", { name: "Reset" }).click();
+    await expect(dots.first()).toBeVisible();
+
+    // The everywhere level changes every song without an override.
+    await sheet.getByRole("tab", { name: "Everywhere" }).click();
+    await sheet.getByRole("switch", { name: /Band notes/ }).uncheck();
+    await expect(page.getByRole("region", { name: "Verse 1" })).not.toContainText("keys only");
+  });
+});
+
 test.describe("auto-scroll", () => {
   test.use({ locale: "en-US", colorScheme: "light" });
 
@@ -223,7 +260,8 @@ test.describe("editor", () => {
     await page.reload();
     await expect(page.getByRole("region", { name: "Chorus" })).toBeVisible();
 
-    await page.getByRole("link", { name: "Edit" }).click();
+    await page.getByRole("button", { name: "View options" }).click();
+    await page.getByRole("link", { name: "Edit the song" }).click();
     await page.getByRole("tab", { name: "Preview" }).click();
     await page.getByRole("button", { name: "Delete this song" }).click();
     await page.getByRole("button", { name: "Delete", exact: true }).click();

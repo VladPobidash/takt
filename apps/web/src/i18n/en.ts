@@ -165,6 +165,22 @@ export const en = {
   "setlist.position": "{position} of {count}",
   "common.close": "Close",
 
+  "view.title": "View options",
+  "view.scope.song": "This song",
+  "view.scope.setlist": "This setlist",
+  "view.scope.everywhere": "Everywhere",
+  "view.introSong": "Only for “{title}”. Overrides the setlist and the defaults.",
+  "view.introSetlist": "For every song of this setlist, unless a song says otherwise.",
+  "view.introEverywhere": "The defaults for all songs on this device.",
+  "view.fromSong": "Set for this song",
+  "view.fromSetlist": "From this setlist",
+  "view.fromEverywhere": "Default everywhere",
+  "view.reset": "Reset",
+  "view.bandNotes": "Band notes",
+  "view.instrumentNotes": "Notes for my instrument",
+  "view.personalNotes": "My personal notes",
+  "view.editSong": "Edit the song",
+
   "update.available": "A new version of Takt is ready.",
   "update.apply": "Update now",
 } as const;

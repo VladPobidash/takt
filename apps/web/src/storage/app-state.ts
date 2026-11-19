@@ -3,13 +3,21 @@ import { detectLanguage, type Language } from "../i18n/index.ts";
 import { type Bundle, createBundle } from "./bundle.ts";
 import { slugify, uniqueId } from "./slug.ts";
 import type { SongStore, StoredFile } from "./types.ts";
+import {
+  DEFAULT_VIEW_OPTIONS,
+  type ViewOptionKey,
+  type ViewOptions,
+  type ViewOverrides,
+  withOverride,
+} from "./view-options.ts";
 
 export type Theme = "system" | "light" | "dark";
 export type ChordSize = "s" | "m" | "l";
 export type InstrumentChoice = "harmony" | "guitar" | "bass" | "keys" | "drums";
 
 /** Device settings (ADR 0008): stored locally, never in `.takt` files. */
-export interface Settings {
+/** Device settings (ADR 0008); the view options here are the "everywhere" level of the cascade. */
+export interface Settings extends ViewOptions {
   language: Language;
   /** Note naming on screen, independent of how a file is written. */
   notation: "H" | "B";
@@ -17,20 +25,22 @@ export interface Settings {
   instrument: InstrumentChoice;
   /** Size of chord names on the song screen. */
   chordSize: ChordSize;
-  /** "Everywhere" level of the view options. */
-  beatDots: boolean;
-  soundingChords: boolean;
-  /** Open songs in compact mode. */
-  compact: boolean;
   /** When the last full backup was exported from this device (ms since the epoch), null if never. */
   lastBackupAt: number | null;
   /** The setlist that was open last: the "Service" section returns to it. */
   lastSetlistId: string | null;
 }
 
+/** View options set for one song or one setlist, by id (ADR 0009). */
+export interface ViewOverrideLevels {
+  song: Record<string, ViewOverrides>;
+  setlist: Record<string, ViewOverrides>;
+}
+
 export interface AppState {
   songs: StoredFile[];
   setlists: StoredFile[];
+  viewOverrides: ViewOverrideLevels;
   settings: Settings;
 }
 
@@ -43,9 +53,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     theme: "system",
     instrument: "harmony",
     chordSize: "m",
-    beatDots: true,
-    soundingChords: true,
-    compact: false,
+    ...DEFAULT_VIEW_OPTIONS,
     lastBackupAt: null,
     lastSetlistId: null,
   };
@@ -78,6 +86,10 @@ export class AppData {
     const data = new AppData(store, {
       songs: await store.listSongs(),
       setlists: await store.listSetlists(),
+      viewOverrides: {
+        song: (saved.viewOverridesSong as ViewOverrideLevels["song"] | undefined) ?? {},
+        setlist: (saved.viewOverridesSetlist as ViewOverrideLevels["setlist"] | undefined) ?? {},
+      },
       settings,
     });
     if (saved.seeded !== true) {
@@ -187,6 +199,7 @@ export class AppData {
   async deleteSetlist(id: string): Promise<void> {
     await this.store.deleteSetlist(id);
     this.update({ setlists: this.state.setlists.filter((setlist) => setlist.id !== id) });
+    await this.dropOverrides("setlist", id);
     if (this.state.settings.lastSetlistId === id) await this.setSetting("lastSetlistId", null);
   }
 
@@ -200,6 +213,39 @@ export class AppData {
   async deleteSong(id: string): Promise<void> {
     await this.store.deleteSong(id);
     this.update({ songs: this.state.songs.filter((song) => song.id !== id) });
+    await this.dropOverrides("song", id);
+  }
+
+  /** Sets one view option for a song or a setlist; `undefined` goes back to the inherited value. */
+  async setViewOverride(
+    scope: "song" | "setlist",
+    id: string,
+    key: ViewOptionKey,
+    value: boolean | undefined,
+  ): Promise<void> {
+    const level = { ...this.state.viewOverrides[scope] };
+    const next = withOverride(level[id], key, value);
+    if (next) level[id] = next;
+    else delete level[id];
+    await this.saveOverrides(scope, level);
+  }
+
+  private async saveOverrides(
+    scope: "song" | "setlist",
+    level: Record<string, ViewOverrides>,
+  ): Promise<void> {
+    this.update({ viewOverrides: { ...this.state.viewOverrides, [scope]: level } });
+    await this.store.setSetting(
+      scope === "song" ? "viewOverridesSong" : "viewOverridesSetlist",
+      level,
+    );
+  }
+
+  private async dropOverrides(scope: "song" | "setlist", id: string): Promise<void> {
+    if (!(id in this.state.viewOverrides[scope])) return;
+    const level = { ...this.state.viewOverrides[scope] };
+    delete level[id];
+    await this.saveOverrides(scope, level);
   }
 
   async setSetting<K extends keyof Settings>(key: K, value: Settings[K]): Promise<void> {

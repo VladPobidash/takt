@@ -198,6 +198,22 @@ export const uk: Messages = {
   "setlist.position": "{position} з {count}",
   "common.close": "Закрити",
 
+  "view.title": "Вигляд",
+  "view.scope.song": "Ця пісня",
+  "view.scope.setlist": "Цей сетлист",
+  "view.scope.everywhere": "Усюди",
+  "view.introSong": "Лише для «{title}». Має перевагу над сетлистом і типовими значеннями.",
+  "view.introSetlist": "Для всіх пісень цього сетлиста, якщо пісня не каже інакше.",
+  "view.introEverywhere": "Типові значення для всіх пісень на цьому пристрої.",
+  "view.fromSong": "Задано для цієї пісні",
+  "view.fromSetlist": "З цього сетлиста",
+  "view.fromEverywhere": "Типово всюди",
+  "view.reset": "Скинути",
+  "view.bandNotes": "Нотатки гурту",
+  "view.instrumentNotes": "Нотатки для мого інструмента",
+  "view.personalNotes": "Мої особисті нотатки",
+  "view.editSong": "Редагувати пісню",
+
   "update.available": "Нова версія Takt готова.",
   "update.apply": "Оновити зараз",
 };

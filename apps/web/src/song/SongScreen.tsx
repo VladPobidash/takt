@@ -4,22 +4,24 @@ import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import type { InstrumentChoice } from "../storage/app-state.ts";
+import { resolveViewOptions } from "../storage/view-options.ts";
 import {
   BackIcon,
   CompactIcon,
-  EditIcon,
   MinusIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
   PreviousIcon,
+  SlidersIcon,
 } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
 import { SectionTile, sectionAnchor } from "./SectionTile.tsx";
 import { usePlayback } from "./usePlayback.ts";
 import { useWakeLock } from "./useWakeLock.ts";
+import { everywhereOptions, ViewOptionsSheet } from "./ViewOptionsSheet.tsx";
 import { capoLabel, keyLabel, songDisplay } from "./view.ts";
 
 const TABS: { id: InstrumentChoice; label: MessageKey }[] = [
@@ -42,19 +44,26 @@ export interface SetlistContext {
   nextHref: string | null;
   /** "2 of 6" */
   position: string;
+  setlistId: string;
 }
 
 const SWIPE_MIN_PX = 70;
 
 export function SongScreen({ id, context }: { id: string; context?: SetlistContext }) {
-  const { songs, settings, t } = useApp();
+  const { songs, settings, viewOverrides, t } = useApp();
   const stored = songs.find((song) => song.id === id);
   const [instrument, setInstrument] = useState<InstrumentChoice>(settings.instrument);
   const [ownTranspose, setOwnTranspose] = useState(0);
   const transpose = context ? context.transpose : ownTranspose;
   const setTranspose = context ? context.onTranspose : setOwnTranspose;
   const [capoChoice, setCapoChoice] = useState<number | null>(null);
-  const [compact, setCompact] = useState(settings.compact);
+  const view = resolveViewOptions(
+    everywhereOptions(settings),
+    context ? viewOverrides.setlist[context.setlistId] : undefined,
+    viewOverrides.song[id],
+  ).value;
+  const [compact, setCompact] = useState(view.compact);
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const [, navigate] = useLocation();
   const scroller = useRef<HTMLElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -143,8 +152,8 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   const options = {
     display,
     time: song.time,
-    beatDots: settings.beatDots,
-    soundingChords: settings.soundingChords,
+    beatDots: view.beatDots,
+    soundingChords: view.soundingChords,
     compact,
   };
   const meta: [string, string][] = [
@@ -190,14 +199,15 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
           >
             <CompactIcon />
           </button>
-          <Link
-            href={`/songs/${encodeURIComponent(id)}/edit`}
-            aria-label={t("song.edit")}
-            title={t("song.edit")}
-            className="grid size-11 shrink-0 place-items-center"
+          <button
+            type="button"
+            aria-label={t("view.title")}
+            title={t("view.title")}
+            onClick={() => setOptionsOpen(true)}
+            className="grid size-11 shrink-0 place-items-center rounded-control"
           >
-            <EditIcon />
-          </Link>
+            <SlidersIcon />
+          </button>
         </div>
         <FormTimeline
           form={song.form}
@@ -294,7 +304,12 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
           {song.sections.map((section) => (
             <SectionTile
               key={section.index}
-              section={section}
+              section={{
+                ...section,
+                notes: section.notes.filter((note) =>
+                  note.instrument === null ? view.bandNotes : view.instrumentNotes,
+                ),
+              }}
               options={options}
               now={section.index === nowSection}
             />
@@ -384,6 +399,13 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
           </NavButton>
         )}
       </footer>
+      <ViewOptionsSheet
+        open={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        songId={id}
+        songTitle={song.title ?? id}
+        setlistId={context?.setlistId ?? null}
+      />
     </div>
   );
 }

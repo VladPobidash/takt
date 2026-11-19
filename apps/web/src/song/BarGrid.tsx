@@ -86,7 +86,7 @@ function BarCell({ bar, last, options }: { bar: Bar; last: boolean; options: Bar
           })}
         </div>
         {options.beatDots && !options.compact && (
-          <div aria-hidden="true" className="mt-1.5 flex">
+          <div aria-hidden="true" data-beat-dots className="mt-1.5 flex">
             {Array.from({ length: dots }, (_, beat) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: identical decorative dots
               <span key={beat} className="flex-1">
