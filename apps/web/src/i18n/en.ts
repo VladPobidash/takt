@@ -102,6 +102,19 @@ export const en = {
     "This @{instrument} line has {bars} bars, the line it replaces has {expected}.",
   "diagnostic.invalid-setlist-entry": "This setlist line cannot be read.",
 
+  "library.unchanged": { one: "{count} was already here", other: "{count} were already here" },
+  "library.notReadable": "“{name}” is not a .takt file or a Takt bundle.",
+  "library.lastBackup": "Last backup: {date}.",
+  "library.noBackup": "No backup yet.",
+
+  "editor.export": "Export as a .takt file",
+
+  "settings.data": "Data",
+  "settings.dataHint":
+    "Songs live only on this device. A backup is one file with all of them; keep it somewhere else.",
+  "settings.backup": "Export everything",
+  "settings.restoreHint": "To restore, import the backup file in the library.",
+
   "update.available": "A new version of Takt is ready.",
   "update.apply": "Update now",
 } as const;

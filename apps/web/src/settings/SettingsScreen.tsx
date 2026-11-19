@@ -3,6 +3,8 @@ import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import { LANGUAGES } from "../i18n/index.ts";
 import type { InstrumentChoice, Settings, Theme } from "../storage/app-state.ts";
+import { backupFileName, formatBundle } from "../storage/bundle.ts";
+import { saveFile } from "../ui/save-file.ts";
 import { MainTopBar } from "../ui/TopBar.tsx";
 import { UpdateNotice } from "../ui/UpdateNotice.tsx";
 
@@ -77,6 +79,16 @@ export function SettingsScreen() {
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     void data.setSetting(key, value);
   const select = "h-12 w-full rounded-control bg-surface px-3 text-[15px] font-bold";
+
+  async function backup() {
+    const now = new Date();
+    const saved = await saveFile(
+      backupFileName(now),
+      formatBundle(data.exportBundle(now)),
+      "application/json",
+    );
+    if (saved) await data.setSetting("lastBackupAt", now.getTime());
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -166,6 +178,27 @@ export function SettingsScreen() {
             onChange={(value) => set("soundingChords", value)}
             label={t("settings.soundingChords")}
           />
+        </Group>
+        <Group title={t("settings.data")}>
+          <p className="mb-2 text-[13px] font-medium text-muted">{t("settings.dataHint")}</p>
+          <button
+            type="button"
+            onClick={() => void backup()}
+            className="h-12 w-full rounded-control bg-accent text-[15px] font-bold text-accent-fg"
+          >
+            {t("settings.backup")}
+          </button>
+          <p className="mt-2 text-[13px] font-medium text-muted">
+            {settings.lastBackupAt === null
+              ? t("library.noBackup")
+              : t("library.lastBackup", {
+                  date: new Intl.DateTimeFormat(settings.language, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  }).format(settings.lastBackupAt),
+                })}{" "}
+            {t("settings.restoreHint")}
+          </p>
         </Group>
         <p className="text-[13px] font-medium text-muted">
           {t("settings.version")} {__APP_VERSION__}

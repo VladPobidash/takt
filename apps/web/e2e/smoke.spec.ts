@@ -135,6 +135,37 @@ test.describe("editor", () => {
   });
 });
 
+test.describe("backup", () => {
+  test.use({ locale: "en-US" });
+
+  test("everything is exported as one file and restored on an empty device", async ({
+    page,
+    browser,
+  }) => {
+    await page.goto("/settings");
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Export everything" }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toMatch(/^takt-backup-\d{4}-\d{2}-\d{2}\.taktbundle$/);
+    const path = await file.path();
+    await expect(page.getByText(/Last backup:/)).toBeVisible();
+
+    // A second device: its own storage, where the example songs were deleted.
+    const other = await browser.newContext({ locale: "en-US" });
+    const second = await other.newPage();
+    await second.goto("/songs/silent-night/edit");
+    await second.getByRole("tab", { name: "Preview" }).click();
+    await second.getByRole("button", { name: "Delete this song" }).click();
+    await second.getByRole("button", { name: "Delete", exact: true }).click();
+    await expect(second.getByRole("link", { name: /Silent Night/ })).toHaveCount(0);
+
+    await second.locator('input[type="file"]').setInputFiles(path);
+    await expect(second.getByRole("status")).toContainText("1 song imported · 1 was already here");
+    await expect(second.getByRole("link", { name: /Silent Night/ })).toBeVisible();
+    await other.close();
+  });
+});
+
 test.describe("the production server", () => {
   test("answers app routes with the app, caches hashed assets forever and nothing else", async ({
     request,

@@ -5,6 +5,7 @@ import { useApp } from "../app-context.tsx";
 import { newSongText } from "../editor/template.ts";
 import { requestPersistentStorage } from "../pwa.ts";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
+import { parseBundle } from "../storage/bundle.ts";
 import { ImportIcon, PlusIcon, SearchIcon } from "../ui/icons.tsx";
 import { IconButton, MainTopBar } from "../ui/TopBar.tsx";
 import { UpdateNotice } from "../ui/UpdateNotice.tsx";
@@ -53,14 +54,30 @@ export function LibraryScreen() {
     : rows;
 
   async function importFiles(list: FileList | null) {
-    const files = [...(list ?? [])].filter((file) => /\.(takt|txt)$/i.test(file.name));
+    const files = [...(list ?? [])];
     if (files.length === 0) return;
-    const read = await Promise.all(
-      files.map(async (file) => ({ name: file.name, text: await file.text() })),
-    );
-    const added = await data.importSongs(read);
+    let added = 0;
+    let unchanged = 0;
+    const songFiles: { name: string; text: string }[] = [];
+    for (const file of files) {
+      const text = await file.text();
+      const bundle = parseBundle(text);
+      if (bundle) {
+        const result = await data.importBundle(bundle);
+        added += result.added;
+        unchanged += result.unchanged;
+      } else if (/\.(takt|txt)$/i.test(file.name)) {
+        songFiles.push({ name: file.name, text });
+      } else {
+        setMessage(t("library.notReadable", { name: file.name }));
+        return;
+      }
+    }
+    added += (await data.importSongs(songFiles)).length;
     requestPersistentStorage();
-    setMessage(t("library.imported", { count: added.length }));
+    const parts = [t("library.imported", { count: added })];
+    if (unchanged > 0) parts.push(t("library.unchanged", { count: unchanged }));
+    setMessage(parts.join(" · "));
   }
 
   return (
@@ -75,7 +92,7 @@ export function LibraryScreen() {
             <input
               ref={input}
               type="file"
-              accept=".takt,.txt,text/plain"
+              accept=".takt,.taktbundle,.txt,.json,text/plain,application/json"
               multiple
               hidden
               onChange={(event) => {
@@ -154,7 +171,16 @@ export function LibraryScreen() {
             </li>
           ))}
         </ul>
-        <p className="pt-4 text-[13px] font-semibold text-muted">{t("library.onDevice")}</p>
+        <p className="pt-4 text-[13px] font-semibold text-muted">
+          {t("library.onDevice")}{" "}
+          {settings.lastBackupAt === null
+            ? t("library.noBackup")
+            : t("library.lastBackup", {
+                date: new Intl.DateTimeFormat(settings.language, { dateStyle: "medium" }).format(
+                  settings.lastBackupAt,
+                ),
+              })}
+        </p>
       </main>
     </div>
   );

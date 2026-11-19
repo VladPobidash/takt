@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { detectLanguage, type Language } from "../i18n/index.ts";
+import { type Bundle, createBundle } from "./bundle.ts";
 import { slugify, uniqueId } from "./slug.ts";
 import type { SongStore, StoredFile } from "./types.ts";
 
@@ -19,6 +20,8 @@ export interface Settings {
   /** "Everywhere" level of the view options. */
   beatDots: boolean;
   soundingChords: boolean;
+  /** When the last full backup was exported from this device (ms since the epoch), null if never. */
+  lastBackupAt: number | null;
 }
 
 export interface AppState {
@@ -37,6 +40,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     chordSize: "m",
     beatDots: true,
     soundingChords: true,
+    lastBackupAt: null,
   };
 }
 
@@ -106,6 +110,29 @@ export class AppData {
   async createSong(name: string, text: string, now = Date.now()): Promise<StoredFile> {
     const [song] = await this.importSongs([{ name, text }], now);
     return song as StoredFile;
+  }
+
+  /** Everything on this device as one bundle. */
+  exportBundle(now: Date): Bundle {
+    return createBundle({ songs: this.state.songs, setlists: [] }, now);
+  }
+
+  /**
+   * Adds the songs of a bundle. A song that is already here with the same text is left alone;
+   * one with the same id but another text is stored next to it under a numbered id — importing
+   * never overwrites what is on the device.
+   */
+  async importBundle(
+    bundle: Bundle,
+    now = Date.now(),
+  ): Promise<{ added: number; unchanged: number }> {
+    const texts = new Set(this.state.songs.map((song) => song.text));
+    const fresh = bundle.songs.filter((song) => !texts.has(song.text));
+    await this.importSongs(
+      fresh.map((song) => ({ name: song.id, text: song.text })),
+      now,
+    );
+    return { added: fresh.length, unchanged: bundle.songs.length - fresh.length };
   }
 
   async saveSong(song: StoredFile): Promise<void> {
