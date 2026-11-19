@@ -145,6 +145,8 @@ export const en = {
   "setlist.deleteText": "The setlist is removed from this device. Its songs stay in the library.",
   "setlist.previous": "Previous song",
   "setlist.next": "Next song",
+  "setlist.keysHint": "Pedal or ← → — previous / next song. ↑ ↓ — sections.",
+  "setlist.songs": "Songs of the setlist",
   "setlist.position": "{position} of {count}",
   "common.close": "Close",
 

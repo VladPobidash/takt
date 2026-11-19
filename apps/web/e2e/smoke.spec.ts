@@ -212,6 +212,49 @@ test.describe("service map", () => {
   });
 });
 
+test.describe("laptop layout", () => {
+  test.use({
+    locale: "en-US",
+    colorScheme: "dark",
+    viewport: { width: 1280, height: 800 },
+    isMobile: false,
+  });
+
+  test("the setlist stays next to the song and marks the current one", async ({ page }) => {
+    await page.goto("/library?tab=setlists");
+    await page.getByRole("button", { name: "New setlist" }).click();
+    for (const title of ["Silent Night", "Достойний Ти Один"]) {
+      await page.getByRole("button", { name: "Add a song" }).click();
+      await page.getByRole("dialog").getByRole("button", { name: title }).click();
+    }
+    await page.getByRole("link", { name: "Start" }).click();
+
+    const sidebar = page.getByRole("navigation", { name: "Songs of the setlist" });
+    await expect(sidebar.getByRole("link", { name: /Silent Night/ })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    await sidebar.getByRole("link", { name: /Достойний Ти Один/ }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Достойний Ти Один");
+    await expect(sidebar.getByRole("link", { name: /Достойний Ти Один/ })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+
+    // Eight bars per row: the five-bar line of the first verse stays on one row.
+    const bars = page
+      .getByRole("region", { name: "Verse 1" })
+      .locator(".grid")
+      .nth(1)
+      .locator("> div");
+    const tops = await bars.evaluateAll((cells) =>
+      cells.map((cell) => Math.round(cell.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size).toBe(1);
+    await page.screenshot({ path: test.info().outputPath("laptop.png") });
+  });
+});
+
 test.describe("backup", () => {
   test.use({ locale: "en-US" });
 
