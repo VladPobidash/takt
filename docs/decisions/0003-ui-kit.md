@@ -43,6 +43,11 @@ The runtime-size advantage of Preact, Svelte and Solid matters little here: the 
 9. **JavaScript budget:** the song screen loads at most **150 kB gzip** of JavaScript. This is a guard against accidental bloat (checked in CI once the app exists), not a hard device constraint; raising it is a conscious decision.
 10. **React Compiler:** not used in the MVP. Revisit only if profiling shows a real rendering problem.
 
+## Implementation notes (2026-11-19)
+
+- `@base-ui/react` is installed and used where a primitive is really needed — first for the searchable select (`Combobox`). The wrappers live in `apps/web/src/ui/` and are written by hand in the shadcn style (Base UI primitive + Tailwind classes on our tokens); the shadcn CLI is not used, because its generated theme would compete with our token file. Simple pieces (buttons, tabs, radio and switch rows, confirm dialog on the native `<dialog>`) need no library.
+- Base UI costs about 46 kB gzip, so screens that use it are loaded on demand (`React.lazy`); the song screen stays near 100 kB gzip against its 150 kB budget. Lazy chunks are precached by the service worker like everything else.
+
 ## Consequences
 
 - Accepting this ADR fixes the app framework (React). The format library stays framework-free and dependency-free.

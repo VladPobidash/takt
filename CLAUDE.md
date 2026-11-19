@@ -66,7 +66,7 @@ apps/
     src/library/     library screen (list, search, file import, new song)
     src/setlist/     service map (setlists): model.ts, service map screen, song inside a setlist
     src/settings/    settings screen
-    src/ui/          shared pieces (top bar, icons)
+    src/ui/          shared pieces: top bar, icons, SearchableSelect (Base UI Combobox), ConfirmDialog, save-file
     e2e/             Playwright smoke tests (phone viewport, offline start)
     server.mjs       dependency-free static server for production (`pnpm start`)
 docs/
@@ -90,4 +90,5 @@ examples/            sample .takt files (no copyrighted lyrics); also parser fix
 - `pnpm e2e` — Playwright smoke tests in a phone viewport against the production build (CI runs them after `verify`).
 - One package: `pnpm --filter @takt/format test`. Run the app: `pnpm --filter @takt/web dev` (or `build` + `preview`).
 - UI strings go through `t()` with keys from `apps/web/src/i18n/en.ts`; `uk.ts` must have the same keys (the type checker enforces it). Colours come from the tokens in `apps/web/src/styles/app.css`, never from literals in components.
+- Base UI (`@base-ui/react`) is heavy: any screen that imports it is loaded with `React.lazy` (see `App.tsx`), so the song screen stays inside its JavaScript budget.
 - Relative imports use the `.ts` extension; no enums or namespaces (`erasableSyntaxOnly`).
