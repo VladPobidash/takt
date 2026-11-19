@@ -102,6 +102,12 @@ export class AppData {
     return added;
   }
 
+  /** Stores a new song under an id made from `name` and returns it. */
+  async createSong(name: string, text: string, now = Date.now()): Promise<StoredFile> {
+    const [song] = await this.importSongs([{ name, text }], now);
+    return song as StoredFile;
+  }
+
   async saveSong(song: StoredFile): Promise<void> {
     await this.store.putSong(song);
     this.update({ songs: [...this.state.songs.filter((s) => s.id !== song.id), song] });

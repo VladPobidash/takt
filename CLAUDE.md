@@ -25,7 +25,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 
 ## Current state
 
-- Code: the format library (`packages/format`) is complete for the MVP; the app (`apps/web`) has the song screen (instrument views, capo, transposition, H/B), the library with file import and the settings screen. It installs as a PWA and works offline. Not built yet: service map, editor, export and backup, compact mode. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
+- Code: the format library (`packages/format`) is complete for the MVP; the app (`apps/web`) has the song screen (instrument views, capo, transposition, H/B), the library with file import, the editor (text, live preview, parser warnings, new and delete) and the settings screen. It installs as a PWA and works offline. Not built yet: service map, export and backup, compact mode. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
 - **Workflow (authorised by the author on 2026-11-19):** work is tracked in GitHub issues under the MVP tracking issue (`VladPobidash/takt#1`). One issue → one small pull request that names the issue it closes (`Closes #N`, or "partly done" when it is not finished). When CI is green, Claude squash-merges its own pull request and starts the next one from the updated `main`; the author does not review each one. A red CI is fixed, never bypassed.
 - **Decisions:** technical planning continues in `docs/tech-planning.md`. On 2026-11-19 the author delegated the remaining technical decisions: decide, write the ADR as accepted with a "Decided by" line, keep working, do not stop to ask. Product-level changes (scope, principles, the format's meaning for musicians) are still reported clearly.
 - **Accepted so far:** app stack ([ADR 0003](docs/decisions/0003-ui-kit.md): React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4, bar grid as plain DOM, modern browsers only, 150 kB gzip JavaScript budget for the song screen); repository and tooling ([ADR 0004](docs/decisions/0004-repo-structure-and-tooling.md): pnpm monorepo, TypeScript 7, Biome, Vite 8, `pnpm verify`); format library ([ADR 0005](docs/decisions/0005-format-library.md): `parse` → document with spans and diagnostics, `resolveSong` → view for an instrument, never throw, rewrite text by spans); testing ([ADR 0006](docs/decisions/0006-testing.md): Vitest, test-first parser, fast-check).
@@ -61,7 +61,8 @@ apps/
     src/i18n/        en.ts (source of keys), uk.ts, translate()
     src/storage/     SongStore adapter (IndexedDB, memory), AppData (songs + settings)
     src/song/        song screen: view model (view.ts), bar grid, section tiles, form timeline
-    src/library/     library screen (list, search, file import)
+    src/editor/      editor screen: text, live preview, warnings, quick-symbol bar
+    src/library/     library screen (list, search, file import, new song)
     src/settings/    settings screen
     src/ui/          shared pieces (top bar, icons)
     e2e/             Playwright smoke tests (phone viewport, offline start)

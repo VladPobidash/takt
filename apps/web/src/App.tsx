@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Redirect, Route, Switch } from "wouter";
 import { AppContext, type App as AppValue } from "./app-context.tsx";
+import { EditorScreen } from "./editor/EditorScreen.tsx";
 import { type Translate, translate } from "./i18n/index.ts";
 import { LibraryScreen } from "./library/LibraryScreen.tsx";
 import { SettingsScreen } from "./settings/SettingsScreen.tsx";
@@ -32,6 +33,9 @@ export function App({ data }: { data: AppData }) {
       <Switch>
         <Route path="/library" component={LibraryScreen} />
         <Route path="/settings" component={SettingsScreen} />
+        <Route path="/songs/:id/edit">
+          {(params) => <EditorScreen key={params.id} id={params.id} />}
+        </Route>
         <Route path="/songs/:id">{(params) => <SongScreen key={params.id} id={params.id} />}</Route>
         <Route>
           <Redirect to="/library" replace />

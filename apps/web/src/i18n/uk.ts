@@ -75,6 +75,55 @@ export const uk: Messages = {
   "settings.chordSize.l.hint": "Для телефона на пюпітрі",
   "settings.version": "Версія",
 
+  "library.new": "Нова пісня",
+  "library.newTitle": "Нова пісня",
+
+  "song.edit": "Редагувати",
+
+  "editor.editing": "Редагування",
+  "editor.done": "Готово",
+  "editor.text": "Текст",
+  "editor.preview": "Перегляд",
+  "editor.textLabel": "Текст пісні",
+  "editor.symbols": "Швидкі символи",
+  "editor.insert": "Вставити {symbol}",
+  "editor.show": "Показати",
+  "editor.noProblems": "Проблем не знайдено",
+  "editor.problems": {
+    one: "{count} проблема",
+    few: "{count} проблеми",
+    many: "{count} проблем",
+    other: "{count} проблеми",
+  },
+  "editor.line": "Рядок {line}",
+  "editor.delete": "Видалити цю пісню",
+  "editor.deleteTitle": "Видалити «{title}»?",
+  "editor.deleteText": "Пісню буде видалено з цього пристрою. Це не можна скасувати.",
+  "editor.deleteConfirm": "Видалити",
+  "common.cancel": "Скасувати",
+
+  "diagnostic.missing-title": "У пісні немає назви. Почніть файл з «# Назва».",
+  "diagnostic.unexpected-header-line":
+    "Цей рядок — не «назва: значення» і не нотатка. Можливо, бракує заголовка секції (##)?",
+  "diagnostic.invalid-time": "«{value}» — не розмір. Пишіть як 4/4 або 6/8.",
+  "diagnostic.invalid-tempo": "«{value}» — не темп. Вкажіть удари за хвилину, наприклад 120.",
+  "diagnostic.invalid-capo": "«{value}» — не лад капо. Вкажіть число від 0 до 12.",
+  "diagnostic.invalid-notation": "«{value}» — не система назв. Вкажіть H або B.",
+  "diagnostic.invalid-key": "«{value}» — не тональність. Пишіть як D, Hm або F#.",
+  "diagnostic.unknown-section-ref": "Немає секції «{name}», яку можна повторити.",
+  "diagnostic.empty-section": "У цій секції немає тактів і нічого повторити.",
+  "diagnostic.unknown-chord": "«{text}» — не акорд. Показується як написано.",
+  "diagnostic.ambiguous-b":
+    "«{text}»: B тут — сі чи сі-бемоль? Додайте в заголовок «notation: H» або «notation: B».",
+  "diagnostic.bar-too-long": "У цьому такті {beats} долей, а за розміром має бути {expected}.",
+  "diagnostic.bar-short": "Короткий такт: {beats} долей замість {expected}.",
+  "diagnostic.mixed-durations": "В одному такті змішано зірочки й крапки; крапки не враховано.",
+  "diagnostic.part-without-base":
+    "Рядок {line} партії @{instrument} не має базового рядка, який він замінює.",
+  "diagnostic.part-bar-count":
+    "У цьому рядку @{instrument} {bars} тактів, а в рядку, який він замінює, — {expected}.",
+  "diagnostic.invalid-setlist-entry": "Цей рядок сетлиста не вдається прочитати.",
+
   "update.available": "Нова версія Takt готова.",
   "update.apply": "Оновити зараз",
 };

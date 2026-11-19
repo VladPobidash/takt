@@ -43,6 +43,16 @@ export const ImportIcon = () => (
     <path d="M12 4v11M7 11l5 5 5-5M5 20h14" />
   </Icon>
 );
+export const EditIcon = () => (
+  <Icon>
+    <path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" />
+  </Icon>
+);
+export const WarningIcon = () => (
+  <Icon>
+    <path d="M12 4l9 16H3l9-16zM12 10v4M12 17.5v.5" />
+  </Icon>
+);
 export const SearchIcon = () => (
   <Icon>
     <circle cx="11" cy="11" r="6.5" />
