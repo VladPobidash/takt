@@ -14,7 +14,8 @@
     "test": "pnpm -r test",
     "build": "pnpm -r --if-present build",
     "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build",
-    "e2e": "pnpm --filter @takt/web e2e"
+    "e2e": "pnpm --filter @takt/web e2e",
+    "start": "node apps/web/server.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.8",

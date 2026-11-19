@@ -65,6 +65,7 @@ apps/
     src/settings/    settings screen
     src/ui/          shared pieces (top bar, icons)
     e2e/             Playwright smoke tests (phone viewport, offline start)
+    server.mjs       dependency-free static server for production (`pnpm start`)
 docs/
   brief.md           product brief
   format.md          .takt format spec v0

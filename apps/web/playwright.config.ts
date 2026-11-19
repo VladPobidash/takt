@@ -16,7 +16,9 @@ export default defineConfig({
     trace: "off",
   },
   webServer: {
-    command: `pnpm build && pnpm exec vite preview --port ${PORT} --strictPort`,
+    // The same server that runs in production (ADR 0011).
+    command: "pnpm build && node server.mjs",
+    env: { PORT: String(PORT) },
     port: PORT,
     reuseExistingServer: !process.env.CI,
   },
