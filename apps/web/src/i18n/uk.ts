@@ -178,6 +178,8 @@ export const uk: Messages = {
     "Сетлист буде видалено з цього пристрою. Його пісні залишаться в бібліотеці.",
   "setlist.previous": "Попередня пісня",
   "setlist.next": "Наступна пісня",
+  "setlist.keysHint": "Педаль або ← → — попередня / наступна пісня. ↑ ↓ — секції.",
+  "setlist.songs": "Пісні сетлиста",
   "setlist.position": "{position} з {count}",
   "common.close": "Закрити",
 

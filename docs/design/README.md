@@ -131,6 +131,7 @@ Horizontal strips (tabs, chips) hide the scrollbar entirely (`scrollbar-width: n
 - Phone, song: fixed header (top bar, form timeline, instrument tabs ≈ 136 px) + scrolling sections + player toolbar (56 px). Only the middle scrolls.
 - Phone, other screens: top bar + content. No bottom navigation, no full-width footer bars unless the screen is a task flow (editor, review).
 - Laptop: setlist sidebar (≈300 px) + song area; normal mode 8 bars per row, compact mode 3 columns.
+- Breakpoints follow the available width, never the device: the sidebar and 8 bars per row start at **64rem (1024 px)** — laptops and tablets in landscape; below that a tablet in portrait gets the phone layout. Compact mode uses 2 columns from 48rem and 3 from 80rem. Lists (library, service map, settings) keep a maximum content width instead of stretching.
 
 ## Localisation
 
