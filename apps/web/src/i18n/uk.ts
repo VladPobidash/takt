@@ -124,6 +124,24 @@ export const uk: Messages = {
     "У цьому рядку @{instrument} {bars} тактів, а в рядку, який він замінює, — {expected}.",
   "diagnostic.invalid-setlist-entry": "Цей рядок сетлиста не вдається прочитати.",
 
+  "library.unchanged": {
+    one: "{count} уже була тут",
+    few: "{count} уже були тут",
+    many: "{count} уже були тут",
+    other: "{count} уже були тут",
+  },
+  "library.notReadable": "«{name}» — не файл .takt і не набір Takt.",
+  "library.lastBackup": "Остання резервна копія: {date}.",
+  "library.noBackup": "Резервної копії ще немає.",
+
+  "editor.export": "Експортувати як файл .takt",
+
+  "settings.data": "Дані",
+  "settings.dataHint":
+    "Пісні зберігаються лише на цьому пристрої. Резервна копія — один файл з усіма піснями; тримайте його деінде.",
+  "settings.backup": "Експортувати все",
+  "settings.restoreHint": "Щоб відновити, імпортуйте файл копії в бібліотеці.",
+
   "update.available": "Нова версія Takt готова.",
   "update.apply": "Оновити зараз",
 };

@@ -8,6 +8,7 @@ import { SectionTile } from "../song/SectionTile.tsx";
 import { songDisplay } from "../song/view.ts";
 import { ConfirmDialog } from "../ui/ConfirmDialog.tsx";
 import { BackIcon, WarningIcon } from "../ui/icons.tsx";
+import { saveFile } from "../ui/save-file.ts";
 import { insertAt } from "./template.ts";
 
 const SYMBOLS = ["|", "*", "#", "b", "/", "##", "@", ">"];
@@ -223,8 +224,15 @@ export function EditorScreen({ id }: { id: string }) {
           </div>
           <button
             type="button"
+            onClick={() => void saveFile(`${id}.takt`, text, "text/plain")}
+            className="mt-6 h-11 w-full rounded-control bg-surface text-[15px] font-bold"
+          >
+            {t("editor.export")}
+          </button>
+          <button
+            type="button"
             onClick={() => setConfirmDelete(true)}
-            className="mt-6 h-11 w-full rounded-control border border-line text-[15px] font-bold text-muted"
+            className="mt-2 h-11 w-full rounded-control border border-line text-[15px] font-bold text-muted"
           >
             {t("editor.delete")}
           </button>
