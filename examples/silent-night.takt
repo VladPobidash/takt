@@ -1,0 +1,47 @@
+# Silent Night
+artist: Franz Xaver Gruber, 1818 — public domain
+key: B
+notation: H
+tempo: 44
+time: 6/8
+capo: 3
+
+// The key is B flat: in H-notation "B" is B flat and "H" is B natural.
+// Guitar plays capo 3 and reads G shapes; keys read the sounding chords
+// and have their own, fuller part in the verses.
+
+## Intro
+| F7 | B | B*** F7*** | B |
+@keys > solo: melody of the last line, one octave up
+@guitar > let the first chord ring, enter with picking in bar 3
+
+## Verse 1
+| B | | F7 | B |
+| Eb | B | Eb | B |
+| F7 | B | B*** F7*** | B |
+@keys | B | Bsus4 B | F7 | B |
+@keys | Eb | B/D | Eb | B/D |
+@keys | F7/C | B/D | B/F*** F7*** | B |
+@bass > enter in line 2
+> first line: guitar and voice only
+Silent night, holy night
+All is calm, all is bright
+Round yon virgin mother and child
+Holy infant so tender and mild
+Sleep in heavenly peace
+Sleep in heavenly peace
+
+## Verse 2 = Verse 1
+@drums > brushes, start here
+
+## Interlude = Intro
+
+## Verse 3 [quiet]
+| B | | F7 | B |
+| Eb | B | Eb | B |
+| N.C. | | B F7 | B | rit.
+@keys > pads only, no left hand
+> line 3: voices alone for two bars
+
+## Outro x2
+| Eb | B |

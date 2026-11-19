@@ -21,14 +21,15 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 - **Accept how musicians already write.** `| E*** G* |`, empty bars, `A - E`, `(2x)`, H/B notation must parse.
 - **Local-first.** No server-side storage of user content. A stateless helper server is acceptable only if an ADR says so.
 - **Offline on stage.** Nothing on the playing path may need the network.
-- **Phone first, laptop comfortable.**
+- **Mobile-first; tablets and desktops supported.** Modern devices only — no work for old phones or old browsers ([ADR 0003](docs/decisions/0003-ui-kit.md)).
 
 ## Current state
 
 - No code yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
-- Next step: technical planning. Open decisions and questions are listed in `docs/tech-planning.md`; each answer becomes an ADR.
-- Stack and app architecture are **not decided**. Do not scaffold frameworks or add dependencies before an ADR in `docs/decisions/` is accepted by the user.
-- Likely direction (to confirm in an ADR): the format is a standalone, dependency-free TypeScript library (`packages/format`: parser, transpose, capo, ChordPro export) separate from the app (`apps/web`), with storage behind an adapter interface.
+- Work is tracked in GitHub issues under the MVP tracking issue (`VladPobidash/takt#1`); every change reaches `main` through a pull request that names the issue it closes.
+- **Decisions:** technical planning continues in `docs/tech-planning.md`. On 2026-11-19 the author delegated the remaining technical decisions: decide, write the ADR as accepted with a "Decided by" line, keep working, do not stop to ask. Product-level changes (scope, principles, the format's meaning for musicians) are still reported clearly.
+- **Accepted so far:** app stack ([ADR 0003](docs/decisions/0003-ui-kit.md): React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4, bar grid as plain DOM, modern browsers only, 150 kB gzip JavaScript budget for the song screen); repository and tooling ([ADR 0004](docs/decisions/0004-repo-structure-and-tooling.md): pnpm monorepo, TypeScript 7, Biome, Vite 8, `pnpm verify`); format library ([ADR 0005](docs/decisions/0005-format-library.md): `parse` → document with spans and diagnostics, `resolveSong` → view for an instrument, never throw, rewrite text by spans); testing ([ADR 0006](docs/decisions/0006-testing.md): Vitest, test-first parser, fast-check).
+- **Not decided yet:** platform (PWA vs wrapper), storage, state and routing, localisation, timing, hosting — issues #4–#9. Do not add dependencies for these before their ADR exists.
 
 ## Conventions
 
