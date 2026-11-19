@@ -10,7 +10,7 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 @bass | D | A | F#** G** | A |
 ```
 
-> Status: **pre-alpha.** The format library works; the app shows songs per instrument (capo, transposition, H/B naming) and imports `.takt` files. No offline install, setlists or editor yet. First real-world test: a worship night on 12 December 2026.
+> Status: **pre-alpha.** The format library works; the app shows songs per instrument (capo, transposition, H/B naming) and imports `.takt` files. It installs as a PWA and works offline. No setlists, editor or export yet. First real-world test: a worship night on 12 December 2026.
 
 ## Principles
 
@@ -36,6 +36,7 @@ Requires Node 22.12 or newer (CI uses Node 24) and [pnpm](https://pnpm.io) 12.
 pnpm install
 pnpm verify    # lint + format check, type check, tests, build — the same as CI
 pnpm fix       # apply lint and format fixes
+pnpm e2e       # browser smoke tests in a phone viewport (needs Playwright's Chromium)
 ```
 
 - `packages/format` — `@takt/format`: the `.takt` parser and tools. No runtime dependencies, no DOM.
