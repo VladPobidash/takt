@@ -1,8 +1,8 @@
 import { execSync } from "node:child_process";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { defineConfig } from "vitest/config";
 
 function appVersion(): string {
   const date = new Date().toISOString().slice(0, 10);
@@ -54,4 +54,6 @@ export default defineConfig({
   ],
   define: { __APP_VERSION__: JSON.stringify(appVersion()) },
   server: { host: true },
+  // Playwright owns e2e/; Vitest runs the unit tests next to the sources.
+  test: { include: ["src/**/*.test.{ts,tsx}"] },
 });

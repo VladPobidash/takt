@@ -10,3 +10,6 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Playwright output
+**/e2e/.results/
