@@ -9,7 +9,7 @@ These are already decided and constrain every answer below:
 - **Product:** [brief](brief.md), [format v0](format.md), [roadmap](roadmap.md).
 - **Local-first** ([ADR 0001](decisions/0001-local-first.md)). No server-side storage. Nothing on the playing path needs the network.
 - **Design v1 accepted** ([design system](design/README.md), [MVP screens](design/mvp-v1/README.md)). Swiss Blocks, Onest, EN + UA from day one, no bottom navigation, dense layouts.
-- **Phone first, laptop comfortable.** Older phones on a music stand, screen always on.
+- **Mobile-first, tablets and desktops supported.** Phone on a music stand, screen always on. Modern devices only — old phones and old browsers are not supported (author's decision, 2026-11-19).
 - **Timeline.** Weekly Saturday services are tests; the worship night on **2026-12-12** is the first real use. Stage 2 (song view usable by the band) targets 31 Oct.
 - **Team.** One developer working with Claude Code in a cloud environment. Static hosting (Railway Hobby or GitHub Pages were mentioned).
 - **Not in the MVP:** cloud sync, live session, change history. The architecture must not close these doors (see brief → "Data and sync", [change history idea](ideas/change-history.md)).
@@ -19,6 +19,8 @@ These are already decided and constrain every answer below:
 ### 1. App stack and UI foundation
 
 [ADR 0003](decisions/0003-ui-kit.md) proposes React + TypeScript + shadcn/ui (Base UI) + Tailwind. It is **not accepted**.
+
+> 2026-11-19: direction chosen (React + shadcn/ui on Base UI + Tailwind v4). ADR 0003 was revised to answer the questions below and waits for acceptance.
 
 - Accept, revise or replace it? Alternatives worth a fair look: Preact, Svelte, Solid, React Aria Components.
 - Bundle size and start-up time on an older Android phone. Is there a budget?
