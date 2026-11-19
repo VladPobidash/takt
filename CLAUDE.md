@@ -26,9 +26,10 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 ## Current state
 
 - No code yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
+- Work is tracked in GitHub issues under the MVP tracking issue (`VladPobidash/takt#1`); every change reaches `main` through a pull request that names the issue it closes.
 - Technical planning is in progress: `docs/tech-planning.md` lists the decisions; each answer becomes an ADR (written as proposed, accepted only by the user).
 - **App stack accepted 2026-11-19 ([ADR 0003](docs/decisions/0003-ui-kit.md)):** React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4 (CSS config, design tokens as CSS variables), bar grid as plain DOM, browser floor Safari 16.4 / Chrome 111 / Firefox 128, 150 kB gzip JavaScript budget for the song screen.
-- Repository structure and tooling, the format library design, testing, platform and storage are **not decided yet**. Do not scaffold or add dependencies before the matching ADR in `docs/decisions/` is accepted by the user.
+- Repository structure and tooling are proposed in [ADR 0004](docs/decisions/0004-repo-structure-and-tooling.md) (**not accepted yet**). The format library design, testing, platform and storage are **not decided yet**. Do not scaffold or add dependencies before the matching ADR in `docs/decisions/` is accepted by the user.
 - Likely direction (to confirm in an ADR): the format is a standalone, dependency-free TypeScript library (`packages/format`: parser, transpose, capo, ChordPro export) separate from the app (`apps/web`), with storage behind an adapter interface.
 
 ## Conventions
