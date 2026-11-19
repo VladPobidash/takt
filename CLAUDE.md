@@ -25,7 +25,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 
 ## Current state
 
-- No code yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
+- Code: repository scaffold and the format library (`packages/format`) in progress; no app yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
 - Work is tracked in GitHub issues under the MVP tracking issue (`VladPobidash/takt#1`); every change reaches `main` through a pull request that names the issue it closes.
 - **Decisions:** technical planning continues in `docs/tech-planning.md`. On 2026-11-19 the author delegated the remaining technical decisions: decide, write the ADR as accepted with a "Decided by" line, keep working, do not stop to ask. Product-level changes (scope, principles, the format's meaning for musicians) are still reported clearly.
 - **Accepted so far:** app stack ([ADR 0003](docs/decisions/0003-ui-kit.md): React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4, bar grid as plain DOM, modern browsers only, 150 kB gzip JavaScript budget for the song screen); repository and tooling ([ADR 0004](docs/decisions/0004-repo-structure-and-tooling.md): pnpm monorepo, TypeScript 7, Biome, Vite 8, `pnpm verify`); format library ([ADR 0005](docs/decisions/0005-format-library.md): `parse` → document with spans and diagnostics, `resolveSong` → view for an instrument, never throw, rewrite text by spans); testing ([ADR 0006](docs/decisions/0006-testing.md): Vitest, test-first parser, fast-check).
@@ -44,17 +44,34 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 ## Repository layout
 
 ```
-CLAUDE.md          this file
-README.md          public overview (EN)
-LICENSE            Apache-2.0
+CLAUDE.md            this file
+README.md            public overview (EN)
+LICENSE              Apache-2.0
+package.json         root scripts (check, fix, typecheck, test, build, verify)
+pnpm-workspace.yaml  workspaces: apps/*, packages/*
+biome.json           lint + format (Biome)
+tsconfig.base.json   shared TypeScript settings
+.github/workflows/   CI: pnpm verify on every pull request and push to main
+packages/
+  format/            @takt/format — .takt parser and tools; zero runtime dependencies, no DOM
+apps/
+  web/               the app (not created yet)
 docs/
-  brief.md         product brief
-  format.md        .takt format spec v0
-  roadmap.md       stages + open questions
-  tech-planning.md technical decisions and questions to settle before code
-  design/          design system (README.md), design brief
-    mvp-v1/        accepted MVP screens: screenshots + Claude Design sources
-  decisions/       ADRs
-  ideas/           future features, not in the MVP (e.g. change history)
-examples/          sample .takt files (no copyrighted lyrics)
+  brief.md           product brief
+  format.md          .takt format spec v0
+  roadmap.md         stages + open questions
+  tech-planning.md   technical decisions and questions
+  design/            design system (README.md), design brief
+    mvp-v1/          accepted MVP screens: screenshots + Claude Design sources
+  decisions/         ADRs
+  ideas/             future features, not in the MVP (e.g. change history)
+examples/            sample .takt files (no copyrighted lyrics); also parser fixtures
 ```
+
+## Commands
+
+- `pnpm install` — install (pnpm 12 is pinned in `packageManager`; Node >= 22.12).
+- `pnpm verify` — everything CI runs: `pnpm check` (Biome), `pnpm typecheck`, `pnpm test` (Vitest), `pnpm build`. Run it before every commit.
+- `pnpm fix` — apply Biome fixes and formatting.
+- One package: `pnpm --filter @takt/format test`.
+- Relative imports use the `.ts` extension; no enums or namespaces (`erasableSyntaxOnly`).
