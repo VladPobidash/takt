@@ -35,3 +35,4 @@ What it gives us and what it costs.
 | [0009](0009-app-state-and-routing.md) | App state, routing and the view-option cascade | accepted (delegated) |
 | [0010](0010-localisation.md) | Localisation: typed message tables and `Intl` | accepted (delegated) |
 | [0011](0011-hosting.md) | Hosting: a static site on Railway | accepted |
+| [0012](0012-timing.md) | Timing: auto-scroll follows a time anchor, section by section | accepted (delegated) |

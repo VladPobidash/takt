@@ -10,12 +10,15 @@ import {
   EditIcon,
   MinusIcon,
   NextIcon,
+  PauseIcon,
+  PlayIcon,
   PlusIcon,
   PreviousIcon,
 } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
-import { SectionTile } from "./SectionTile.tsx";
+import { SectionTile, sectionAnchor } from "./SectionTile.tsx";
+import { usePlayback } from "./usePlayback.ts";
 import { useWakeLock } from "./useWakeLock.ts";
 import { capoLabel, keyLabel, songDisplay } from "./view.ts";
 
@@ -106,6 +109,17 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
     [doc, instrument],
   );
 
+  const playback = usePlayback(song);
+  const nowSection = playback.step?.section ?? null;
+  // Auto-scroll follows sections only: when the section changes, it is brought to the top.
+  useEffect(() => {
+    if (nowSection !== null) {
+      document
+        .getElementById(sectionAnchor(nowSection))
+        ?.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+  }, [nowSection]);
+
   if (!song) {
     return (
       <div className="flex h-full flex-col">
@@ -185,7 +199,12 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
             <EditIcon />
           </Link>
         </div>
-        <FormTimeline form={song.form} sections={song.sections} />
+        <FormTimeline
+          form={song.form}
+          sections={song.sections}
+          current={nowSection}
+          onJump={playback.jumpTo}
+        />
         <div
           role="tablist"
           aria-label={t("song.instruments")}
@@ -273,23 +292,63 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
           style={compact ? ({ "--chord-size": "17px" } as CSSProperties) : undefined}
         >
           {song.sections.map((section) => (
-            <SectionTile key={section.index} section={section} options={options} />
+            <SectionTile
+              key={section.index}
+              section={section}
+              options={options}
+              now={section.index === nowSection}
+            />
           ))}
         </div>
       </main>
 
       <footer className="flex h-14 shrink-0 items-center gap-2 border-t border-line px-3 pb-[env(safe-area-inset-bottom)]">
         {context && (
-          <>
-            <NavButton href={previousHref} label={t("setlist.previous")}>
-              <PreviousIcon />
-            </NavButton>
-            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-muted">
-              {context.position}
-            </span>
-          </>
+          <NavButton href={previousHref} label={t("setlist.previous")}>
+            <PreviousIcon />
+          </NavButton>
         )}
-        <span className="ml-auto" />
+        <button
+          type="button"
+          aria-label={playback.playing ? t("song.pause") : t("song.play")}
+          title={
+            playback.available
+              ? playback.playing
+                ? t("song.pause")
+                : t("song.play")
+              : t("song.noTempo")
+          }
+          aria-pressed={playback.playing}
+          disabled={!playback.available}
+          onClick={playback.toggle}
+          className={`grid size-11 shrink-0 place-items-center rounded-control disabled:opacity-40 ${
+            playback.playing ? "bg-accent text-accent-fg" : "bg-surface"
+          }`}
+        >
+          {playback.playing ? <PauseIcon /> : <PlayIcon />}
+        </button>
+        <p role="status" className="min-w-0 flex-1 leading-tight">
+          <span className="block truncate text-[14px] font-extrabold">
+            {playback.step
+              ? (song.sections[playback.step.section]?.name ?? "")
+              : playback.countIn
+                ? t("song.countIn")
+                : t("song.autoScroll")}
+          </span>
+          <span className="block truncate text-[11px] font-semibold text-muted">
+            {playback.step
+              ? [
+                  t("song.barOf", { bar: playback.step.bar, bars: playback.step.bars }),
+                  playback.step.passes > 1
+                    ? t("song.passOf", { pass: playback.step.pass, passes: playback.step.passes })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : (context?.position ??
+                (song.tempo !== null ? `${song.tempo} ${t("song.bpm")}` : t("song.noTempo")))}
+          </span>
+        </p>
         <IconButton
           label={t("song.transposeDown")}
           variant="surface"
