@@ -21,7 +21,6 @@ export type DiagnosticCode =
   | "invalid-capo"
   | "invalid-notation"
   | "invalid-key"
-  | "text-before-first-section"
   | "unknown-section-ref"
   | "empty-section"
   | "unknown-chord"
@@ -29,7 +28,6 @@ export type DiagnosticCode =
   | "bar-too-long"
   | "bar-short"
   | "mixed-durations"
-  | "nothing-to-repeat"
   | "part-without-base"
   | "part-bar-count"
   | "invalid-setlist-entry";
