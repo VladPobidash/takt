@@ -179,6 +179,13 @@ export function SettingsScreen() {
             label={t("settings.soundingChords")}
           />
         </Group>
+        <Group title={t("song.compact")}>
+          <SwitchRow
+            checked={settings.compact}
+            onChange={(value) => set("compact", value)}
+            label={t("settings.compact")}
+          />
+        </Group>
         <Group title={t("settings.data")}>
           <p className="mb-2 text-[13px] font-medium text-muted">{t("settings.dataHint")}</p>
           <button

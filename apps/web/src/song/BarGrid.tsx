@@ -8,6 +8,8 @@ export interface BarGridOptions {
   beatDots: boolean;
   /** Under a capo shape, also show the sounding chord. */
   soundingChords: boolean;
+  /** Compact mode: the whole song on one screen — small chords, no beat dots, always 4 bars per row. */
+  compact?: boolean;
 }
 
 /**
@@ -19,7 +21,9 @@ export function BarLine({ line, options }: { line: ResolvedLine; options: BarGri
   return (
     <div>
       {line.label && <p className="mb-0.5 text-[12px] font-semibold opacity-80">{line.label}</p>}
-      <div className="grid grid-cols-4 gap-y-1.5 wide:grid-cols-8">
+      <div
+        className={`grid grid-cols-4 ${options.compact ? "gap-y-1" : "gap-y-1.5 wide:grid-cols-8"}`}
+      >
         {line.bars.map((bar, index) => (
           <BarCell
             // Bars have no identity of their own: the position in the line is the key.
@@ -44,7 +48,7 @@ function BarCell({ bar, last, options }: { bar: Bar; last: boolean; options: Bar
   return (
     <div className="min-w-0">
       <div
-        className={`flex min-h-11 flex-col justify-between border-l-2 border-bar pl-1.5 ${last ? "border-r-2" : ""}`}
+        className={`flex flex-col justify-between border-l-2 border-bar pl-1.5 ${options.compact ? "min-h-6" : "min-h-11"} ${last ? "border-r-2" : ""}`}
         style={{ width: `${width * 100}%` }}
       >
         <div className="flex min-w-0 items-start gap-x-1.5">
@@ -81,7 +85,7 @@ function BarCell({ bar, last, options }: { bar: Bar; last: boolean; options: Bar
             );
           })}
         </div>
-        {options.beatDots && (
+        {options.beatDots && !options.compact && (
           <div aria-hidden="true" className="mt-1.5 flex">
             {Array.from({ length: dots }, (_, beat) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: identical decorative dots

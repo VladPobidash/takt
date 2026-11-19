@@ -79,6 +79,8 @@ export const uk: Messages = {
   "library.newTitle": "Нова пісня",
 
   "song.edit": "Редагувати",
+  "song.compact": "Компактний режим",
+  "settings.compact": "Відкривати пісні в компактному режимі",
 
   "editor.editing": "Редагування",
   "editor.done": "Готово",

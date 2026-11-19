@@ -63,6 +63,8 @@ export const en = {
   "library.newTitle": "New song",
 
   "song.edit": "Edit",
+  "song.compact": "Compact mode",
+  "settings.compact": "Open songs in compact mode",
 
   "editor.editing": "Editing",
   "editor.done": "Done",

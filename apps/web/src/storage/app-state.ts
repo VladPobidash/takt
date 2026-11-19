@@ -20,6 +20,8 @@ export interface Settings {
   /** "Everywhere" level of the view options. */
   beatDots: boolean;
   soundingChords: boolean;
+  /** Open songs in compact mode. */
+  compact: boolean;
   /** When the last full backup was exported from this device (ms since the epoch), null if never. */
   lastBackupAt: number | null;
   /** The setlist that was open last: the "Service" section returns to it. */
@@ -43,6 +45,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     chordSize: "m",
     beatDots: true,
     soundingChords: true,
+    compact: false,
     lastBackupAt: null,
     lastSetlistId: null,
   };
