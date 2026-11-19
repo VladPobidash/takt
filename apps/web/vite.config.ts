@@ -6,8 +6,11 @@ import { defineConfig } from "vitest/config";
 
 function appVersion(): string {
   const date = new Date().toISOString().slice(0, 10);
+  // Railway builds without a .git folder and passes the commit in the environment.
+  const fromHost = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7);
+  if (fromHost) return `${fromHost} · ${date}`;
   try {
-    return `${execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim()} · ${date}`;
+    return `${execSync("git rev-parse --short HEAD", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim()} · ${date}`;
   } catch {
     return date;
   }

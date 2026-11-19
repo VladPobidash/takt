@@ -30,7 +30,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 - **Decisions:** technical planning continues in `docs/tech-planning.md`. On 2026-11-19 the author delegated the remaining technical decisions: decide, write the ADR as accepted with a "Decided by" line, keep working, do not stop to ask. Product-level changes (scope, principles, the format's meaning for musicians) are still reported clearly.
 - **Accepted so far:** app stack ([ADR 0003](docs/decisions/0003-ui-kit.md): React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4, bar grid as plain DOM, modern browsers only, 150 kB gzip JavaScript budget for the song screen); repository and tooling ([ADR 0004](docs/decisions/0004-repo-structure-and-tooling.md): pnpm monorepo, TypeScript 7, Biome, Vite 8, `pnpm verify`); format library ([ADR 0005](docs/decisions/0005-format-library.md): `parse` → document with spans and diagnostics, `resolveSong` → view for an instrument, never throw, rewrite text by spans); testing ([ADR 0006](docs/decisions/0006-testing.md): Vitest, test-first parser, fast-check).
 - **Also accepted (delegated):** PWA only, precached, updates never interrupt playing ([ADR 0007](docs/decisions/0007-platform-pwa.md)); `.takt` text in IndexedDB (`idb`) behind a `SongStore` adapter, `.taktbundle` JSON for exchange ([ADR 0008](docs/decisions/0008-storage.md)); `wouter` routes, no state library ([ADR 0009](docs/decisions/0009-app-state-and-routing.md)); typed message tables + `Intl`, no i18n library ([ADR 0010](docs/decisions/0010-localisation.md)); Railway static hosting, no telemetry ([ADR 0011](docs/decisions/0011-hosting.md)).
-- **Production:** <https://web-production-e41cbcc9.up.railway.app> — Railway project `takt`, service `web`, built from `main` on every merge (`pnpm build`, `pnpm start`). The cloud environment `takt` holds the Railway API token for `backboard.railway.com` and may reach the production host, so a deploy can be checked after a merge.
+- **Production:** <https://web-production-e41cbcc9.up.railway.app> — Railway project `takt`, service `web`, built from `main` (`pnpm build`, `pnpm start`). Railway does not release on push yet (its GitHub app has no access to the repository): **after merging a change to the app, run `scripts/deploy-railway.sh`** and check the site. The cloud environment `takt` holds the Railway API token for `backboard.railway.com` and may reach the production host, so a deploy can be checked after a merge.
 - **Not decided yet:** metronome and auto-scroll timing (issue #8, stretch).
 
 ## Conventions
@@ -78,6 +78,7 @@ docs/
     mvp-v1/          accepted MVP screens: screenshots + Claude Design sources
   decisions/         ADRs
   ideas/             future features, not in the MVP (e.g. change history)
+scripts/             deploy-railway.sh — release the latest main to Railway through its API
 examples/            sample .takt files (no copyrighted lyrics); also parser fixtures
 ```
 
