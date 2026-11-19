@@ -34,4 +34,4 @@ What it gives us and what it costs.
 | [0008](0008-storage.md) | Storage: `.takt` text in IndexedDB behind an adapter, JSON bundles for exchange | accepted (delegated) |
 | [0009](0009-app-state-and-routing.md) | App state, routing and the view-option cascade | accepted (delegated) |
 | [0010](0010-localisation.md) | Localisation: typed message tables and `Intl` | accepted (delegated) |
-| [0011](0011-hosting.md) | Hosting: a static site on Railway | accepted (configuration pending) |
+| [0011](0011-hosting.md) | Hosting: a static site on Railway | accepted |
