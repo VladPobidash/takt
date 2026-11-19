@@ -29,6 +29,8 @@ export interface Settings extends ViewOptions {
   lastBackupAt: number | null;
   /** The setlist that was open last: the "Service" section returns to it. */
   lastSetlistId: string | null;
+  /** The "install the app" hint was dismissed on this device. */
+  installHintDismissed: boolean;
 }
 
 /** View options set for one song or one setlist, by id (ADR 0009). */
@@ -58,6 +60,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     ...DEFAULT_VIEW_OPTIONS,
     lastBackupAt: null,
     lastSetlistId: null,
+    installHintDismissed: false,
   };
 }
 

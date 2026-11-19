@@ -418,6 +418,28 @@ test.describe("laptop layout", () => {
   });
 });
 
+test.describe("install and screen hints", () => {
+  test.use({ locale: "en-US" });
+
+  test("the library explains how to install until the hint is dismissed", async ({ page }) => {
+    await page.goto("/library");
+    const hint = page.getByRole("complementary", { name: "Install Takt" });
+    await expect(hint).toContainText("without a network");
+    await hint.getByRole("button", { name: "Not now" }).click();
+    await expect(hint).toHaveCount(0);
+    await expect.poll(() => page.reload().then(() => hint.count())).toBe(0);
+  });
+
+  test("when the browser refuses to keep the screen awake, the view options say so", async ({
+    page,
+  }) => {
+    // Headless Chromium refuses the wake lock, like a phone in power-saving mode.
+    await page.goto("/songs/silent-night");
+    await page.getByRole("button", { name: "View options" }).click();
+    await expect(page.getByRole("note")).toContainText("The screen may turn off");
+  });
+});
+
 test.describe("backup", () => {
   test.use({ locale: "en-US" });
 

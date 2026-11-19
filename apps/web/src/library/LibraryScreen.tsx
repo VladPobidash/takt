@@ -7,6 +7,7 @@ import { requestPersistentStorage } from "../pwa.ts";
 import { newSetlistText, readSetlist } from "../setlist/model.ts";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
 import { parseBundle } from "../storage/bundle.ts";
+import { InstallHint } from "../ui/InstallHint.tsx";
 import { ImportIcon, PlusIcon, SearchIcon } from "../ui/icons.tsx";
 import { IconButton, MainTopBar } from "../ui/TopBar.tsx";
 import { UpdateNotice } from "../ui/UpdateNotice.tsx";
@@ -160,6 +161,7 @@ export function LibraryScreen() {
           ))}
         </div>
         <UpdateNotice />
+        <InstallHint />
         {message && (
           <p
             role="status"

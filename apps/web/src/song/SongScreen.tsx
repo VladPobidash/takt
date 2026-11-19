@@ -70,7 +70,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   const [, navigate] = useLocation();
   const scroller = useRef<HTMLElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
-  useWakeLock();
+  const wakeLock = useWakeLock();
   const backHref = context?.backHref ?? "/library";
   const previousHref = context?.previousHref ?? null;
   const nextHref = context?.nextHref ?? null;
@@ -233,9 +233,13 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
             aria-label={t("view.title")}
             title={t("view.title")}
             onClick={() => setOptionsOpen(true)}
-            className="grid size-11 shrink-0 place-items-center rounded-control"
+            className="relative grid size-11 shrink-0 place-items-center rounded-control"
           >
             <SlidersIcon />
+            {/* A quiet marker: the sheet explains that the screen may turn off. */}
+            {wakeLock === "refused" && (
+              <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-2 bg-signal" />
+            )}
           </button>
         </div>
         <FormTimeline
@@ -443,6 +447,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
         songId={id}
         songTitle={song.title ?? id}
         setlistId={context?.setlistId ?? null}
+        screenMayTurnOff={wakeLock === "refused"}
       />
     </div>
   );

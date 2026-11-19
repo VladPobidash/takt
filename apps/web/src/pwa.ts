@@ -39,3 +39,50 @@ export function applyUpdate(): void {
 export function requestPersistentStorage(): void {
   void navigator.storage?.persist?.().catch(() => false);
 }
+
+/** True when the app runs installed (from the home screen), not in a browser tab. */
+export function isStandalone(): boolean {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
+/** iPhone and iPad have no install prompt: the user adds the app from Safari's Share menu. */
+export function isAppleMobile(): boolean {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+interface InstallPromptEvent extends Event {
+  prompt: () => Promise<unknown>;
+}
+let installPrompt: InstallPromptEvent | null = null;
+const installListeners = new Set<() => void>();
+
+/** Chromium offers an install prompt through an event; it is kept until the user asks for it. */
+export function listenForInstallPrompt(): void {
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event as InstallPromptEvent;
+    for (const listener of installListeners) listener();
+  });
+  window.addEventListener("appinstalled", () => {
+    installPrompt = null;
+    for (const listener of installListeners) listener();
+  });
+}
+
+/** A function that opens the browser's install dialog, or null where there is none. */
+export function useInstallPrompt(): (() => void) | null {
+  const available = useSyncExternalStore(
+    (listener) => {
+      installListeners.add(listener);
+      return () => installListeners.delete(listener);
+    },
+    () => installPrompt !== null,
+  );
+  return available ? () => void installPrompt?.prompt() : null;
+}
