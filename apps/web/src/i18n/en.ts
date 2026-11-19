@@ -52,6 +52,11 @@ export const en = {
   "settings.beatDots": "Beat dots under chords",
   "settings.soundingChords": "Guitar: sounding chords under shapes",
   "settings.songView": "Song view",
+  "settings.chordSize": "Chord size",
+  "settings.chordSize.s": "Small",
+  "settings.chordSize.m": "Medium",
+  "settings.chordSize.l": "Large",
+  "settings.chordSize.l.hint": "For a phone on a music stand",
   "settings.version": "Version",
 
   "update.available": "A new version of Takt is ready.",

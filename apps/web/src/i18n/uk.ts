@@ -68,6 +68,11 @@ export const uk: Messages = {
   "settings.beatDots": "Крапки долей під акордами",
   "settings.soundingChords": "Гітара: звучання під формами",
   "settings.songView": "Вигляд пісні",
+  "settings.chordSize": "Розмір акордів",
+  "settings.chordSize.s": "Малий",
+  "settings.chordSize.m": "Середній",
+  "settings.chordSize.l": "Великий",
+  "settings.chordSize.l.hint": "Для телефона на пюпітрі",
   "settings.version": "Версія",
 
   "update.available": "Нова версія Takt готова.",

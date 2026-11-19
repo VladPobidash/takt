@@ -7,16 +7,20 @@ import { SettingsScreen } from "./settings/SettingsScreen.tsx";
 import { SongScreen } from "./song/SongScreen.tsx";
 import { type AppData, useAppState } from "./storage/app-state.ts";
 
+/** Root size of a chord name; quality and bass scale with it (design: 25–26 px by default). */
+const CHORD_SIZES = { s: "21px", m: "25px", l: "30px" } as const;
+
 export function App({ data }: { data: AppData }) {
   const state = useAppState(data);
-  const { language, theme } = state.settings;
+  const { language, theme, chordSize } = state.settings;
 
   useEffect(() => {
     const root = document.documentElement;
     root.lang = language;
     if (theme === "system") delete root.dataset.theme;
     else root.dataset.theme = theme;
-  }, [language, theme]);
+    root.style.setProperty("--chord-size", CHORD_SIZES[chordSize]);
+  }, [language, theme, chordSize]);
 
   const app = useMemo<AppValue>(() => {
     const t: Translate = (key, params) => translate(language, key, params);
