@@ -2,9 +2,11 @@ import { formatKey, parse, type ResolvedSong, resolveSong } from "@takt/format";
 import { useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { useApp } from "../app-context.tsx";
+import { requestPersistentStorage } from "../pwa.ts";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
 import { ImportIcon, SearchIcon } from "../ui/icons.tsx";
 import { IconButton, MainTopBar } from "../ui/TopBar.tsx";
+import { UpdateNotice } from "../ui/UpdateNotice.tsx";
 
 interface Row {
   id: string;
@@ -48,6 +50,7 @@ export function LibraryScreen() {
       files.map(async (file) => ({ name: file.name, text: await file.text() })),
     );
     const added = await data.importSongs(read);
+    requestPersistentStorage();
     setMessage(t("library.imported", { count: added.length }));
   }
 
@@ -89,6 +92,7 @@ export function LibraryScreen() {
         <p className="mt-2 flex items-baseline gap-1.5 border-b border-line pb-2 text-[15px] font-extrabold">
           {t("library.songs")} <span className="font-semibold text-muted">{rows.length}</span>
         </p>
+        <UpdateNotice />
         {message && (
           <p
             role="status"

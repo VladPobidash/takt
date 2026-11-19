@@ -53,6 +53,9 @@ export const en = {
   "settings.soundingChords": "Guitar: sounding chords under shapes",
   "settings.songView": "Song view",
   "settings.version": "Version",
+
+  "update.available": "A new version of Takt is ready.",
+  "update.apply": "Update now",
 } as const;
 
 export type MessageKey = keyof typeof en;

@@ -8,6 +8,7 @@ import { BackIcon, MinusIcon, PlusIcon } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
 import { SectionTile } from "./SectionTile.tsx";
+import { useWakeLock } from "./useWakeLock.ts";
 import { capoLabel, keyLabel, songDisplay } from "./view.ts";
 
 const TABS: { id: InstrumentChoice; label: MessageKey }[] = [
@@ -25,6 +26,7 @@ export function SongScreen({ id }: { id: string }) {
   const [instrument, setInstrument] = useState<InstrumentChoice>(settings.instrument);
   const [transpose, setTranspose] = useState(0);
   const [capoChoice, setCapoChoice] = useState<number | null>(null);
+  useWakeLock();
 
   const doc = useMemo(
     () => (stored ? parse(stored.text, { defaultNotation: settings.notation }).doc : null),

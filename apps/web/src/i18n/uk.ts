@@ -69,4 +69,7 @@ export const uk: Messages = {
   "settings.soundingChords": "Гітара: звучання під формами",
   "settings.songView": "Вигляд пісні",
   "settings.version": "Версія",
+
+  "update.available": "Нова версія Takt готова.",
+  "update.apply": "Оновити зараз",
 };
