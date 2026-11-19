@@ -22,10 +22,13 @@ export interface Settings {
   soundingChords: boolean;
   /** When the last full backup was exported from this device (ms since the epoch), null if never. */
   lastBackupAt: number | null;
+  /** The setlist that was open last: the "Service" section returns to it. */
+  lastSetlistId: string | null;
 }
 
 export interface AppState {
   songs: StoredFile[];
+  setlists: StoredFile[];
   settings: Settings;
 }
 
@@ -41,6 +44,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     beatDots: true,
     soundingChords: true,
     lastBackupAt: null,
+    lastSetlistId: null,
   };
 }
 
@@ -68,7 +72,11 @@ export class AppData {
     for (const key of Object.keys(settings) as (keyof Settings)[]) {
       if (saved[key] !== undefined) (settings as Record<string, unknown>)[key] = saved[key];
     }
-    const data = new AppData(store, { songs: await store.listSongs(), settings });
+    const data = new AppData(store, {
+      songs: await store.listSongs(),
+      setlists: await store.listSetlists(),
+      settings,
+    });
     if (saved.seeded !== true) {
       if (data.state.songs.length === 0 && options.seed) await data.importSongs(options.seed);
       await store.setSetting("seeded", true);
@@ -114,7 +122,19 @@ export class AppData {
 
   /** Everything on this device as one bundle. */
   exportBundle(now: Date): Bundle {
-    return createBundle({ songs: this.state.songs, setlists: [] }, now);
+    return createBundle({ songs: this.state.songs, setlists: this.state.setlists }, now);
+  }
+
+  /** One setlist with the songs it lists, to send to the band as a single file. */
+  exportSetlistBundle(id: string, songIds: string[], now: Date): Bundle {
+    const wanted = new Set(songIds);
+    return createBundle(
+      {
+        songs: this.state.songs.filter((song) => wanted.has(song.id)),
+        setlists: this.state.setlists.filter((setlist) => setlist.id === id),
+      },
+      now,
+    );
   }
 
   /**
@@ -132,12 +152,46 @@ export class AppData {
       fresh.map((song) => ({ name: song.id, text: song.text })),
       now,
     );
+    const known = new Set(this.state.setlists.map((setlist) => setlist.text));
+    const taken = new Set(this.state.setlists.map((setlist) => setlist.id));
+    for (const setlist of bundle.setlists) {
+      if (known.has(setlist.text)) continue;
+      const id = uniqueId(slugify(setlist.id), taken);
+      taken.add(id);
+      await this.saveSetlist({ id, text: setlist.text, updatedAt: now });
+    }
     return { added: fresh.length, unchanged: bundle.songs.length - fresh.length };
   }
 
+  async createSetlist(name: string, text: string, now = Date.now()): Promise<StoredFile> {
+    const id = uniqueId(slugify(name), new Set(this.state.setlists.map((setlist) => setlist.id)));
+    const setlist: StoredFile = { id, text, updatedAt: now };
+    await this.saveSetlist(setlist);
+    return setlist;
+  }
+
+  async saveSetlist(setlist: StoredFile): Promise<void> {
+    // Keep the position: a setlist is replaced in place, a new one goes to the end.
+    const exists = this.state.setlists.some((s) => s.id === setlist.id);
+    this.update({
+      setlists: exists
+        ? this.state.setlists.map((s) => (s.id === setlist.id ? setlist : s))
+        : [...this.state.setlists, setlist],
+    });
+    await this.store.putSetlist(setlist);
+  }
+
+  async deleteSetlist(id: string): Promise<void> {
+    await this.store.deleteSetlist(id);
+    this.update({ setlists: this.state.setlists.filter((setlist) => setlist.id !== id) });
+    if (this.state.settings.lastSetlistId === id) await this.setSetting("lastSetlistId", null);
+  }
+
+  // Saves update the in-memory state first and then write to the store, so the screen
+  // (and the next edit, which starts from the state) never waits for the disk.
   async saveSong(song: StoredFile): Promise<void> {
-    await this.store.putSong(song);
     this.update({ songs: [...this.state.songs.filter((s) => s.id !== song.id), song] });
+    await this.store.putSong(song);
   }
 
   async deleteSong(id: string): Promise<void> {

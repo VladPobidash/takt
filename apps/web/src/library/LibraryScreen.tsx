@@ -1,9 +1,10 @@
 import { formatKey, parse, type ResolvedSong, resolveSong } from "@takt/format";
 import { useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useApp } from "../app-context.tsx";
 import { newSongText } from "../editor/template.ts";
 import { requestPersistentStorage } from "../pwa.ts";
+import { newSetlistText, readSetlist } from "../setlist/model.ts";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
 import { parseBundle } from "../storage/bundle.ts";
 import { ImportIcon, PlusIcon, SearchIcon } from "../ui/icons.tsx";
@@ -17,11 +18,24 @@ interface Row {
 }
 
 export function LibraryScreen() {
-  const { songs, settings, data, t } = useApp();
+  const { songs, setlists, settings, data, t } = useApp();
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const [, navigate] = useLocation();
+  const tab = new URLSearchParams(useSearch()).get("tab") === "setlists" ? "setlists" : "songs";
+
+  async function createSetlist() {
+    const today = new Date();
+    const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const title = t("library.newSetlistTitle");
+    const setlist = await data.createSetlist(
+      `${title} ${date}`,
+      newSetlistText(title, date, settings.notation),
+    );
+    requestPersistentStorage();
+    navigate(`/setlists/${encodeURIComponent(setlist.id)}`);
+  }
 
   async function createSong() {
     const title = t("library.newTitle");
@@ -102,9 +116,9 @@ export function LibraryScreen() {
             />
             <button
               type="button"
-              aria-label={t("library.new")}
-              title={t("library.new")}
-              onClick={() => void createSong()}
+              aria-label={tab === "songs" ? t("library.new") : t("library.newSetlist")}
+              title={tab === "songs" ? t("library.new") : t("library.newSetlist")}
+              onClick={() => void (tab === "songs" ? createSong() : createSetlist())}
               className="grid size-11 shrink-0 place-items-center rounded-control bg-accent text-accent-fg"
             >
               <PlusIcon />
@@ -124,9 +138,27 @@ export function LibraryScreen() {
             className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-text outline-none placeholder:text-muted"
           />
         </label>
-        <p className="mt-2 flex items-baseline gap-1.5 border-b border-line pb-2 text-[15px] font-extrabold">
-          {t("library.songs")} <span className="font-semibold text-muted">{rows.length}</span>
-        </p>
+        <div role="tablist" className="mt-1 flex gap-4 border-b border-line">
+          {(["songs", "setlists"] as const).map((value) => (
+            <Link
+              key={value}
+              href={value === "songs" ? "/library" : "/library?tab=setlists"}
+              role="tab"
+              aria-selected={tab === value}
+              replace
+              className={`flex h-10 items-center gap-1.5 border-b-[3px] text-[15px] ${
+                tab === value
+                  ? "border-signal font-extrabold"
+                  : "border-transparent font-semibold text-muted"
+              }`}
+            >
+              {t(value === "songs" ? "library.songs" : "library.setlists")}
+              <span className="font-semibold text-muted">
+                {value === "songs" ? rows.length : setlists.length}
+              </span>
+            </Link>
+          ))}
+        </div>
         <UpdateNotice />
         {message && (
           <p
@@ -138,39 +170,77 @@ export function LibraryScreen() {
         )}
       </div>
       <main className="mx-auto min-h-0 w-full max-w-3xl flex-1 overflow-y-auto px-3 pb-4">
-        {rows.length === 0 && <p className="py-6 text-muted">{t("library.empty")}</p>}
-        {rows.length > 0 && visible.length === 0 && (
-          <p className="py-6 text-muted">{t("library.nothingFound")}</p>
+        {tab === "songs" && (
+          <>
+            {rows.length === 0 && <p className="py-6 text-muted">{t("library.empty")}</p>}
+            {rows.length > 0 && visible.length === 0 && (
+              <p className="py-6 text-muted">{t("library.nothingFound")}</p>
+            )}
+            <ul>
+              {visible.map(({ id, song, warnings }) => (
+                <li key={id} className="border-b border-line">
+                  <Link href={`/songs/${encodeURIComponent(id)}`} className="block py-2.5">
+                    <div className="flex items-baseline gap-3">
+                      <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold">
+                        {song.title ?? id}
+                      </span>
+                      {song.key && (
+                        <span className="text-[17px] font-extrabold">
+                          {formatKey(song.key, settings.notation)}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mb-1.5 truncate text-[13px] font-semibold text-muted">
+                      {[
+                        song.tempo !== null ? `${song.tempo} ${t("song.bpm")}` : null,
+                        `${song.time.beats}/${song.time.unit}`,
+                        t("library.sections", { count: song.sections.length }),
+                        warnings > 0 ? t("library.warnings", { count: warnings }) : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                    <MiniFormStrip form={song.form} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-        <ul>
-          {visible.map(({ id, song, warnings }) => (
-            <li key={id} className="border-b border-line">
-              <Link href={`/songs/${encodeURIComponent(id)}`} className="block py-2.5">
-                <div className="flex items-baseline gap-3">
-                  <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold">
-                    {song.title ?? id}
-                  </span>
-                  {song.key && (
-                    <span className="text-[17px] font-extrabold">
-                      {formatKey(song.key, settings.notation)}
-                    </span>
-                  )}
-                </div>
-                <p className="mb-1.5 truncate text-[13px] font-semibold text-muted">
-                  {[
-                    song.tempo !== null ? `${song.tempo} ${t("song.bpm")}` : null,
-                    `${song.time.beats}/${song.time.unit}`,
-                    t("library.sections", { count: song.sections.length }),
-                    warnings > 0 ? t("library.warnings", { count: warnings }) : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-                <MiniFormStrip form={song.form} />
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {tab === "setlists" && (
+          <>
+            {setlists.length === 0 && <p className="py-6 text-muted">{t("library.noSetlists")}</p>}
+            <ul>
+              {[...setlists]
+                .map((stored) => ({
+                  id: stored.id,
+                  ...readSetlist(stored.text, settings.notation),
+                }))
+                .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))
+                .map(({ id, setlist, date }) => (
+                  <li key={id} className="border-b border-line">
+                    <Link href={`/setlists/${encodeURIComponent(id)}`} className="block py-2.5">
+                      <span className="block truncate text-[17px] font-extrabold">
+                        {setlist.title ?? id}
+                      </span>
+                      <span className="block truncate text-[13px] font-semibold text-muted">
+                        {[
+                          date
+                            ? new Intl.DateTimeFormat(settings.language, {
+                                dateStyle: "medium",
+                              }).format(new Date(`${date}T12:00:00`))
+                            : null,
+                          t("library.songCount", { count: setlist.entries.length }),
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+            </ul>
+          </>
+        )}
         <p className="pt-4 text-[13px] font-semibold text-muted">
           {t("library.onDevice")}{" "}
           {settings.lastBackupAt === null

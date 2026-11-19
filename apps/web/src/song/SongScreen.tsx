@@ -1,10 +1,10 @@
 import { parse, resolveSong } from "@takt/format";
-import { useMemo, useState } from "react";
-import { Link } from "wouter";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import type { InstrumentChoice } from "../storage/app-state.ts";
-import { BackIcon, EditIcon, MinusIcon, PlusIcon } from "../ui/icons.tsx";
+import { BackIcon, EditIcon, MinusIcon, NextIcon, PlusIcon, PreviousIcon } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
 import { SectionTile } from "./SectionTile.tsx";
@@ -20,13 +20,72 @@ const TABS: { id: InstrumentChoice; label: MessageKey }[] = [
 ];
 const MAX_CAPO = 11;
 
-export function SongScreen({ id }: { id: string }) {
+/** Where a song sits in a setlist, when it was opened from one. */
+export interface SetlistContext {
+  backHref: string;
+  /** Transposition chosen for this song in the setlist. */
+  transpose: number;
+  /** Stores a new transposition in the setlist. */
+  onTranspose: (semitones: number) => void;
+  previousHref: string | null;
+  nextHref: string | null;
+  /** "2 of 6" */
+  position: string;
+}
+
+const SWIPE_MIN_PX = 70;
+
+export function SongScreen({ id, context }: { id: string; context?: SetlistContext }) {
   const { songs, settings, t } = useApp();
   const stored = songs.find((song) => song.id === id);
   const [instrument, setInstrument] = useState<InstrumentChoice>(settings.instrument);
-  const [transpose, setTranspose] = useState(0);
+  const [ownTranspose, setOwnTranspose] = useState(0);
+  const transpose = context ? context.transpose : ownTranspose;
+  const setTranspose = context ? context.onTranspose : setOwnTranspose;
   const [capoChoice, setCapoChoice] = useState<number | null>(null);
+  const [, navigate] = useLocation();
+  const scroller = useRef<HTMLElement>(null);
+  const touch = useRef<{ x: number; y: number } | null>(null);
   useWakeLock();
+  const backHref = context?.backHref ?? "/library";
+  const previousHref = context?.previousHref ?? null;
+  const nextHref = context?.nextHref ?? null;
+
+  // Keys and page-turner pedals: ← → and PageUp / PageDown change the song, ↑ ↓ the section.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (
+        event.target instanceof HTMLElement &&
+        /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)
+      )
+        return;
+      const song = {
+        ArrowLeft: previousHref,
+        PageUp: previousHref,
+        ArrowRight: nextHref,
+        PageDown: nextHref,
+      }[event.key];
+      if (song !== undefined) {
+        event.preventDefault();
+        if (song) navigate(song);
+        return;
+      }
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+      const main = scroller.current;
+      if (!main) return;
+      event.preventDefault();
+      const sections = [...main.querySelectorAll<HTMLElement>("section[id]")];
+      const top = main.getBoundingClientRect().top;
+      const current = sections.findLastIndex(
+        (section) => section.getBoundingClientRect().top <= top + 12,
+      );
+      const target = sections[event.key === "ArrowDown" ? current + 1 : Math.max(0, current - 1)];
+      target?.scrollIntoView({ block: "start", behavior: "smooth" });
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [previousHref, nextHref, navigate]);
 
   const doc = useMemo(
     () => (stored ? parse(stored.text, { defaultNotation: settings.notation }).doc : null),
@@ -43,7 +102,7 @@ export function SongScreen({ id }: { id: string }) {
       <div className="flex h-full flex-col">
         <header className="flex h-[52px] items-center px-1">
           <Link
-            href="/library"
+            href={backHref}
             aria-label={t("common.back")}
             className="grid size-11 place-items-center"
           >
@@ -76,7 +135,7 @@ export function SongScreen({ id }: { id: string }) {
       <header className="shrink-0 border-b border-line pb-0">
         <div className="flex h-[52px] items-center gap-1 px-1">
           <Link
-            href="/library"
+            href={backHref}
             aria-label={t("common.back")}
             className="grid size-11 shrink-0 place-items-center"
           >
@@ -131,7 +190,26 @@ export function SongScreen({ id }: { id: string }) {
         </div>
       </header>
 
-      <main className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-3 pt-2">
+      <main
+        ref={scroller}
+        className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-3 pt-2"
+        onTouchStart={(event) => {
+          const point = event.touches[0];
+          touch.current = point ? { x: point.clientX, y: point.clientY } : null;
+        }}
+        onTouchEnd={(event) => {
+          const start = touch.current;
+          const point = event.changedTouches[0];
+          touch.current = null;
+          if (!start || !point) return;
+          const dx = point.clientX - start.x;
+          const dy = point.clientY - start.y;
+          // A clearly horizontal swipe changes the song; anything else is scrolling.
+          if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 2) return;
+          const target = dx < 0 ? nextHref : previousHref;
+          if (target) navigate(target);
+        }}
+      >
         {guitar && (
           <div className="mb-2 flex flex-wrap items-center gap-2 px-0.5">
             <span className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted">
@@ -176,7 +254,18 @@ export function SongScreen({ id }: { id: string }) {
         </div>
       </main>
 
-      <footer className="flex h-14 shrink-0 items-center justify-end gap-2 border-t border-line px-3 pb-[env(safe-area-inset-bottom)]">
+      <footer className="flex h-14 shrink-0 items-center gap-2 border-t border-line px-3 pb-[env(safe-area-inset-bottom)]">
+        {context && (
+          <>
+            <NavButton href={previousHref} label={t("setlist.previous")}>
+              <PreviousIcon />
+            </NavButton>
+            <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-muted">
+              {context.position}
+            </span>
+          </>
+        )}
+        <span className="ml-auto" />
         <IconButton
           label={t("song.transposeDown")}
           variant="surface"
@@ -206,7 +295,37 @@ export function SongScreen({ id }: { id: string }) {
         >
           <PlusIcon />
         </IconButton>
+        {context && (
+          <NavButton href={nextHref} label={t("setlist.next")}>
+            <NextIcon />
+          </NavButton>
+        )}
       </footer>
     </div>
+  );
+}
+
+/** Previous / next song: a link when there is one, a dimmed placeholder at the ends of the setlist. */
+function NavButton({
+  href,
+  label,
+  children,
+}: {
+  href: string | null;
+  label: string;
+  children: ReactNode;
+}) {
+  const className = "grid size-11 shrink-0 place-items-center rounded-control";
+  if (!href) {
+    return (
+      <span aria-hidden="true" className={`${className} opacity-30`}>
+        {children}
+      </span>
+    );
+  }
+  return (
+    <Link href={href} aria-label={label} title={label} className={className}>
+      {children}
+    </Link>
   );
 }

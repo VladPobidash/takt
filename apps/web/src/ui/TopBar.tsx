@@ -1,10 +1,11 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import { ChevronDownIcon } from "./icons.tsx";
 
 const SECTIONS: { path: string; label: MessageKey }[] = [
+  { path: "/service", label: "nav.service" },
   { path: "/library", label: "nav.library" },
   { path: "/settings", label: "nav.settings" },
 ];
@@ -16,7 +17,6 @@ const SECTIONS: { path: string; label: MessageKey }[] = [
 export function MainTopBar({ current, actions }: { current: MessageKey; actions?: ReactNode }) {
   const { t } = useApp();
   const [open, setOpen] = useState(false);
-  const [location] = useLocation();
   const menu = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function MainTopBar({ current, actions }: { current: MessageKey; actions?
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className={`flex h-11 items-center rounded-badge px-3 text-[15px] font-semibold ${
-                  location.startsWith(section.path) ? "bg-surface" : ""
+                  section.label === current ? "bg-surface" : ""
                 }`}
               >
                 {t(section.label)}
