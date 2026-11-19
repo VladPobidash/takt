@@ -10,7 +10,7 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 @bass | D | A | F#** G** | A |
 ```
 
-> Status: **pre-alpha, design phase.** No code yet. First real-world test: a worship night on 12 December 2026.
+> Status: **pre-alpha.** The format library is being written; there is no app yet. First real-world test: a worship night on 12 December 2026.
 
 ## Principles
 
@@ -27,6 +27,21 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 - [Roadmap & open questions](docs/roadmap.md)
 - [Design system](docs/design/README.md) · [MVP screens v1](docs/design/mvp-v1/README.md) · [design brief](docs/design/brief.md)
 - [Decisions (ADR)](docs/decisions/) · [technical planning](docs/tech-planning.md)
+
+## Development
+
+Requires Node 22.12 or newer (CI uses Node 24) and [pnpm](https://pnpm.io) 12.
+
+```
+pnpm install
+pnpm verify    # lint + format check, type check, tests, build — the same as CI
+pnpm fix       # apply lint and format fixes
+```
+
+- `packages/format` — `@takt/format`: the `.takt` parser and tools. No runtime dependencies, no DOM.
+- `apps/web` — the app (not created yet).
+
+Work is tracked in [issues](https://github.com/VladPobidash/takt/issues/1); changes reach `main` through pull requests.
 
 ## License
 

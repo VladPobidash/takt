@@ -1,0 +1,22 @@
+{
+  "name": "takt",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@12.22.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build": "pnpm -r --if-present build",
+    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.8",
+    "typescript": "7.0.2"
+  }
+}
