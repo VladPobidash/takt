@@ -66,6 +66,7 @@ One workflow on every pull request and every push to `main`: install → `pnpm c
 
 - `main` is always in a working state. Work happens on short-lived branches and reaches `main` only through a **pull request** with green CI, squash-merged.
 - Work is tracked in **GitHub issues**; a pull request names the issue it closes (`Closes #N`). One issue per pull request where practical.
+- Since 2026-11-19 the author lets Claude Code squash-merge its own pull requests once CI is green, without a review of each one.
 - Commit messages: plain imperative English, no prefix convention.
 - A new runtime dependency in `apps/web` is named and justified in the pull request description. `packages/format` gets none.
 - Versioning: `@takt/format` is `0.x` and is not published to npm before the worship night. The format's own version ("v0") lives in [format.md](../format.md) and is independent of the package version.
