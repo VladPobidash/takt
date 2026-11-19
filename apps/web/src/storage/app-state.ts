@@ -4,6 +4,7 @@ import { slugify, uniqueId } from "./slug.ts";
 import type { SongStore, StoredFile } from "./types.ts";
 
 export type Theme = "system" | "light" | "dark";
+export type ChordSize = "s" | "m" | "l";
 export type InstrumentChoice = "harmony" | "guitar" | "bass" | "keys" | "drums";
 
 /** Device settings (ADR 0008): stored locally, never in `.takt` files. */
@@ -13,6 +14,8 @@ export interface Settings {
   notation: "H" | "B";
   theme: Theme;
   instrument: InstrumentChoice;
+  /** Size of chord names on the song screen. */
+  chordSize: ChordSize;
   /** "Everywhere" level of the view options. */
   beatDots: boolean;
   soundingChords: boolean;
@@ -31,6 +34,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     notation: language === "uk" ? "H" : "B",
     theme: "system",
     instrument: "harmony",
+    chordSize: "m",
     beatDots: true,
     soundingChords: true,
   };

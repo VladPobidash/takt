@@ -143,6 +143,18 @@ export function SettingsScreen() {
             />
           ))}
         </Group>
+        <Group title={t("settings.chordSize")}>
+          {(["s", "m", "l"] as const).map((size) => (
+            <RadioRow
+              key={size}
+              name="chord-size"
+              checked={settings.chordSize === size}
+              onChange={() => set("chordSize", size)}
+              label={t(`settings.chordSize.${size}`)}
+              hint={size === "l" ? t("settings.chordSize.l.hint") : undefined}
+            />
+          ))}
+        </Group>
         <Group title={t("settings.songView")}>
           <SwitchRow
             checked={settings.beatDots}

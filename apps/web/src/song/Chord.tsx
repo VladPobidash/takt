@@ -16,7 +16,7 @@ export function ChordName({ chord, small = false }: { chord: ChordText; small?: 
       <span className="text-[length:var(--chord-size,25px)] font-extrabold tracking-[-0.02em]">
         {chord.root}
       </span>
-      <span className="text-[15px] font-bold">
+      <span className="text-[calc(var(--chord-size,25px)*0.6)] font-bold">
         {chord.quality}
         {chord.bass && <span className="opacity-70">/{chord.bass}</span>}
       </span>
