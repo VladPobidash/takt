@@ -10,10 +10,11 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "24.19.2",
     "fast-check": "4.10.3",
     "vitest": "5.1.1"
   }
