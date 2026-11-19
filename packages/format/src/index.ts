@@ -6,6 +6,9 @@ export { formatChord, formatNote, parseChord, semitone } from "./chord.ts";
 export { readHeader } from "./header.ts";
 export { type KnownInstrument, normalizeInstrument } from "./instruments.ts";
 export { parse } from "./parse.ts";
+export { resolveSong, sectionType } from "./resolve.ts";
+export { transposeText } from "./rewrite.ts";
+export { formatSetlist, parseSetlist, type Setlist, type SetlistEntry } from "./setlist.ts";
 export {
   type CapoSuggestion,
   capoShape,

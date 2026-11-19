@@ -26,10 +26,10 @@ const DASH = /^[-–—]+$/;
 const REPEAT = /(?:^|\s)\(?\s*(?:[xх×]\s*(\d+)|(\d+)\s*[xх×])\s*\)?(?=\s|$)/i;
 const B_ROOT = /^B(?![#♯b♭])|\/B(?![#♯b♭])/;
 
-/** Reads a repeat such as `x2` or `(2x)` out of free text and returns what is left. */
-export function extractRepeat(text: string): { repeat: number; rest: string } {
+/** Reads a repeat such as `x2` or `(2x)` out of free text and returns what is left; null if none is written. */
+export function extractRepeat(text: string): { repeat: number | null; rest: string } {
   const match = REPEAT.exec(text);
-  if (!match) return { repeat: 1, rest: text.trim() };
+  if (!match) return { repeat: null, rest: text.trim() };
   const repeat = Number(match[1] ?? match[2]);
   const rest = (text.slice(0, match.index) + text.slice(match.index + match[0].length)).trim();
   return { repeat: Math.max(repeat, 1), rest };
@@ -85,7 +85,7 @@ export function parseBars(text: string, at: Pos, context: BarsContext): ParsedBa
     const to = pipes[i + 1] as number;
     bars.push(parseBar(plain, from, to, span, context, diagnostics));
   }
-  return { label, bars, cue: tail.rest || null, repeat: tail.repeat, diagnostics };
+  return { label, bars, cue: tail.rest || null, repeat: tail.repeat ?? 1, diagnostics };
 }
 
 function parseBar(

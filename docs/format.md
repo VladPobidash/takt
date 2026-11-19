@@ -61,7 +61,7 @@ time: 4/4
 
 - **Tag** — a cue for everyone ("dip", "powerful").
 - **Repeat:** `x2`, `2x` or `(2x)`.
-- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name; notes written under it are kept. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`).
+- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name; notes written under it are kept. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`). The reusing section also takes the repeat, unless it writes its own (`## Interlude = Intro x1` plays once).
 - Repeats are shown folded (`×4`), never unrolled; the form timeline is sized by bars × repeats.
 - **Section type** (color and abbreviation) is detected from the name, in English and Ukrainian: intro/вступ, verse/куплет, pre-chorus/передприспів, chorus/приспів, bridge/брідж, interlude/програш, instrumental, outro/кінцівка.
 
@@ -127,6 +127,7 @@ A line prefixed with `@instrument`:
 - Flats for F, B♭, E♭, A♭, D♭, G♭ and Dm, Gm, Cm, Fm, B♭m, E♭m; sharps in other keys.
 - Chord shapes with a capo = sounding chord minus capo.
 - Capo suggestion: options from fret 0 to 7 where the shapes fall into C, G, D, A, E, Am, Em, Dm.
+- Transposing a file rewrites only its chords and its `key:` value; spacing, notes and lyrics stay as written. If the file was read in H-notation only because it contained an `H`, and the transposed file no longer has one, `notation: H` is added to the header so that its `B` keeps meaning B♭. Declaring `notation:` in every file avoids the question.
 
 ## Setlist (`.taktset`)
 
