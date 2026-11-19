@@ -28,6 +28,8 @@ These are already decided and constrain every answer below:
 
 ### 2. Repository structure and tooling
 
+> **Proposed 2026-11-19:** [ADR 0004](decisions/0004-repo-structure-and-tooling.md) — pnpm monorepo (`packages/format` + `apps/web`), Node 24, TypeScript 7, Biome, Vite 8, CI on every pull request, work through issues and pull requests. Waiting for acceptance.
+
 - Monorepo layout: the likely direction is `packages/format` (framework-free) + `apps/web`. Confirm or change.
 - Package manager and workspaces, Node version, TypeScript settings (strict?).
 - Build tool and dev server.
