@@ -24,7 +24,7 @@ For the bundle: a zip needs a compression library and cannot be read as text; a 
 - **Local database** (same IndexedDB, separate object stores, versioned schema with migrations): device settings (instrument, note naming, language, theme, chord size) now; view-option layers and personal notes when those features are built. None of it goes into `.takt` files.
 - **Exchange:** a song is exported as its `.takt` file. A setlist with its songs, and a full backup, are one JSON file with the extension `.taktbundle`: `{ "format": "takt-bundle", "version": 1, "setlists": [{ id, text }], "songs": [{ id, text }], "settings"?: {…} }`. Importing a bundle never overwrites: a song that is already on the device with the same text is skipped, and one with the same id but another text is stored next to it under a numbered id.
 - **Reminder:** the library shows when the last backup was made and nudges after changes; settings have "Export everything".
-- **Anchors for personal notes** (stretch): section name + occurrence + line and bar number; decided in detail when notes are built.
+- **Anchors for personal notes:** the section's name, which section of that name it is, then the line and the bar inside it (`bridge#1/0/3`); a note on a whole section has no line and bar. Adding, removing or editing other sections does not move a note; renaming its section or inserting bars before it in the same line does. Notes are stored per song id on the device, travel in a full backup and never in a shared setlist.
 
 ## Consequences
 

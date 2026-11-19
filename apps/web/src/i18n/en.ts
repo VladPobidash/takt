@@ -181,6 +181,15 @@ export const en = {
   "view.personalNotes": "My personal notes",
   "view.editSong": "Edit the song",
 
+  "notes.bar": "Bar {bar} · {section}",
+  "notes.section": "{section} · the whole section",
+  "notes.barLabel": "Personal note, bar {bar}",
+  "notes.onlyYou": "Only you see this note. It stays on this device.",
+  "notes.text": "Personal note",
+  "notes.placeholder": "For example: watch the drummer here",
+  "notes.save": "Save",
+  "notes.delete": "Delete",
+
   "update.available": "A new version of Takt is ready.",
   "update.apply": "Update now",
 } as const;

@@ -10,6 +10,16 @@ const INSTRUMENT_LABEL: Record<string, MessageKey> = {
   drums: "instrument.drums",
 };
 
+export interface SectionNotes {
+  barNote: (line: number, bar: number) => string | undefined;
+  barLabel: (line: number, bar: number) => string;
+  /** The note on the section as a whole. */
+  sectionNote: string | undefined;
+  /** `line` and `bar` are null for the section itself. */
+  onTap: (line: number | null, bar: number | null) => void;
+  visible: boolean;
+}
+
 export const sectionAnchor = (index: number) => `s${index + 1}`;
 
 /** A section of the song as a coloured tile: badge, name, tag, repeat, notes, bars. */
@@ -17,11 +27,14 @@ export function SectionTile({
   section,
   options,
   now = false,
+  personal,
 }: {
   section: ResolvedSection;
   options: BarGridOptions;
   /** Auto-scroll is playing this section: it gets an outline, never the chords or beats. */
   now?: boolean;
+  /** Personal notes of this section; leave out where notes cannot be edited (editor preview). */
+  personal?: SectionNotes;
 }) {
   const { t } = useApp();
   const notes = section.notes.map((note) => {
@@ -35,11 +48,33 @@ export function SectionTile({
       </p>
     );
   });
+  const sectionChip = personal?.visible && personal.sectionNote && (
+    <button
+      type="button"
+      onClick={() => personal.onTap(null, null)}
+      className="mb-2 inline-flex max-w-full items-center gap-1.5 rounded-badge bg-mine-bg px-1.5 py-0.5 text-left text-[12px] font-semibold text-mine-fg"
+    >
+      <span aria-hidden="true" className="size-2 shrink-0 bg-mine-dot" />
+      <span className="min-w-0 break-words">{personal.sectionNote}</span>
+    </button>
+  );
   const lines = (
     <div className={`flex flex-col ${options.compact ? "gap-1" : "gap-2.5"}`}>
       {section.lines.map((line, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional
-        <BarLine key={index} line={line} options={options} />
+        <BarLine
+          // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional
+          key={index}
+          line={line}
+          options={options}
+          personal={
+            personal && {
+              notes: line.bars.map((_, bar) => personal.barNote(index, bar)),
+              onTap: (bar) => personal.onTap(index, bar),
+              label: (bar) => personal.barLabel(index, bar),
+              visible: personal.visible,
+            }
+          }
+        />
       ))}
     </div>
   );
@@ -80,6 +115,7 @@ export function SectionTile({
         <div className="min-w-0 flex-1">
           {lines}
           {notes}
+          {sectionChip}
         </div>
       </section>
     );
@@ -95,7 +131,19 @@ export function SectionTile({
     >
       <header className="mb-2 flex items-center gap-2">
         {badge}
-        <h2 className="min-w-0 truncate text-[16px] font-bold">{section.name}</h2>
+        <h2 className="min-w-0 truncate text-[16px] font-bold">
+          {personal ? (
+            <button
+              type="button"
+              onClick={() => personal.onTap(null, null)}
+              className="max-w-full truncate text-left"
+            >
+              {section.name}
+            </button>
+          ) : (
+            section.name
+          )}
+        </h2>
         {section.tag && (
           <span className="shrink-0 rounded-badge bg-ink px-1.5 py-0.5 text-[12px] font-bold text-tile">
             {section.tag}
@@ -111,6 +159,7 @@ export function SectionTile({
         )}
       </header>
       {notes}
+      {sectionChip}
       {lines}
     </section>
   );

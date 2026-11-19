@@ -3,6 +3,8 @@ import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useStat
 import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
+import { anchorKey, sectionOccurrences } from "../notes/anchors.ts";
+import { NoteDialog } from "../notes/NoteDialog.tsx";
 import type { InstrumentChoice } from "../storage/app-state.ts";
 import { resolveViewOptions } from "../storage/view-options.ts";
 import {
@@ -18,7 +20,7 @@ import {
 } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
-import { SectionTile, sectionAnchor } from "./SectionTile.tsx";
+import { type SectionNotes, SectionTile, sectionAnchor } from "./SectionTile.tsx";
 import { usePlayback } from "./usePlayback.ts";
 import { useWakeLock } from "./useWakeLock.ts";
 import { everywhereOptions, ViewOptionsSheet } from "./ViewOptionsSheet.tsx";
@@ -50,7 +52,7 @@ export interface SetlistContext {
 const SWIPE_MIN_PX = 70;
 
 export function SongScreen({ id, context }: { id: string; context?: SetlistContext }) {
-  const { songs, settings, viewOverrides, t } = useApp();
+  const { songs, settings, viewOverrides, personalNotes, data, t } = useApp();
   const stored = songs.find((song) => song.id === id);
   const [instrument, setInstrument] = useState<InstrumentChoice>(settings.instrument);
   const [ownTranspose, setOwnTranspose] = useState(0);
@@ -64,6 +66,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   ).value;
   const [compact, setCompact] = useState(view.compact);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [noteTarget, setNoteTarget] = useState<{ key: string; title: string } | null>(null);
   const [, navigate] = useLocation();
   const scroller = useRef<HTMLElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -145,6 +148,32 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
       </div>
     );
   }
+
+  const songNotes = personalNotes[id] ?? {};
+  const occurrences = sectionOccurrences(song.sections);
+  /** Personal notes of one section: what is on each bar, and what a tap opens. */
+  const personalFor = (index: number): SectionNotes => {
+    const place = occurrences[index] ?? { section: "", occurrence: 1 };
+    const section = song.sections[index];
+    const barNumber = (line: number, bar: number) =>
+      (section?.lines.slice(0, line).reduce((sum, item) => sum + item.bars.length, 0) ?? 0) +
+      bar +
+      1;
+    return {
+      barNote: (line, bar) => songNotes[anchorKey({ ...place, line, bar })],
+      barLabel: (line, bar) => t("notes.barLabel", { bar: barNumber(line, bar) }),
+      sectionNote: songNotes[anchorKey({ ...place, line: null, bar: null })],
+      onTap: (line, bar) =>
+        setNoteTarget({
+          key: anchorKey({ ...place, line, bar }),
+          title:
+            line === null || bar === null
+              ? t("notes.section", { section: place.section })
+              : t("notes.bar", { bar: barNumber(line, bar), section: place.section }),
+        }),
+      visible: view.personalNotes,
+    };
+  };
 
   const guitar = instrument === "guitar";
   const capo = guitar ? (capoChoice ?? song.capo ?? 0) : 0;
@@ -312,6 +341,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
               }}
               options={options}
               now={section.index === nowSection}
+              personal={personalFor(section.index)}
             />
           ))}
         </div>
@@ -399,6 +429,14 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
           </NavButton>
         )}
       </footer>
+      <NoteDialog
+        target={noteTarget && { title: noteTarget.title, text: songNotes[noteTarget.key] ?? "" }}
+        onClose={() => setNoteTarget(null)}
+        onSave={(text) => {
+          if (noteTarget) void data.setPersonalNote(id, noteTarget.key, text);
+          setNoteTarget(null);
+        }}
+      />
       <ViewOptionsSheet
         open={optionsOpen}
         onClose={() => setOptionsOpen(false)}

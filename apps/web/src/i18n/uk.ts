@@ -214,6 +214,15 @@ export const uk: Messages = {
   "view.personalNotes": "Мої особисті нотатки",
   "view.editSong": "Редагувати пісню",
 
+  "notes.bar": "Такт {bar} · {section}",
+  "notes.section": "{section} · уся секція",
+  "notes.barLabel": "Особиста нотатка, такт {bar}",
+  "notes.onlyYou": "Цю нотатку бачите лише ви. Вона лишається на цьому пристрої.",
+  "notes.text": "Особиста нотатка",
+  "notes.placeholder": "Наприклад: тут дивитися на барабанщика",
+  "notes.save": "Зберегти",
+  "notes.delete": "Видалити",
+
   "update.available": "Нова версія Takt готова.",
   "update.apply": "Оновити зараз",
 };
