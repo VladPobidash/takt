@@ -1,6 +1,6 @@
 # 0004. Repository structure and tooling
 
-- **Status:** proposed — waiting for the author's acceptance
+- **Status:** accepted
 - **Date:** 2026-11-19
 
 ## Context
@@ -26,7 +26,7 @@ Options considered (versions and peer dependencies checked on npm, 2026-11-19):
 | Library build | None for now | Building `packages/format` to `dist/` is needed only to publish it to npm |
 | Task runner | pnpm scripts | Turborepo / Nx: caching and orchestration that two packages do not need |
 
-## Decision (proposed)
+## Decision
 
 ### Layout
 

@@ -20,15 +20,16 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 ## Open questions
 
 - [ ] Product name and file extension (`.takt` is a working name).
-- [ ] 6/8 time: is one asterisk an eighth note (6 per bar) or a pulse (2 per bar)?
-- [ ] Empty bar `| |` and `%` — the same thing or different?
-- [ ] How to write small keys parts: text, note names, mini-tab?
-- [ ] Rhythm cues for cajón and drums: just notes or a dedicated notation?
-- [ ] Show repeats as `x4` or unroll them (for "where are we now")?
-- [ ] Lyrics: only a block under the section, or eventually aligned to bars?
+- [x] 6/8 time: one asterisk is an eighth note (6 per bar); `tempo` counts the dotted-quarter pulse ([ADR 0005](decisions/0005-format-library.md)). To confirm on the band's own 6/8 songs.
+- [x] Empty bar `| |` and `%` are different: keep the last chord vs play the previous bar again ([ADR 0005](decisions/0005-format-library.md)).
+- [ ] How to write small keys parts: text, note names, mini-tab? (v0: plain-text cues, `@keys > …`.)
+- [ ] Rhythm cues for cajón and drums: just notes or a dedicated notation? (v0: plain-text cues, `@drums > …`.)
+- [x] Repeats are shown folded as `×4`; the timeline and the metronome unroll them ([ADR 0005](decisions/0005-format-library.md)).
+- [ ] Lyrics: only a block under the section, or eventually aligned to bars? (v0: a block under the section.)
 - [ ] PWA or native wrapper from the start?
 - [x] App stack and UI foundation: React 19 + shadcn/ui (Base UI) + Tailwind v4, modern devices only ([ADR 0003](decisions/0003-ui-kit.md), accepted 2026-11-19).
-- [ ] Default H/B notation.
+- [x] Default H/B notation: the file decides (`notation:` header, or any `H` in it); otherwise the device setting, which starts as H for a Ukrainian UI and B for others ([ADR 0005](decisions/0005-format-library.md)).
+- [x] Repository structure and tooling ([ADR 0004](decisions/0004-repo-structure-and-tooling.md), accepted 2026-11-19); format library design ([ADR 0005](decisions/0005-format-library.md)); testing ([ADR 0006](decisions/0006-testing.md)).
 - [x] UI language: English by default, Ukrainian from day one ([ADR 0002](decisions/0002-visual-direction.md)).
 - [x] Visual direction: "Swiss Blocks" in Onest ([ADR 0002](decisions/0002-visual-direction.md)).
 - [x] MVP screens: design v1 accepted on 2026-10-26 ([mvp-v1](design/mvp-v1/README.md)).

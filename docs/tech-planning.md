@@ -1,6 +1,6 @@
 # Technical planning — decisions and questions
 
-Status: **in progress** (started 2026-10-26; planning session 2026-11-19: block 1 decided). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
+Status: **in progress** (started 2026-10-26; planning session 2026-11-19: blocks 1–4 decided; the author delegated the remaining decisions). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
 
 ## Fixed inputs
 
@@ -28,7 +28,7 @@ These are already decided and constrain every answer below:
 
 ### 2. Repository structure and tooling
 
-> **Proposed 2026-11-19:** [ADR 0004](decisions/0004-repo-structure-and-tooling.md) — pnpm monorepo (`packages/format` + `apps/web`), Node 24, TypeScript 7, Biome, Vite 8, CI on every pull request, work through issues and pull requests. Waiting for acceptance.
+> **Decided 2026-11-19:** [ADR 0004](decisions/0004-repo-structure-and-tooling.md) (accepted) — pnpm monorepo (`packages/format` + `apps/web`), Node 24, TypeScript 7, Biome, Vite 8, CI on every pull request, work through issues and pull requests.
 
 - Monorepo layout: the likely direction is `packages/format` (framework-free) + `apps/web`. Confirm or change.
 - Package manager and workspaces, Node version, TypeScript settings (strict?).
@@ -38,6 +38,8 @@ These are already decided and constrain every answer below:
 - Commit and branch conventions, release/versioning of the format library.
 
 ### 3. Format library (`.takt` parser) design
+
+> **Decided 2026-11-19:** [ADR 0005](decisions/0005-format-library.md).
 
 - AST shape: song → meta → sections (name, tag, repeat, reference/reuse) → lines → bars → cells (chord, beats). Where do instrument layers (`@bass`, `@keys`), notes (`>`), comments (`//`) and lyrics live?
 - Source positions in the AST, for editor highlighting, linter warnings and later "who changed this bar".
@@ -50,6 +52,8 @@ These are already decided and constrain every answer below:
 - Public API and how the app calls it (sync, pure functions?).
 
 ### 4. Testing strategy
+
+> **Decided 2026-11-19:** [ADR 0006](decisions/0006-testing.md).
 
 - Test runner for the library and the app.
 - Parser fixtures: the "Parser test cases" in [format.md](format.md) first, then the band's songs in [examples/](../examples/).
@@ -111,15 +115,15 @@ These are already decided and constrain every answer below:
 
 ## Format questions to settle with the first real song
 
-From [roadmap → Open questions](roadmap.md#open-questions). Write the first song (e.g. «Могутній Бог», chords and structure only) into [examples/](../examples/) and decide against it:
+From [roadmap → Open questions](roadmap.md#open-questions). The first song is [examples/silent-night.takt](../examples/silent-night.takt) — public domain, in 6/8, key of B♭ written in H-notation, with a separate keys part and a capo view for guitar. The band's own songs follow.
 
-- [ ] 6/8: is one `*` an eighth note (6 per bar) or a pulse (2 per bar)?
-- [ ] `| |` vs `%`: same meaning or different?
+- [x] 6/8: one `*` is an eighth note (6 per bar).
+- [x] `| |` vs `%`: different.
 - [ ] Notation for small keys parts.
 - [ ] Rhythm cues for cajón and drums.
-- [ ] Repeats shown as `x4` or unrolled (affects auto-scroll status "pass 3 of 4").
+- [x] Repeats shown as `×4`, unrolled only by the timeline and the metronome.
 - [ ] Lyrics: block under the section or aligned to bars (MVP: probably neither is needed).
-- [ ] Default H/B notation.
+- [x] Default H/B notation: decided by the file, then by the device setting.
 - [ ] Product name and file extension.
 
 ## Suggested order

@@ -1,6 +1,6 @@
 # `.takt` format v0 (draft)
 
-A song file is plain text that is easy to type, even on a phone. The bar notation comes from our band's PDF charts; the grid ideas come from [ChordPro grid](https://chordpro.org/beta/directives-env_grid/). The spec is not frozen yet — open questions are in [roadmap.md](roadmap.md#open-questions).
+A song file is plain text that is easy to type, even on a phone. The bar notation comes from our band's PDF charts; the grid ideas come from [ChordPro grid](https://chordpro.org/beta/directives-env_grid/). The spec is not frozen yet — open questions are in [roadmap.md](roadmap.md#open-questions). How the parser reads it is decided in [ADR 0005](decisions/0005-format-library.md). A complete public-domain example lives in [examples/silent-night.takt](../examples/silent-night.takt).
 
 ## Example
 
@@ -48,8 +48,8 @@ time: 4/4
 | Key | Meaning |
 | --- | --- |
 | `key` | key, e.g. `D`, `Hm`, `F#` |
-| `tempo` | BPM |
-| `time` | time signature, e.g. `4/4`, `6/8` |
+| `tempo` | BPM. In compound time (6/8, 9/8, 12/8) it counts the pulse the band taps — the dotted quarter, two per bar in 6/8 |
+| `time` | time signature, e.g. `4/4`, `6/8`; `4/4` if missing |
 | `artist` | artist / source |
 | `capo` | suggested capo for guitar |
 | `notation` | `H` or `B` (see "Chords") |
@@ -61,41 +61,57 @@ time: 4/4
 
 - **Tag** — a cue for everyone ("dip", "powerful").
 - **Repeat:** `x2`, `2x` or `(2x)`.
-- **Reuse:** an empty section with an already-known name takes that section's most recent content. `## A = B` is an explicit reference.
+- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name; notes written under it are kept. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`).
+- Repeats are shown folded (`×4`), never unrolled; the form timeline is sized by bars × repeats.
 - **Section type** (color and abbreviation) is detected from the name, in English and Ukrainian: intro/вступ, verse/куплет, pre-chorus/передприспів, chorus/приспів, bridge/брідж, interlude/програш, instrumental, outro/кінцівка.
 
 ## Bar line
 
-Bars are separated by `|`. Text before the first `|` is a left label; text after the last `|` is a right-hand cue (`| … | x2 quiet`).
+Bars are separated by `|`. Text before the first `|` is a left label; text after the last `|` is a right-hand cue (`| … | x2 quiet`), and a repeat written there (`x2`, `2x`, `(2x)`) repeats the line.
 
 | Notation | Meaning |
 | --- | --- |
 | `\| D \|` | D for the whole bar |
-| `\| Hm** D** \|` | 2 beats each: one asterisk = one beat |
+| `\| Hm** D** \|` | 2 beats each: one asterisk = one beat of the time signature's lower number (a quarter in 4/4, an eighth in 6/8) |
 | `\| Asus4* A*** \|` | 1 + 3 beats |
 | `\| E*** G \|` | a chord without asterisks takes the remainder (1) |
-| `\| A E \|`, `\| A - E \|` | split evenly; `-` is ignored |
-| `\| D . G . \|` | cell mode, as in ChordPro grid: token = beat, `.` continues |
-| `\| \|` | empty bar — hold the previous chord (as in "Боже, я вдячний Тобі") |
-| `\| % \|` | repeat the previous bar |
+| `\| A E \|`, `\| A - E \|` | split evenly; `-` is ignored. In 6/8 this is the usual half-bar change (3 + 3) |
+| `\| D . G . \|` | cell mode, as in ChordPro grid: the tokens are equal slots of the bar, `.` continues the chord before it |
+| `\| \|` | empty bar — keep playing the last chord (as in "Боже, я вдячний Тобі"); drawn empty |
+| `\| % \|` | play the previous bar again, with all its chords; drawn as `%` |
 | `\| N.C. \|` | no chord |
 | `\| A** \|` in 4/4 | a short 2-beat bar, drawn narrower |
 
-Duration rule: chords with asterisks have an explicit beat count; chords without asterisks split the rest of the bar evenly. If every chord has asterisks, the bar length equals their sum (a short or long bar).
+Duration rule: a bar has as many beats as the upper number of the time signature. Chords with asterisks have an explicit beat count; chords without asterisks split the rest of the bar evenly. If every chord has asterisks, the bar length equals their sum: a shorter bar is legal (the editor shows a hint), a longer one gets a warning ("this bar has 5 beats in 4/4").
+
+In 6/8 a bar has six beats (eighths):
+
+```
+time: 6/8
+
+| B | | F7 | B |
+| F7 | B | B*** F7*** | B |
+| N.C. | | B F7 | B | rit.
+```
+
+`B*** F7***` and `B F7` mean the same here: three eighths each.
 
 ## Chords
 
 Root `A`–`H`, accidental `#` or `b`, quality (`m`, `sus4`, `7`, `maj7`…), bass note after `/`.
 
-Notation: with `notation: H`, H = B natural and B = B♭. If not set, the personal setting applies — but any H in the file implies H-notation. Evidence from our .xlsx: "Краса Хреста" in "B" with chords Gm, Eb, F — that is B♭.
+Notation: with `notation: H`, H = B natural and B = B♭; with `notation: B`, B = B natural. If not set, any H in the file implies H-notation; otherwise the personal setting applies and the editor points at every ambiguous `B`. Other flats are written with `b` (`Eb`, `Ab`), also in H-notation; `Bb` is accepted as B♭. Evidence from our .xlsx: "Краса Хреста" in "B" with chords Gm, Eb, F — that is B♭.
+
+A token the parser does not recognise as a chord is kept and shown as written, with a warning.
 
 ## Instrument parts
 
 A line prefixed with `@instrument`:
 
-- `@bass | … |` — in the bass view, replaces the section's base line with the same ordinal number. A part holds only the differences from the base, not a copy of the song.
+- `@bass | … |` — in the bass view, replaces the section's base line with the same ordinal number: the first `@bass` bar line replaces the first base line, the second replaces the second. Sections without `@bass` lines show the base. A part holds only the sections that differ, not a copy of the song.
 - `@keys > …` — a cue visible only to keys players.
-- Names are free-form, with synonyms: guitar/гітара, bass/бас, keys/клавіші/піано, drums/барабани, cajon/кахон.
+- Names are free-form, with synonyms: guitar/гітара, bass/бас, keys/клавіші/піано, drums/барабани/cajon/кахон (drums and cajón share one view).
+- Keys parts and drum rhythms have no notation of their own in v0: write them as cues (`@keys > …`, `@drums > …`).
 - Capo is not a part, it is a view parameter.
 
 ## Notes and lyrics
@@ -145,4 +161,12 @@ Real lines from our band's PDF that v0 must parse:
 | G*** Hm* | A | D/F# | Hm*** A*|
 | Hm** D** | G** A** | (2x)
 | F# | F# | F#sus | F#sus |
+```
+
+In 6/8, from [examples/silent-night.takt](../examples/silent-night.takt):
+
+```
+| F7 | B | B*** F7*** | B |
+| N.C. | | B F7 | B | rit.
+@keys | F7/C | B/D | B/F*** F7*** | B |
 ```

@@ -2,6 +2,8 @@
 
 Every decision that is hard to reverse (storage, format, stack, repo structure) gets its own file: `NNNN-short-name.md`.
 
+Since 2026-11-19 the author has delegated the remaining technical decisions: such an ADR is written, marked accepted with a **Decided by** line, and work continues; the author reviews it afterwards and can reopen it.
+
 Template:
 
 ```
@@ -25,4 +27,6 @@ What it gives us and what it costs.
 | [0001](0001-local-first.md) | Local-first, no server-side storage | accepted |
 | [0002](0002-visual-direction.md) | Visual direction: "Swiss Blocks" in Onest | accepted |
 | [0003](0003-ui-kit.md) | App stack and UI foundation: React + shadcn/ui (Base UI) + Tailwind CSS v4 | accepted |
-| [0004](0004-repo-structure-and-tooling.md) | Repository structure and tooling: pnpm monorepo, TypeScript 7, Biome, Vite 8, PR workflow | proposed |
+| [0004](0004-repo-structure-and-tooling.md) | Repository structure and tooling: pnpm monorepo, TypeScript 7, Biome, Vite 8, PR workflow | accepted |
+| [0005](0005-format-library.md) | Format library design: two layers, diagnostics, span-based rewriting | accepted |
+| [0006](0006-testing.md) | Testing strategy: Vitest, test-first parser, property tests, phone-viewport smoke tests | accepted (delegated) |
