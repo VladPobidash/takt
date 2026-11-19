@@ -1,6 +1,6 @@
 # Technical planning — decisions and questions
 
-Status: **in progress** (started 2026-10-26; planning session 2026-11-19: blocks 1–4 decided; the author delegated the remaining decisions). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
+Status: **in progress** (started 2026-10-26; planning session 2026-11-19: blocks 1–8 and 11 decided; the author delegated the remaining decisions). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
 
 ## Fixed inputs
 
@@ -63,11 +63,15 @@ These are already decided and constrain every answer below:
 
 ### 5. Platform: PWA or native wrapper
 
+> **Decided 2026-11-19:** [ADR 0007](decisions/0007-platform-pwa.md).
+
 - PWA only for the MVP, or Capacitor (or Tauri) from the start?
 - iOS: storage eviction for PWAs, Wake Lock support, "Add to Home Screen" flow. Is any band member on iPhone for 12 Dec?
 - Service worker: precache strategy, offline start, and an update flow that never changes the app in the middle of a service.
 
 ### 6. Storage
+
+> **Decided 2026-11-19:** [ADR 0008](decisions/0008-storage.md).
 
 - Where songs (`.takt`) and setlists (`.taktset`) live in the MVP: IndexedDB, OPFS, or a real folder via the File System Access API (desktop Chrome)?
 - Storage adapter interface, so cloud folders and native file access can plug in later.
@@ -78,12 +82,16 @@ These are already decided and constrain every answer below:
 
 ### 7. App state, routing and view options
 
+> **Decided 2026-11-19:** [ADR 0009](decisions/0009-app-state-and-routing.md).
+
 - URL scheme: deep links to a library song, a setlist, a song inside a setlist, a section.
 - Where app state lives (store library or framework state).
 - How the view-option cascade (song → setlist → everywhere) is resolved and shown ("From this setlist", Reset).
 - Song key and "tonight" note per setlist entry: stored in the setlist file or locally?
 
 ### 8. Localisation
+
+> **Decided 2026-11-19:** [ADR 0010](decisions/0010-localisation.md).
 
 - i18n library (or a small own one). Ukrainian plural forms (one / few / many) are a must.
 - Message files: format, location, how to keep EN and UA keys in sync (a CI check?).
@@ -107,6 +115,8 @@ These are already decided and constrain every answer below:
 - Accessibility: contrast checks, focus order, screen-reader labels for chords.
 
 ### 11. Deploy and operations
+
+> **Decided 2026-11-19:** [ADR 0011](decisions/0011-hosting.md).
 
 - Hosting: GitHub Pages, Railway Hobby, or another static host. Custom domain?
 - Preview deploys per branch or PR?

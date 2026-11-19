@@ -30,3 +30,8 @@ What it gives us and what it costs.
 | [0004](0004-repo-structure-and-tooling.md) | Repository structure and tooling: pnpm monorepo, TypeScript 7, Biome, Vite 8, PR workflow | accepted |
 | [0005](0005-format-library.md) | Format library design: two layers, diagnostics, span-based rewriting | accepted |
 | [0006](0006-testing.md) | Testing strategy: Vitest, test-first parser, property tests, phone-viewport smoke tests | accepted (delegated) |
+| [0007](0007-platform-pwa.md) | Platform: an installable PWA, no native wrapper for the MVP | accepted (delegated) |
+| [0008](0008-storage.md) | Storage: `.takt` text in IndexedDB behind an adapter, JSON bundles for exchange | accepted (delegated) |
+| [0009](0009-app-state-and-routing.md) | App state, routing and the view-option cascade | accepted (delegated) |
+| [0010](0010-localisation.md) | Localisation: typed message tables and `Intl` | accepted (delegated) |
+| [0011](0011-hosting.md) | Hosting: a static site on Railway | accepted (configuration pending) |

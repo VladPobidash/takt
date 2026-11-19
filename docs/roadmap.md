@@ -26,7 +26,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 - [ ] Rhythm cues for cajón and drums: just notes or a dedicated notation? (v0: plain-text cues, `@drums > …`.)
 - [x] Repeats are shown folded as `×4`; the timeline and the metronome unroll them ([ADR 0005](decisions/0005-format-library.md)).
 - [ ] Lyrics: only a block under the section, or eventually aligned to bars? (v0: a block under the section.)
-- [ ] PWA or native wrapper from the start?
+- [x] PWA only for the MVP; a native wrapper later ([ADR 0007](decisions/0007-platform-pwa.md)).
 - [x] App stack and UI foundation: React 19 + shadcn/ui (Base UI) + Tailwind v4, modern devices only ([ADR 0003](decisions/0003-ui-kit.md), accepted 2026-11-19).
 - [x] Default H/B notation: the file decides (`notation:` header, or any `H` in it); otherwise the device setting, which starts as H for a Ukrainian UI and B for others ([ADR 0005](decisions/0005-format-library.md)).
 - [x] Repository structure and tooling ([ADR 0004](decisions/0004-repo-structure-and-tooling.md), accepted 2026-11-19); format library design ([ADR 0005](decisions/0005-format-library.md)); testing ([ADR 0006](decisions/0006-testing.md)).
