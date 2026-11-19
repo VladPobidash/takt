@@ -25,7 +25,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 
 ## Current state
 
-- Code: repository scaffold and the format library (`packages/format`) in progress; no app yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
+- Code: the format library (`packages/format`) is complete for the MVP; the app (`apps/web`) has the song screen (instrument views, capo, transposition, H/B), the library with file import and the settings screen. Not built yet: offline install (PWA), service map, editor, export. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
 - Work is tracked in GitHub issues under the MVP tracking issue (`VladPobidash/takt#1`); every change reaches `main` through a pull request that names the issue it closes.
 - **Decisions:** technical planning continues in `docs/tech-planning.md`. On 2026-11-19 the author delegated the remaining technical decisions: decide, write the ADR as accepted with a "Decided by" line, keep working, do not stop to ask. Product-level changes (scope, principles, the format's meaning for musicians) are still reported clearly.
 - **Accepted so far:** app stack ([ADR 0003](docs/decisions/0003-ui-kit.md): React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4, bar grid as plain DOM, modern browsers only, 150 kB gzip JavaScript budget for the song screen); repository and tooling ([ADR 0004](docs/decisions/0004-repo-structure-and-tooling.md): pnpm monorepo, TypeScript 7, Biome, Vite 8, `pnpm verify`); format library ([ADR 0005](docs/decisions/0005-format-library.md): `parse` → document with spans and diagnostics, `resolveSong` → view for an instrument, never throw, rewrite text by spans); testing ([ADR 0006](docs/decisions/0006-testing.md): Vitest, test-first parser, fast-check).
@@ -56,7 +56,14 @@ tsconfig.base.json   shared TypeScript settings
 packages/
   format/            @takt/format — .takt parser and tools; zero runtime dependencies, no DOM
 apps/
-  web/               the app (not created yet)
+  web/               @takt/web — the app (React, Vite, Tailwind v4)
+    src/styles/      app.css: design tokens as CSS variables + Tailwind theme
+    src/i18n/        en.ts (source of keys), uk.ts, translate()
+    src/storage/     SongStore adapter (IndexedDB, memory), AppData (songs + settings)
+    src/song/        song screen: view model (view.ts), bar grid, section tiles, form timeline
+    src/library/     library screen (list, search, file import)
+    src/settings/    settings screen
+    src/ui/          shared pieces (top bar, icons)
 docs/
   brief.md           product brief
   format.md          .takt format spec v0
@@ -74,5 +81,6 @@ examples/            sample .takt files (no copyrighted lyrics); also parser fix
 - `pnpm install` — install (pnpm 12 is pinned in `packageManager`; Node >= 22.12).
 - `pnpm verify` — everything CI runs: `pnpm check` (Biome), `pnpm typecheck`, `pnpm test` (Vitest), `pnpm build`. Run it before every commit.
 - `pnpm fix` — apply Biome fixes and formatting.
-- One package: `pnpm --filter @takt/format test`.
+- One package: `pnpm --filter @takt/format test`. Run the app: `pnpm --filter @takt/web dev` (or `build` + `preview`).
+- UI strings go through `t()` with keys from `apps/web/src/i18n/en.ts`; `uk.ts` must have the same keys (the type checker enforces it). Colours come from the tokens in `apps/web/src/styles/app.css`, never from literals in components.
 - Relative imports use the `.ts` extension; no enums or namespaces (`erasableSyntaxOnly`).
