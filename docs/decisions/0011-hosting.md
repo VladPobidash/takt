@@ -1,6 +1,6 @@
 # 0011. Hosting: a static site on Railway
 
-- **Status:** accepted — host chosen by the author on 2026-11-19; configuration to be completed when access is granted
+- **Status:** accepted — host chosen by the author on 2026-11-19; deployed the same day
 - **Date:** 2026-11-19
 
 ## Context
@@ -20,9 +20,15 @@ The app is a static build ([ADR 0001](0001-local-first.md), [ADR 0007](0007-plat
 - The root `package.json` has `build` and `start` scripts, which is what Railway's builder (Railpack) looks for in a Node project. No Railway config file is committed: `railway.json` (Config as Code) is deprecated, closed to new services and stops working on 2026-12-01.
 - The end-to-end tests run against this same server.
 
+## Deployment (2026-11-19)
+
+- Railway project `takt`, environment `production`, service `web`, connected to the GitHub repository `VladPobidash/takt`, branch `main`. Railway builds with the root `build` script and starts with the root `start` script; nothing else is configured on the service.
+- Address: <https://web-production-e41cbcc9.up.railway.app> (a Railway-generated domain; a custom domain can replace it later).
+- Checked after the first deploy: the home page, an app route, `sw.js` and the manifest are served with `no-cache`, hashed assets with `immutable`, text with Brotli; in a real browser the library and a song open and the service worker registers.
+
 ## Consequences
 
-- The project, the service and the domain are created on Railway once access exists; the repository needs no further change for that.
+- Deploys need no step by hand: a merge to `main` is built and released by Railway.
 - Preview deploys per pull request are not set up for now.
 
 ## Sources
