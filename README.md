@@ -10,7 +10,7 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 @bass | D | A | F#** G** | A |
 ```
 
-> Status: **pre-alpha.** The format library works; the app shows songs per instrument (capo, transposition, H/B naming) and imports `.takt` files. It installs as a PWA and works offline. No setlists, editor or export yet. First real-world test: a worship night on 12 December 2026.
+> Status: **pre-alpha.** The format library works; the app shows songs per instrument (capo, transposition, H/B naming) and imports `.takt` files. Songs can be written and edited in the app with a live preview and warnings. It installs as a PWA and works offline. No setlists or export yet. First real-world test: a worship night on 12 December 2026.
 
 ## Principles
 

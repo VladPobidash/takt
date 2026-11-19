@@ -59,6 +59,49 @@ export const en = {
   "settings.chordSize.l.hint": "For a phone on a music stand",
   "settings.version": "Version",
 
+  "library.new": "New song",
+  "library.newTitle": "New song",
+
+  "song.edit": "Edit",
+
+  "editor.editing": "Editing",
+  "editor.done": "Done",
+  "editor.text": "Text",
+  "editor.preview": "Preview",
+  "editor.textLabel": "Song text",
+  "editor.symbols": "Quick symbols",
+  "editor.insert": "Insert {symbol}",
+  "editor.show": "Show",
+  "editor.noProblems": "No problems found",
+  "editor.problems": { one: "{count} problem", other: "{count} problems" },
+  "editor.line": "Line {line}",
+  "editor.delete": "Delete this song",
+  "editor.deleteTitle": "Delete “{title}”?",
+  "editor.deleteText": "The song is removed from this device. This cannot be undone.",
+  "editor.deleteConfirm": "Delete",
+  "common.cancel": "Cancel",
+
+  "diagnostic.missing-title": "The song has no title. Start the file with “# Title”.",
+  "diagnostic.unexpected-header-line":
+    "This line is neither “name: value” nor a note. Is a section header (##) missing?",
+  "diagnostic.invalid-time": "“{value}” is not a time signature. Write it like 4/4 or 6/8.",
+  "diagnostic.invalid-tempo": "“{value}” is not a tempo. Write beats per minute, like 120.",
+  "diagnostic.invalid-capo": "“{value}” is not a capo fret. Write a number from 0 to 12.",
+  "diagnostic.invalid-notation": "“{value}” is not a note naming. Write H or B.",
+  "diagnostic.invalid-key": "“{value}” is not a key. Write it like D, Hm or F#.",
+  "diagnostic.unknown-section-ref": "There is no section called “{name}” to reuse.",
+  "diagnostic.empty-section": "This section has no bars and nothing to reuse.",
+  "diagnostic.unknown-chord": "“{text}” is not a chord. It is shown as written.",
+  "diagnostic.ambiguous-b":
+    "“{text}”: is B here B natural or B flat? Add “notation: H” or “notation: B” to the header.",
+  "diagnostic.bar-too-long": "This bar has {beats} beats, the time signature has {expected}.",
+  "diagnostic.bar-short": "A short bar: {beats} beats instead of {expected}.",
+  "diagnostic.mixed-durations": "Asterisks and dots are mixed in one bar; the dots are ignored.",
+  "diagnostic.part-without-base": "Line {line} of @{instrument} has no base line to replace.",
+  "diagnostic.part-bar-count":
+    "This @{instrument} line has {bars} bars, the line it replaces has {expected}.",
+  "diagnostic.invalid-setlist-entry": "This setlist line cannot be read.",
+
   "update.available": "A new version of Takt is ready.",
   "update.apply": "Update now",
 } as const;

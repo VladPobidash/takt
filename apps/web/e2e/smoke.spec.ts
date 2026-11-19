@@ -89,6 +89,52 @@ test.describe("Ukrainian UI", () => {
   });
 });
 
+test.describe("editor", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("a new song is written, checked, saved and deleted", async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto("/library");
+    await page.getByRole("button", { name: "New song" }).click();
+    await expect(page).toHaveURL(/\/songs\/new-song\/edit$/);
+
+    const text = page.getByRole("textbox", { name: "Song text" });
+    await text.fill("# Morning\nkey: G\nnotation: B\n\n## Verse\n| G | D** C*** |\n");
+    await expect(page.getByRole("status")).toContainText(
+      "Line 6: This bar has 5 beats, the time signature has 4.",
+    );
+    await page.getByRole("button", { name: "Show" }).click();
+    expect(
+      await text.evaluate((el: HTMLTextAreaElement) =>
+        el.value.slice(el.selectionStart, el.selectionEnd),
+      ),
+    ).toBe(" D** C*** ");
+
+    await text.fill("# Morning\nkey: G\nnotation: B\n\n## Verse\n| G | D** C** |\n");
+    await expect(page.getByText("No problems found")).toBeVisible();
+    await text.press("Control+End");
+    await page.getByRole("button", { name: "Insert ##" }).click();
+    await text.pressSequentially("Chorus\n| C | G |");
+
+    await page.getByRole("tab", { name: "Preview" }).click();
+    await expect(page.getByRole("region", { name: "Chorus" })).toContainText("C");
+    await page.screenshot({ path: test.info().outputPath("editor-preview.png") });
+
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Morning");
+    await page.reload();
+    await expect(page.getByRole("region", { name: "Chorus" })).toBeVisible();
+
+    await page.getByRole("link", { name: "Edit" }).click();
+    await page.getByRole("tab", { name: "Preview" }).click();
+    await page.getByRole("button", { name: "Delete this song" }).click();
+    await page.getByRole("button", { name: "Delete", exact: true }).click();
+    await expect(page).toHaveURL(/\/library$/);
+    await expect(page.getByRole("link", { name: /Morning/ })).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("the production server", () => {
   test("answers app routes with the app, caches hashed assets forever and nothing else", async ({
     request,

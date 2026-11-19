@@ -1,10 +1,11 @@
 import { formatKey, parse, type ResolvedSong, resolveSong } from "@takt/format";
 import { useMemo, useRef, useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
+import { newSongText } from "../editor/template.ts";
 import { requestPersistentStorage } from "../pwa.ts";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
-import { ImportIcon, SearchIcon } from "../ui/icons.tsx";
+import { ImportIcon, PlusIcon, SearchIcon } from "../ui/icons.tsx";
 import { IconButton, MainTopBar } from "../ui/TopBar.tsx";
 import { UpdateNotice } from "../ui/UpdateNotice.tsx";
 
@@ -19,6 +20,14 @@ export function LibraryScreen() {
   const [query, setQuery] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const [, navigate] = useLocation();
+
+  async function createSong() {
+    const title = t("library.newTitle");
+    const song = await data.createSong(title, newSongText(title, settings.notation));
+    requestPersistentStorage();
+    navigate(`/songs/${encodeURIComponent(song.id)}/edit`);
+  }
 
   const rows = useMemo(() => {
     const collator = new Intl.Collator(settings.language);
@@ -74,6 +83,15 @@ export function LibraryScreen() {
                 event.target.value = "";
               }}
             />
+            <button
+              type="button"
+              aria-label={t("library.new")}
+              title={t("library.new")}
+              onClick={() => void createSong()}
+              className="grid size-11 shrink-0 place-items-center rounded-control bg-accent text-accent-fg"
+            >
+              <PlusIcon />
+            </button>
           </>
         }
       />

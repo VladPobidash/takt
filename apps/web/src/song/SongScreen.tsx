@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import type { InstrumentChoice } from "../storage/app-state.ts";
-import { BackIcon, MinusIcon, PlusIcon } from "../ui/icons.tsx";
+import { BackIcon, EditIcon, MinusIcon, PlusIcon } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
 import { SectionTile } from "./SectionTile.tsx";
@@ -97,6 +97,14 @@ export function SongScreen({ id }: { id: string }) {
               ))}
             </p>
           </div>
+          <Link
+            href={`/songs/${encodeURIComponent(id)}/edit`}
+            aria-label={t("song.edit")}
+            title={t("song.edit")}
+            className="ml-auto grid size-11 shrink-0 place-items-center"
+          >
+            <EditIcon />
+          </Link>
         </div>
         <FormTimeline form={song.form} sections={song.sections} />
         <div
