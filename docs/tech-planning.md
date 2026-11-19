@@ -1,6 +1,6 @@
 # Technical planning — decisions and questions
 
-Status: **open** (2026-10-26). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
+Status: **in progress** (started 2026-10-26; planning session 2026-11-19: block 1 decided). This is a checklist for the technical planning session, not a set of answers. Each decision below ends as an ADR in [decisions/](decisions/) (proposed → accepted by the author); format questions end as changes to [format.md](format.md).
 
 ## Fixed inputs
 
@@ -9,6 +9,7 @@ These are already decided and constrain every answer below:
 - **Product:** [brief](brief.md), [format v0](format.md), [roadmap](roadmap.md).
 - **Local-first** ([ADR 0001](decisions/0001-local-first.md)). No server-side storage. Nothing on the playing path needs the network.
 - **Design v1 accepted** ([design system](design/README.md), [MVP screens](design/mvp-v1/README.md)). Swiss Blocks, Onest, EN + UA from day one, no bottom navigation, dense layouts.
+- **App stack** ([ADR 0003](decisions/0003-ui-kit.md)). React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4.
 - **Mobile-first, tablets and desktops supported.** Phone on a music stand, screen always on. Modern devices only — old phones and old browsers are not supported (author's decision, 2026-11-19).
 - **Timeline.** Weekly Saturday services are tests; the worship night on **2026-12-12** is the first real use. Stage 2 (song view usable by the band) targets 31 Oct.
 - **Team.** One developer working with Claude Code in a cloud environment. Static hosting (Railway Hobby or GitHub Pages were mentioned).
@@ -18,9 +19,7 @@ These are already decided and constrain every answer below:
 
 ### 1. App stack and UI foundation
 
-[ADR 0003](decisions/0003-ui-kit.md) proposes React + TypeScript + shadcn/ui (Base UI) + Tailwind. It is **not accepted**.
-
-> 2026-11-19: direction chosen (React + shadcn/ui on Base UI + Tailwind v4). ADR 0003 was revised to answer the questions below and waits for acceptance.
+> **Decided 2026-11-19:** [ADR 0003](decisions/0003-ui-kit.md) (accepted) — React 19 + shadcn/ui on Base UI + Tailwind v4, modern devices only, bar grid as DOM. The questions below are kept for the record.
 
 - Accept, revise or replace it? Alternatives worth a fair look: Preact, Svelte, Solid, React Aria Components.
 - Bundle size and start-up time on an older Android phone. Is there a budget?

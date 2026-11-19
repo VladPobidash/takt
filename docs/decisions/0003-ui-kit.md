@@ -1,7 +1,7 @@
 # 0003. App stack and UI foundation: React + shadcn/ui (Base UI) + Tailwind CSS v4
 
-- **Status:** proposed — waiting for the author's acceptance
-- **Date:** 2026-10-25, revised 2026-11-19 (technical planning session)
+- **Status:** accepted
+- **Date:** 2026-11-19 (proposed 2026-10-25, revised and accepted in the technical planning session)
 
 ## Context
 
@@ -30,7 +30,7 @@ Options considered (facts checked on 2026-11-19 against npm and the projects' do
 
 The runtime-size advantage of Preact, Svelte and Solid matters little here: the device policy excludes slow phones, and an installed PWA starts from the service-worker cache, not from the network.
 
-## Decision (proposed)
+## Decision
 
 1. **Framework:** React 19 + TypeScript. Current versions: `react` / `react-dom` 19.3.
 2. **Components:** shadcn/ui with **Base UI** primitives (`@base-ui/react` 1.9), copied into the app and restyled. Our own music components (`ChordCell`, `BarGrid`, `SectionTile`, `FormTimeline`, `SetlistRow`, `DiffBar`) are built on top, in the same style. If a primitive falls short on i18n or touch, we may use a React Aria hook for that one component.

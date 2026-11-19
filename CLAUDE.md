@@ -21,13 +21,14 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 - **Accept how musicians already write.** `| E*** G* |`, empty bars, `A - E`, `(2x)`, H/B notation must parse.
 - **Local-first.** No server-side storage of user content. A stateless helper server is acceptable only if an ADR says so.
 - **Offline on stage.** Nothing on the playing path may need the network.
-- **Phone first, laptop comfortable.**
+- **Mobile-first; tablets and desktops supported.** Modern devices only — no work for old phones or old browsers ([ADR 0003](docs/decisions/0003-ui-kit.md)).
 
 ## Current state
 
 - No code yet. **Design v1 accepted 2026-10-26.** Follow `docs/design/README.md` (tokens, components, scrollbars, localisation rules) for any UI work; the accepted MVP screens are in `docs/design/mvp-v1/` (screenshots + Claude Design sources — reference, not code to port).
-- Next step: technical planning. Open decisions and questions are listed in `docs/tech-planning.md`; each answer becomes an ADR.
-- Stack and app architecture are **not decided**. Do not scaffold frameworks or add dependencies before an ADR in `docs/decisions/` is accepted by the user.
+- Technical planning is in progress: `docs/tech-planning.md` lists the decisions; each answer becomes an ADR (written as proposed, accepted only by the user).
+- **App stack accepted 2026-11-19 ([ADR 0003](docs/decisions/0003-ui-kit.md)):** React 19 + TypeScript, shadcn/ui on Base UI, Tailwind CSS v4 (CSS config, design tokens as CSS variables), bar grid as plain DOM, browser floor Safari 16.4 / Chrome 111 / Firefox 128, 150 kB gzip JavaScript budget for the song screen.
+- Repository structure and tooling, the format library design, testing, platform and storage are **not decided yet**. Do not scaffold or add dependencies before the matching ADR in `docs/decisions/` is accepted by the user.
 - Likely direction (to confirm in an ADR): the format is a standalone, dependency-free TypeScript library (`packages/format`: parser, transpose, capo, ChordPro export) separate from the app (`apps/web`), with storage behind an adapter interface.
 
 ## Conventions

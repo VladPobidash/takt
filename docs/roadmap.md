@@ -23,7 +23,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 - [ ] Show repeats as `x4` or unroll them (for "where are we now")?
 - [ ] Lyrics: only a block under the section, or eventually aligned to bars?
 - [ ] PWA or native wrapper from the start?
-- [ ] Accept UI foundation: React + shadcn/ui (Base UI) + Tailwind ([ADR 0003](decisions/0003-ui-kit.md), proposed).
+- [x] App stack and UI foundation: React 19 + shadcn/ui (Base UI) + Tailwind v4, modern devices only ([ADR 0003](decisions/0003-ui-kit.md), accepted 2026-11-19).
 - [ ] Default H/B notation.
 - [x] UI language: English by default, Ukrainian from day one ([ADR 0002](decisions/0002-visual-direction.md)).
 - [x] Visual direction: "Swiss Blocks" in Onest ([ADR 0002](decisions/0002-visual-direction.md)).
