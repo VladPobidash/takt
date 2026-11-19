@@ -4,6 +4,7 @@ import type { MessageKey } from "../i18n/en.ts";
 import { LANGUAGES } from "../i18n/index.ts";
 import type { InstrumentChoice, Settings, Theme } from "../storage/app-state.ts";
 import { MainTopBar } from "../ui/TopBar.tsx";
+import { UpdateNotice } from "../ui/UpdateNotice.tsx";
 
 const INSTRUMENTS: { id: InstrumentChoice; label: MessageKey }[] = [
   { id: "harmony", label: "instrument.harmony" },
@@ -88,6 +89,7 @@ export function SettingsScreen() {
         }
       />
       <main className="mx-auto min-h-0 w-full max-w-xl flex-1 overflow-y-auto px-3 pb-6 pt-1">
+        <UpdateNotice />
         <Group title={t("settings.language")}>
           <select
             aria-label={t("settings.language")}
