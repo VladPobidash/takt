@@ -66,10 +66,17 @@ test.describe("Ukrainian UI", () => {
     await page.goto("/songs/dostoinyi-ty-odyn");
     const intro = page.getByRole("region", { name: "Intro" });
     await expect(intro).toContainText("Hm");
-    await page.goto("/settings");
+    // Move around inside the app, as a musician would: no page reloads.
+    await page.getByRole("link", { name: "Назад" }).click();
+    await page.getByRole("button", { name: "Розділи" }).click();
+    await page.getByRole("menuitem", { name: "Налаштування" }).click();
     await page.getByRole("radio", { name: /англійська/ }).check();
-    await page.goto("/songs/dostoinyi-ty-odyn");
+    await page.getByRole("button", { name: "Розділи" }).click();
+    await page.getByRole("menuitem", { name: "Бібліотека" }).click();
+    await page.getByRole("link", { name: /Достойний Ти Один/ }).click();
     await expect(intro).toContainText("Bm");
+    // The choice is stored on the device and survives a restart.
+    await expect.poll(() => page.reload().then(() => intro.textContent())).toContain("Bm");
   });
 
   test("after one visit the app opens a song without a network", async ({ page, context }) => {
