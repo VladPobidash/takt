@@ -88,3 +88,23 @@ test.describe("Ukrainian UI", () => {
     await expect(page.getByRole("tab", { name: "Гармонія" })).toBeVisible();
   });
 });
+
+test.describe("the production server", () => {
+  test("answers app routes with the app, caches hashed assets forever and nothing else", async ({
+    request,
+  }) => {
+    const route = await request.get("/songs/anything");
+    expect(route.status()).toBe(200);
+    expect(route.headers()["content-type"]).toContain("text/html");
+    expect(route.headers()["cache-control"]).toBe("no-cache");
+
+    const script = /src="(\/assets\/[^"]+\.js)"/.exec(await route.text())?.[1] ?? "";
+    const asset = await request.get(script);
+    expect(asset.status()).toBe(200);
+    expect(asset.headers()["cache-control"]).toContain("immutable");
+
+    expect((await request.get("/sw.js")).headers()["cache-control"]).toBe("no-cache");
+    expect((await request.get("/assets/missing.js")).status()).toBe(404);
+    expect((await request.get("/..%2f..%2fpackage.json")).status()).not.toBe(200);
+  });
+});
