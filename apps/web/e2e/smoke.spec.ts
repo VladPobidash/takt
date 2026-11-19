@@ -79,6 +79,52 @@ test.describe("view options", () => {
   });
 });
 
+test.describe("personal notes", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("a note on a bar stays on that bar after a restart and after the song is edited elsewhere", async ({
+    page,
+  }) => {
+    await page.goto("/songs/dostoinyi-ty-odyn");
+    const bridge = page.getByRole("region", { name: "Bridge" });
+    await bridge.getByRole("button", { name: "Personal note, bar 4" }).click();
+    const dialog = page.getByRole("dialog", { name: "Bar 4 · Bridge" });
+    await dialog.getByRole("textbox", { name: "Personal note" }).fill("watch the drummer");
+    await dialog.getByRole("button", { name: "Save" }).click();
+    await expect(bridge.getByRole("button", { name: "watch the drummer" })).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath("personal-note.png") });
+
+    await page.reload();
+    await expect(bridge.getByRole("button", { name: "watch the drummer" })).toBeVisible();
+
+    // A new section before the bridge does not move the note.
+    await page.getByRole("button", { name: "View options" }).click();
+    await page.getByRole("link", { name: "Edit the song" }).click();
+    const text = page.getByRole("textbox", { name: "Song text" });
+    await text.fill(
+      (await text.inputValue()).replace("## Bridge", "## Tag\n| D | A |\n\n## Bridge"),
+    );
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(page.getByRole("region", { name: "Tag" })).toBeVisible();
+    await expect(bridge.getByRole("button", { name: "watch the drummer" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "watch the drummer" })).toHaveCount(1);
+
+    // The view option hides personal notes; deleting removes the note.
+    await page.getByRole("button", { name: "View options" }).click();
+    const sheet = page.getByRole("dialog", { name: "View options" });
+    await sheet.getByRole("switch", { name: /My personal notes/ }).uncheck();
+    await expect(page.getByRole("button", { name: "watch the drummer" })).toHaveCount(0);
+    await sheet.getByRole("button", { name: "Reset" }).click();
+    await sheet.getByRole("button", { name: "Close" }).click();
+    await bridge.getByRole("button", { name: "watch the drummer" }).click();
+    await page
+      .getByRole("dialog", { name: "Bar 4 · Bridge" })
+      .getByRole("button", { name: "Delete" })
+      .click();
+    await expect(page.getByRole("button", { name: "watch the drummer" })).toHaveCount(0);
+  });
+});
+
 test.describe("auto-scroll", () => {
   test.use({ locale: "en-US", colorScheme: "light" });
 

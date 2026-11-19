@@ -16,7 +16,26 @@ export interface BarGridOptions {
  * One line of bars: 4 per row on a phone, 8 on wide screens (plain DOM, ADR 0003).
  * A chord's width is proportional to its beats; a short bar is drawn narrower.
  */
-export function BarLine({ line, options }: { line: ResolvedLine; options: BarGridOptions }) {
+export interface LineNotes {
+  /** The personal note on each bar of the line, by bar index. */
+  notes: (string | undefined)[];
+  /** A bar was tapped: open its note. */
+  onTap: (bar: number) => void;
+  /** Label of the tap target, e.g. "Personal note, bar 4". */
+  label: (bar: number) => string;
+  /** False hides dots and chips (view option) but keeps bars tappable. */
+  visible: boolean;
+}
+
+export function BarLine({
+  line,
+  options,
+  personal,
+}: {
+  line: ResolvedLine;
+  options: BarGridOptions;
+  personal?: LineNotes;
+}) {
   const extras = [line.repeat > 1 ? `×${line.repeat}` : null, line.cue].filter(Boolean).join(" · ");
   return (
     <div>
@@ -32,21 +51,63 @@ export function BarLine({ line, options }: { line: ResolvedLine; options: BarGri
             bar={bar}
             last={index === line.bars.length - 1}
             options={options}
+            noted={Boolean(personal?.visible && personal.notes[index])}
+            onTap={personal ? () => personal.onTap(index) : undefined}
+            tapLabel={personal?.label(index)}
           />
         ))}
       </div>
       {extras && <p className="mt-0.5 text-right text-[12px] font-bold opacity-80">{extras}</p>}
+      {personal?.visible &&
+        personal.notes
+          .flatMap((note, bar) => (note ? [{ bar, note }] : []))
+          .map((item) => (
+            <button
+              type="button"
+              key={item.bar}
+              onClick={() => personal.onTap(item.bar)}
+              className="mr-1 mt-1 inline-flex max-w-full items-center gap-1.5 rounded-badge bg-mine-bg px-1.5 py-0.5 text-left text-[12px] font-semibold text-mine-fg"
+            >
+              <span aria-hidden="true" className="size-2 shrink-0 bg-mine-dot" />
+              <span className="min-w-0 break-words">{item.note}</span>
+            </button>
+          ))}
     </div>
   );
 }
 
-function BarCell({ bar, last, options }: { bar: Bar; last: boolean; options: BarGridOptions }) {
+function BarCell({
+  bar,
+  last,
+  options,
+  noted,
+  onTap,
+  tapLabel,
+}: {
+  bar: Bar;
+  last: boolean;
+  options: BarGridOptions;
+  /** The bar has a personal note: a yellow dot in its corner. */
+  noted: boolean;
+  onTap?: () => void;
+  tapLabel?: string;
+}) {
   const { display, time } = options;
   const width = Math.min(1, bar.beats / time.beats);
   const dots = Math.max(1, Math.round(bar.beats));
   let position = 0;
   return (
-    <div className="min-w-0">
+    <div className="relative min-w-0">
+      {onTap && (
+        // The whole bar is the tap target; the chords stay plain text underneath.
+        <button
+          type="button"
+          aria-label={tapLabel}
+          onClick={onTap}
+          className="absolute inset-0 z-10 rounded-badge"
+        />
+      )}
+      {noted && <span aria-hidden="true" className="absolute right-1 top-0 size-2 bg-mine-dot" />}
       <div
         className={`flex flex-col justify-between border-l-2 border-bar pl-1.5 ${options.compact ? "min-h-6" : "min-h-11"} ${last ? "border-r-2" : ""}`}
         style={{ width: `${width * 100}%` }}

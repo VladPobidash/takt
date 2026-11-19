@@ -13,7 +13,7 @@ Each Saturday service is a test: afterwards we write down what got in the way. D
 5. **5 December.** Dress rehearsal at a service, then bug fixes only.
 6. **12 December.** Worship night.
 
-Stretch, only if stage 3 is finished early — otherwise after the worship night: auto-scroll with the metronome, the three-level view options, personal notes.
+The stretch features — auto-scroll with the metronome, the three-level view options, personal notes — were also built on 19 November.
 
 After the worship night: cloud sync, live session, tap-based editor, native wrapper, [change history and review](ideas/change-history.md).
 

@@ -41,6 +41,8 @@ export interface AppState {
   songs: StoredFile[];
   setlists: StoredFile[];
   viewOverrides: ViewOverrideLevels;
+  /** Personal notes by song id, then by anchor key (see notes/anchors.ts). Never written into .takt files. */
+  personalNotes: Record<string, Record<string, string>>;
   settings: Settings;
 }
 
@@ -90,6 +92,7 @@ export class AppData {
         song: (saved.viewOverridesSong as ViewOverrideLevels["song"] | undefined) ?? {},
         setlist: (saved.viewOverridesSetlist as ViewOverrideLevels["setlist"] | undefined) ?? {},
       },
+      personalNotes: (saved.personalNotes as AppState["personalNotes"] | undefined) ?? {},
       settings,
     });
     if (saved.seeded !== true) {
@@ -137,7 +140,10 @@ export class AppData {
 
   /** Everything on this device as one bundle. */
   exportBundle(now: Date): Bundle {
-    return createBundle({ songs: this.state.songs, setlists: this.state.setlists }, now);
+    return createBundle(
+      { songs: this.state.songs, setlists: this.state.setlists, notes: this.state.personalNotes },
+      now,
+    );
   }
 
   /** One setlist with the songs it lists, to send to the band as a single file. */
@@ -175,7 +181,33 @@ export class AppData {
       taken.add(id);
       await this.saveSetlist({ id, text: setlist.text, updatedAt: now });
     }
+    // Notes of a backup come back for songs that are here under the same id and have none yet.
+    if (bundle.notes) {
+      const ids = new Set(this.state.songs.map((song) => song.id));
+      const notes = { ...this.state.personalNotes };
+      for (const [song, songNotes] of Object.entries(bundle.notes)) {
+        if (ids.has(song) && !notes[song]) notes[song] = songNotes;
+      }
+      await this.saveNotes(notes);
+    }
     return { added: fresh.length, unchanged: bundle.songs.length - fresh.length };
+  }
+
+  /** Sets a personal note at an anchor of a song; empty text removes it. */
+  async setPersonalNote(songId: string, anchor: string, text: string): Promise<void> {
+    const songNotes = { ...this.state.personalNotes[songId] };
+    const trimmed = text.trim();
+    if (trimmed) songNotes[anchor] = trimmed;
+    else delete songNotes[anchor];
+    const notes = { ...this.state.personalNotes };
+    if (Object.keys(songNotes).length > 0) notes[songId] = songNotes;
+    else delete notes[songId];
+    await this.saveNotes(notes);
+  }
+
+  private async saveNotes(notes: AppState["personalNotes"]): Promise<void> {
+    this.update({ personalNotes: notes });
+    await this.store.setSetting("personalNotes", notes);
   }
 
   async createSetlist(name: string, text: string, now = Date.now()): Promise<StoredFile> {
@@ -214,6 +246,11 @@ export class AppData {
     await this.store.deleteSong(id);
     this.update({ songs: this.state.songs.filter((song) => song.id !== id) });
     await this.dropOverrides("song", id);
+    if (this.state.personalNotes[id]) {
+      const notes = { ...this.state.personalNotes };
+      delete notes[id];
+      await this.saveNotes(notes);
+    }
   }
 
   /** Sets one view option for a song or a setlist; `undefined` goes back to the inherited value. */

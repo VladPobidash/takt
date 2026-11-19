@@ -8,12 +8,18 @@ export interface Bundle {
   exportedAt: string;
   songs: { id: string; text: string }[];
   setlists: { id: string; text: string }[];
+  /** Personal notes by song id and anchor — only in a full backup, never in a shared setlist. */
+  notes?: Record<string, Record<string, string>>;
 }
 
 export const BUNDLE_EXTENSION = ".taktbundle";
 
 export function createBundle(
-  content: { songs: StoredFile[]; setlists: StoredFile[] },
+  content: {
+    songs: StoredFile[];
+    setlists: StoredFile[];
+    notes?: Record<string, Record<string, string>>;
+  },
   now: Date,
 ): Bundle {
   const strip = (files: StoredFile[]) =>
@@ -24,6 +30,7 @@ export function createBundle(
     exportedAt: now.toISOString(),
     songs: strip(content.songs),
     setlists: strip(content.setlists),
+    ...(content.notes && Object.keys(content.notes).length > 0 ? { notes: content.notes } : {}),
   };
 }
 
@@ -44,6 +51,19 @@ function files(value: unknown): { id: string; text: string }[] | null {
   return result;
 }
 
+function readNotes(value: unknown): Record<string, Record<string, string>> | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const result: Record<string, Record<string, string>> = {};
+  for (const [song, notes] of Object.entries(value)) {
+    if (typeof notes !== "object" || notes === null) continue;
+    const kept = Object.entries(notes).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    );
+    if (kept.length > 0) result[song] = Object.fromEntries(kept);
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
 /** Reads a bundle. Returns null for anything that is not a bundle this version understands. */
 export function parseBundle(text: string): Bundle | null {
   let data: unknown;
@@ -58,13 +78,16 @@ export function parseBundle(text: string): Bundle | null {
   const songs = files(raw.songs);
   const setlists = files(raw.setlists);
   if (!songs || !setlists) return null;
-  return {
+  const bundle: Bundle = {
     format: "takt-bundle",
     version: 1,
     exportedAt: typeof raw.exportedAt === "string" ? raw.exportedAt : "",
     songs,
     setlists,
   };
+  const notes = readNotes(raw.notes);
+  if (notes) bundle.notes = notes;
+  return bundle;
 }
 
 /** `takt-backup-2026-11-19.taktbundle` */
