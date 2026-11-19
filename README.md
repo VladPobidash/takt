@@ -10,7 +10,7 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 @bass | D | A | F#** G** | A |
 ```
 
-> Status: **pre-alpha.** The format library is being written; there is no app yet. First real-world test: a worship night on 12 December 2026.
+> Status: **pre-alpha.** The format library works; the app shows songs per instrument (capo, transposition, H/B naming) and imports `.takt` files. No offline install, setlists or editor yet. First real-world test: a worship night on 12 December 2026.
 
 ## Principles
 
@@ -39,7 +39,7 @@ pnpm fix       # apply lint and format fixes
 ```
 
 - `packages/format` — `@takt/format`: the `.takt` parser and tools. No runtime dependencies, no DOM.
-- `apps/web` — the app (not created yet).
+- `apps/web` — the app (React, Vite, Tailwind CSS). `pnpm --filter @takt/web dev` starts it.
 
 Work is tracked in [issues](https://github.com/VladPobidash/takt/issues/1); changes reach `main` through pull requests.
 
