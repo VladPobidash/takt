@@ -42,6 +42,25 @@ test.describe("English UI", () => {
   });
 });
 
+test.describe("compact mode", () => {
+  test.use({ locale: "en-US", colorScheme: "dark" });
+
+  test("fits the whole song on one phone screen", async ({ page }) => {
+    await page.goto("/songs/dostoinyi-ty-odyn");
+    const bridge = page.getByRole("region", { name: "Bridge" });
+    await expect(bridge).not.toBeInViewport();
+    await page.getByRole("button", { name: "Compact mode" }).click();
+    await expect(page.getByRole("button", { name: "Compact mode" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(bridge).toBeInViewport({ ratio: 1 });
+    await expect(page.getByRole("region", { name: "Intro" })).toBeInViewport({ ratio: 1 });
+    await expect(bridge).toContainText("яма");
+    await page.screenshot({ path: test.info().outputPath("compact.png") });
+  });
+});
+
 test.describe("Ukrainian UI", () => {
   test.use({ locale: "uk-UA", colorScheme: "light" });
 

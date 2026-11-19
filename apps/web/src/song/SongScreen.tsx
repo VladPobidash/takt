@@ -1,10 +1,18 @@
 import { parse, resolveSong } from "@takt/format";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import type { InstrumentChoice } from "../storage/app-state.ts";
-import { BackIcon, EditIcon, MinusIcon, NextIcon, PlusIcon, PreviousIcon } from "../ui/icons.tsx";
+import {
+  BackIcon,
+  CompactIcon,
+  EditIcon,
+  MinusIcon,
+  NextIcon,
+  PlusIcon,
+  PreviousIcon,
+} from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
 import { FormTimeline } from "./FormTimeline.tsx";
 import { SectionTile } from "./SectionTile.tsx";
@@ -43,6 +51,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   const transpose = context ? context.transpose : ownTranspose;
   const setTranspose = context ? context.onTranspose : setOwnTranspose;
   const [capoChoice, setCapoChoice] = useState<number | null>(null);
+  const [compact, setCompact] = useState(settings.compact);
   const [, navigate] = useLocation();
   const scroller = useRef<HTMLElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -122,6 +131,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
     time: song.time,
     beatDots: settings.beatDots,
     soundingChords: settings.soundingChords,
+    compact,
   };
   const meta: [string, string][] = [
     [t("song.key"), keyLabel(display.soundingKey, settings.notation)],
@@ -156,11 +166,21 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
               ))}
             </p>
           </div>
+          <button
+            type="button"
+            aria-label={t("song.compact")}
+            title={t("song.compact")}
+            aria-pressed={compact}
+            onClick={() => setCompact(!compact)}
+            className={`ml-auto grid size-11 shrink-0 place-items-center rounded-control ${compact ? "bg-accent text-accent-fg" : ""}`}
+          >
+            <CompactIcon />
+          </button>
           <Link
             href={`/songs/${encodeURIComponent(id)}/edit`}
             aria-label={t("song.edit")}
             title={t("song.edit")}
-            className="ml-auto grid size-11 shrink-0 place-items-center"
+            className="grid size-11 shrink-0 place-items-center"
           >
             <EditIcon />
           </Link>
@@ -247,7 +267,11 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
             ))}
           </div>
         )}
-        <div className="flex flex-col gap-1.5">
+        <div
+          // Compact: one column on a phone, two or three on wider screens; a section never splits.
+          className={compact ? "gap-1.5 md:columns-2 xl:columns-3" : "flex flex-col gap-1.5"}
+          style={compact ? ({ "--chord-size": "17px" } as CSSProperties) : undefined}
+        >
           {song.sections.map((section) => (
             <SectionTile key={section.index} section={section} options={options} />
           ))}
