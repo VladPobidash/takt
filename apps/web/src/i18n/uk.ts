@@ -142,6 +142,43 @@ export const uk: Messages = {
   "settings.backup": "Експортувати все",
   "settings.restoreHint": "Щоб відновити, імпортуйте файл копії в бібліотеці.",
 
+  "nav.service": "Служіння",
+  "library.setlists": "Сетлисти",
+  "library.newSetlist": "Новий сетлист",
+  "library.newSetlistTitle": "Служіння",
+  "library.noSetlists":
+    "Сетлистів ще немає. Сетлист — це карта одного служіння: пісні по порядку, з тональностями й нотатками на цей вечір.",
+  "library.songCount": {
+    one: "{count} пісня",
+    few: "{count} пісні",
+    many: "{count} пісень",
+    other: "{count} пісні",
+  },
+
+  "setlist.notFound": "Цього сетлиста немає на цьому пристрої.",
+  "setlist.start": "Почати",
+  "setlist.add": "Додати пісню",
+  "setlist.pick": "Оберіть пісню",
+  "setlist.edit": "Редагувати сетлист",
+  "setlist.doneEditing": "Завершити редагування",
+  "setlist.share": "Надіслати сетлист разом із піснями",
+  "setlist.title": "Назва",
+  "setlist.date": "Дата",
+  "setlist.note": "Нотатка на цей вечір",
+  "setlist.moveUp": "Підняти «{title}»",
+  "setlist.moveDown": "Опустити «{title}»",
+  "setlist.remove": "Прибрати «{title}»",
+  "setlist.missing": "Немає на цьому пристрої",
+  "setlist.empty": "Пісень ще немає.",
+  "setlist.delete": "Видалити цей сетлист",
+  "setlist.deleteTitle": "Видалити «{title}»?",
+  "setlist.deleteText":
+    "Сетлист буде видалено з цього пристрою. Його пісні залишаться в бібліотеці.",
+  "setlist.previous": "Попередня пісня",
+  "setlist.next": "Наступна пісня",
+  "setlist.position": "{position} з {count}",
+  "common.close": "Закрити",
+
   "update.available": "Нова версія Takt готова.",
   "update.apply": "Оновити зараз",
 };

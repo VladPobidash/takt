@@ -135,6 +135,64 @@ test.describe("editor", () => {
   });
 });
 
+test.describe("service map", () => {
+  test.use({ locale: "en-US", colorScheme: "dark" });
+
+  test("a setlist is built, played through with the keyboard and keeps the key chosen for the night", async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto("/library");
+    await page.getByRole("tab", { name: /Setlists/ }).click();
+    await page.getByRole("button", { name: "New setlist" }).click();
+    await expect(page).toHaveURL(/\/setlists\/service-\d{4}-\d{2}-\d{2}$/);
+
+    for (const title of ["Достойний Ти Один", "Silent Night"]) {
+      await page.getByRole("button", { name: "Add a song" }).click();
+      await page.getByRole("dialog").getByRole("searchbox").fill(title.slice(0, 5));
+      await page.getByRole("dialog").getByRole("button", { name: title }).click();
+    }
+    const rows = page.getByRole("listitem");
+    await expect(rows).toHaveCount(2);
+
+    // Order and a note for the night.
+    await page.getByRole("button", { name: "Edit the setlist" }).click();
+    await page.getByRole("button", { name: "Move “Silent Night” up" }).click();
+    await page.getByRole("textbox", { name: "Note for the night: Silent Night" }).fill("no intro");
+    await page.getByRole("button", { name: "Finish editing" }).click();
+    await expect(rows.first()).toContainText("Silent Night");
+    await expect(rows.first()).toContainText("no intro");
+
+    // Play through: the first song, then the next one with the right arrow (or a pedal).
+    await page.getByRole("link", { name: "Start" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Silent Night");
+    await expect(page.getByRole("contentinfo")).toContainText("1 of 2");
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Достойний Ти Один");
+    await expect(page.getByRole("link", { name: "Next song" })).toHaveCount(0);
+
+    // A key for tonight is stored in the setlist, not in the song.
+    await page.getByRole("button", { name: "Transpose up" }).click();
+    await page.getByRole("button", { name: "Transpose up" }).click();
+    await expect(page.getByRole("contentinfo")).toContainText("E");
+    await page.keyboard.press("PageUp");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Silent Night");
+    await page.getByRole("link", { name: "Back" }).click();
+    await expect(rows.nth(1)).toContainText("E");
+    await page.screenshot({ path: test.info().outputPath("service-map.png") });
+
+    await page.reload();
+    await expect(rows.nth(1)).toContainText("E");
+    await page.goto("/songs/dostoinyi-ty-odyn");
+    await expect(page.getByRole("contentinfo")).toContainText("original");
+
+    // The app comes back to the setlist that was open last.
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/setlists\/service-/);
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("backup", () => {
   test.use({ locale: "en-US" });
 

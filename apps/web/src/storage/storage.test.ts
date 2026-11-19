@@ -54,6 +54,18 @@ describe("AppData", () => {
     expect(data.getState().songs.map((s) => s.id)).toEqual(["silent-night", "silent-night-2"]);
   });
 
+  test("a save is visible in the state at once, before the store has written it", async () => {
+    const data = await AppData.load(createMemoryStore(), { preferredLanguages: ["en"] });
+    const first = data.saveSetlist({ id: "s", text: "# One\n", updatedAt: 1 });
+    expect(data.getState().setlists.map((s) => s.text)).toEqual(["# One\n"]);
+    const second = data.saveSetlist({ id: "s", text: "# Two\n", updatedAt: 2 });
+    expect(data.getState().setlists.map((s) => s.text)).toEqual(["# Two\n"]);
+    await Promise.all([first, second]);
+    const song = data.saveSong({ id: "a", text: "# A\n", updatedAt: 1 });
+    expect(data.getState().songs.map((s) => s.id)).toEqual(["a"]);
+    await song;
+  });
+
   test("subscribers hear about changes and writes reach the store", async () => {
     const store = createMemoryStore();
     const data = await AppData.load(store, { preferredLanguages: ["en"] });

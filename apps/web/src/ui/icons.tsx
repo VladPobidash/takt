@@ -53,6 +53,43 @@ export const WarningIcon = () => (
     <path d="M12 4l9 16H3l9-16zM12 10v4M12 17.5v.5" />
   </Icon>
 );
+export const SlidersIcon = () => (
+  <Icon>
+    <path d="M4 8h10M18 8h2M4 16h2M10 16h10" />
+    <circle cx="16" cy="8" r="2" />
+    <circle cx="8" cy="16" r="2" />
+  </Icon>
+);
+export const ShareIcon = () => (
+  <Icon>
+    <path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6" />
+  </Icon>
+);
+export const UpIcon = () => (
+  <Icon>
+    <path d="M6 15l6-6 6 6" />
+  </Icon>
+);
+export const CloseIcon = () => (
+  <Icon>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </Icon>
+);
+export const PreviousIcon = () => (
+  <Icon>
+    <path d="M18 5l-9 7 9 7V5zM6 5v14" />
+  </Icon>
+);
+export const NextIcon = () => (
+  <Icon>
+    <path d="M6 5l9 7-9 7V5zM18 5v14" />
+  </Icon>
+);
+export const PlayIcon = () => (
+  <Icon>
+    <path d="M8 5l11 7-11 7V5z" fill="currentColor" />
+  </Icon>
+);
 export const SearchIcon = () => (
   <Icon>
     <circle cx="11" cy="11" r="6.5" />
