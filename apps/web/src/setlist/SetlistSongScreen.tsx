@@ -58,6 +58,7 @@ export function SetlistSongScreen({
     previousHref: position > 1 ? `${base}/${position - 1}` : null,
     nextHref: position < count ? `${base}/${position + 1}` : null,
     position: t("setlist.position", { position, count }),
+    setlistId,
   };
   const dateLabel = date
     ? new Intl.DateTimeFormat(settings.language, {
