@@ -42,6 +42,35 @@ test.describe("English UI", () => {
   });
 });
 
+test.describe("settings", () => {
+  test.use({ locale: "en-US" });
+
+  test("language and instrument are chosen from searchable lists", async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto("/settings");
+    await page.getByRole("combobox", { name: "Interface language" }).click();
+    await page.getByRole("combobox", { name: "Search languages" }).fill("ukr");
+    await expect(page.getByRole("option")).toHaveCount(1);
+    await page.getByRole("option", { name: /Українська/ }).click();
+    await expect(page.getByRole("button", { name: "Розділи" })).toContainText("Налаштування");
+
+    await page.getByRole("combobox", { name: "Мій інструмент" }).click();
+    await page.getByRole("combobox", { name: "Пошук інструмента" }).fill("гіт");
+    await page.getByRole("option", { name: /Гітара/ }).click();
+    await expect(page.getByRole("combobox", { name: "Мій інструмент" })).toContainText("Гітара");
+    await page.screenshot({ path: test.info().outputPath("settings.png") });
+
+    await page.getByRole("button", { name: "Розділи" }).click();
+    await page.getByRole("menuitem", { name: "Бібліотека" }).click();
+    await page.getByRole("link", { name: /Silent Night/ }).click();
+    await expect(page.getByRole("tab", { name: "Гітара" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("compact mode", () => {
   test.use({ locale: "en-US", colorScheme: "dark" });
 

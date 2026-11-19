@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Redirect, Route, Switch } from "wouter";
 import { AppContext, type App as AppValue } from "./app-context.tsx";
 import { EditorScreen } from "./editor/EditorScreen.tsx";
@@ -6,12 +6,17 @@ import { type Translate, translate } from "./i18n/index.ts";
 import { LibraryScreen } from "./library/LibraryScreen.tsx";
 import { ServiceMapScreen } from "./setlist/ServiceMapScreen.tsx";
 import { SetlistSongScreen } from "./setlist/SetlistSongScreen.tsx";
-import { SettingsScreen } from "./settings/SettingsScreen.tsx";
 import { SongScreen } from "./song/SongScreen.tsx";
 import { type AppData, useAppState } from "./storage/app-state.ts";
 
 /** Root size of a chord name; quality and bass scale with it (design: 25–26 px by default). */
 const CHORD_SIZES = { s: "21px", m: "25px", l: "30px" } as const;
+
+// Settings bring the Base UI combobox with them; loading them on demand keeps the song
+// screen within its JavaScript budget (ADR 0003). The chunk is precached like everything else.
+const SettingsScreen = lazy(() =>
+  import("./settings/SettingsScreen.tsx").then((module) => ({ default: module.SettingsScreen })),
+);
 
 export function App({ data }: { data: AppData }) {
   const state = useAppState(data);
@@ -40,7 +45,11 @@ export function App({ data }: { data: AppData }) {
     <AppContext value={app}>
       <Switch>
         <Route path="/library" component={LibraryScreen} />
-        <Route path="/settings" component={SettingsScreen} />
+        <Route path="/settings">
+          <Suspense fallback={null}>
+            <SettingsScreen />
+          </Suspense>
+        </Route>
         <Route path="/setlists/:id/:position">
           {(params) => (
             <SetlistSongScreen setlistId={params.id} position={Number(params.position)} />
