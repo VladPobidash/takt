@@ -2,7 +2,6 @@ import type { ResolvedSection } from "@takt/format";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import { type BarGridOptions, BarLine } from "./BarGrid.tsx";
-import { compactColumns, useFittingColumns } from "./compact.ts";
 
 const INSTRUMENT_LABEL: Record<string, MessageKey> = {
   guitar: "instrument.guitar",
@@ -76,13 +75,12 @@ export function SectionTile({
       }
     />
   );
-  // Compact: one grid for the whole section, with as many columns as its longest line.
-  const fitting = useFittingColumns(compactColumns(section.lines));
+  // Compact: every section has the columns of the whole song, so a bar has one width everywhere
+  // and bar lines meet across sections.
   const lines = options.compact ? (
     <div
-      ref={fitting.grid}
       className="grid gap-y-0.5"
-      style={{ gridTemplateColumns: `repeat(${fitting.columns}, minmax(min-content, 1fr))` }}
+      style={{ gridTemplateColumns: `repeat(${options.columns ?? 4}, minmax(0, 1fr))` }}
     >
       {section.lines.map((line, index) => lineOf(line, index, true))}
     </div>

@@ -19,7 +19,7 @@ import {
   SlidersIcon,
 } from "../ui/icons.tsx";
 import { IconButton } from "../ui/TopBar.tsx";
-import { useFitScale } from "./compact.ts";
+import { columnCandidates, useCompactFit } from "./compact.ts";
 import { FormTimeline } from "./FormTimeline.tsx";
 import { type SectionNotes, SectionTile, sectionAnchor } from "./SectionTile.tsx";
 import { usePlayback } from "./usePlayback.ts";
@@ -123,11 +123,13 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   );
 
   const playback = usePlayback(song);
-  // Compact mode shrinks a little when the song would not fit the screen otherwise.
-  const fitScale = useFitScale(
+  // Compact mode: one grid for the whole song, shrunk a little when it would not fit the screen.
+  const candidates = useMemo(() => columnCandidates(song?.sections ?? []), [song]);
+  const fit = useCompactFit(
     scroller,
     compact,
-    `${id}/${instrument}/${capoChoice}/${stored?.updatedAt}`,
+    candidates,
+    `${id}/${instrument}/${capoChoice}/${transpose}/${stored?.updatedAt}`,
   );
   const nowSection = playback.step?.section ?? null;
   // Auto-scroll follows sections only: when the section changes, it is brought to the top.
@@ -191,6 +193,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
     beatDots: view.beatDots,
     soundingChords: view.soundingChords,
     compact,
+    columns: fit.columns,
   };
   const meta: [string, string][] = [
     [t("song.key"), keyLabel(display.soundingKey, settings.notation)],
@@ -339,10 +342,12 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
         <div
           // Compact: one column on a phone, two or three on wider screens; a section never splits.
           className={compact ? "gap-1.5 md:columns-2 xl:columns-3" : "flex flex-col gap-1.5"}
+          data-columns={compact ? fit.columns : undefined}
+          data-scale={compact ? fit.scale : undefined}
           style={
             compact
               ? ({
-                  "--compact-scale": fitScale,
+                  "--compact-scale": fit.scale,
                   "--chord-size": "calc(17px * var(--compact-scale))",
                 } as CSSProperties)
               : undefined
