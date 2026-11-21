@@ -30,6 +30,43 @@ describe("AppData", () => {
     expect(second.getState().songs).toEqual([]);
   });
 
+  test("an example added in a later version reaches a device that already uses the app", async () => {
+    const store = createMemoryStore();
+    const original = [{ name: "silent-night.takt", text: "# Silent Night\n", original: true }];
+    const first = await AppData.load(store, { preferredLanguages: ["en"], seed: original });
+    await first.deleteSong("silent-night");
+
+    const later = [...original, { name: "vdiachnist.takt", text: "# Вдячність\n" }];
+    const second = await AppData.load(store, { preferredLanguages: ["en"], seed: later });
+    // The new example arrives; the deleted one does not come back.
+    expect(second.getState().songs.map((s) => s.id)).toEqual(["vdiachnist"]);
+    await second.deleteSong("vdiachnist");
+    const third = await AppData.load(store, { preferredLanguages: ["en"], seed: later });
+    expect(third.getState().songs).toEqual([]);
+  });
+
+  test("a device seeded before the list of examples existed gets only the new ones", async () => {
+    const store = createMemoryStore();
+    await store.setSetting("seeded", true);
+    await store.putSong({ id: "my-song", text: "# Mine\n", updatedAt: 1 });
+    const seed = [
+      { name: "silent-night.takt", text: "# Silent Night\n", original: true },
+      { name: "vdiachnist.takt", text: "# Вдячність\n" },
+    ];
+    const data = await AppData.load(store, { preferredLanguages: ["en"], seed });
+    expect(data.getState().songs.map((s) => s.id)).toEqual(["my-song", "vdiachnist"]);
+  });
+
+  test("an example never replaces or doubles a song the musician already has under that name", async () => {
+    const store = createMemoryStore();
+    await store.putSong({ id: "vdiachnist", text: "# My own version\n", updatedAt: 1 });
+    const seed = [{ name: "vdiachnist.takt", text: "# Вдячність\n" }];
+    const data = await AppData.load(store, { preferredLanguages: ["en"], seed });
+    expect(data.getState().songs.map((s) => [s.id, s.text])).toEqual([
+      ["vdiachnist", "# My own version\n"],
+    ]);
+  });
+
   test("first-run defaults follow the browser language; saved settings win", async () => {
     const store = createMemoryStore();
     const data = await AppData.load(store, { preferredLanguages: ["uk-UA", "en"] });

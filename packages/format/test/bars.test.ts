@@ -175,6 +175,18 @@ describe("tokens", () => {
     expect(shape(read("|: D | A :|").bars)).toEqual(["D:4", "A:4"]);
   });
 
+  test("| C # | — a sharp typed after a space still belongs to the chord", () => {
+    const { bars, diagnostics } = read("| H | D#m | C # |", 6);
+    expect(shape(bars)).toEqual(["H:6", "D#m:6", "C#:6"]);
+    expect(bars[2]?.cells[0]?.chord?.root).toEqual({ letter: "C", accidental: 1 });
+    expect(diagnostics).toEqual([]);
+    // The span covers "C #", so rewriting the chord replaces both parts.
+    const cell = bars[2]?.cells[0];
+    expect("| H | D#m | C # |".slice(cell?.span.start.offset, cell?.span.end.offset)).toBe("C #");
+    // A sharp with nothing to attach to is still reported.
+    expect(read("| # |").diagnostics.map((d) => d.code)).toEqual(["unknown-chord"]);
+  });
+
   test("N.C. in the ways people type it", () => {
     for (const nc of ["N.C.", "NC", "N.C", "n.c."]) {
       expect(read(`| ${nc} |`).bars[0]?.cells[0]?.kind, nc).toBe("no-chord");

@@ -40,6 +40,12 @@ describe("transposeText", () => {
     );
   });
 
+  test('a chord typed as "C #" is rewritten as one chord', () => {
+    expect(transposeText("# T\nkey: F#\n## A\n| F# | C # |\n", 2)).toBe(
+      "# T\nkey: Ab\n## A\n| Ab | Eb |\n",
+    );
+  });
+
   test("leaves unknown tokens, N.C., % and empty bars alone", () => {
     expect(transposeText("# T\nkey: C\n## A\n| C | stop | N.C. | % | | C . G . |\n", 2)).toBe(
       "# T\nkey: D\n## A\n| D | stop | N.C. | % | | D . A . |\n",

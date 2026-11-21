@@ -18,6 +18,7 @@ test.describe("English UI", () => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/library$/);
     await expect(page.getByRole("link", { name: /Silent Night/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Вдячність/ })).toContainText("F#");
     await page.getByRole("link", { name: /Достойний Ти Один/ }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Достойний Ти Один");
     await expect(page.getByRole("region", { name: "Verse 1" })).toContainText("Asus4");
@@ -200,6 +201,49 @@ test.describe("settings", () => {
       "aria-selected",
       "true",
     );
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("a song from the band's chart", () => {
+  test.use({ locale: "uk-UA", colorScheme: "dark" });
+
+  test("«Вдячність»: sections named the band's way, and D shapes with a capo on the fourth fret", async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto("/songs/vdiachnist");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Вдячність");
+    const form = page.getByRole("navigation", { name: "Форма пісні" });
+    await expect(form.getByRole("button")).toHaveText([
+      "I",
+      "V1,2",
+      "C",
+      "I",
+      "V3",
+      "C2",
+      "I",
+      "B1",
+      "B2",
+      "B3",
+      "Inst",
+      "C3",
+    ]);
+    await expect(page.getByRole("region", { name: "3 Verse" })).toHaveAttribute(
+      "data-section",
+      "verse",
+    );
+    await expect(page.getByRole("region", { name: "1 Bridge" })).toHaveAttribute(
+      "data-section",
+      "bridge",
+    );
+
+    await page.getByRole("tab", { name: "Гітара" }).click();
+    await expect(page.getByRole("button", { name: "4→D" })).toHaveAttribute("aria-pressed", "true");
+    const verse = page.getByRole("region", { name: "1, 2 Verse" });
+    await expect(verse).toContainText("Hm");
+    await expect(verse).toContainText("D#m");
+    await page.screenshot({ path: test.info().outputPath("vdiachnist-guitar.png") });
     expect(errors).toEqual([]);
   });
 });
@@ -470,7 +514,7 @@ test.describe("backup", () => {
     await expect(second.getByRole("link", { name: /Silent Night/ })).toHaveCount(0);
 
     await second.locator('input[type="file"]').setInputFiles(path);
-    await expect(second.getByRole("status")).toContainText("1 song imported · 1 was already here");
+    await expect(second.getByRole("status")).toContainText("1 song imported · 2 were already here");
     await expect(second.getByRole("link", { name: /Silent Night/ })).toBeVisible();
     await other.close();
   });

@@ -39,6 +39,14 @@ export interface ViewOverrideLevels {
   setlist: Record<string, ViewOverrides>;
 }
 
+/** An example song shipped with the app. */
+export interface SeedSong {
+  name: string;
+  text: string;
+  /** True for the examples of the first release (see `AppData.load`). */
+  original?: boolean;
+}
+
 export interface AppState {
   songs: StoredFile[];
   setlists: StoredFile[];
@@ -78,10 +86,14 @@ export class AppData {
     this.state = state;
   }
 
-  /** Loads everything from the store; on the very first run stores `seed` songs. */
+  /**
+   * Loads everything from the store and adds the example songs (`seed`) this device has not
+   * been given yet. Each example is offered once: deleting it does not bring it back, and an
+   * example added in a later version reaches devices that already use the app.
+   */
   static async load(
     store: SongStore,
-    options: { preferredLanguages: readonly string[]; seed?: { name: string; text: string }[] },
+    options: { preferredLanguages: readonly string[]; seed?: SeedSong[] },
   ): Promise<AppData> {
     const saved = await store.getSettings();
     const settings = { ...defaultSettings(options.preferredLanguages) };
@@ -98,9 +110,22 @@ export class AppData {
       personalNotes: (saved.personalNotes as AppState["personalNotes"] | undefined) ?? {},
       settings,
     });
-    if (saved.seeded !== true) {
-      if (data.state.songs.length === 0 && options.seed) await data.importSongs(options.seed);
-      await store.setSetting("seeded", true);
+    const seed = options.seed ?? [];
+    // Before the list existed a device only recorded that it had been seeded: it had
+    // received the examples marked `original`.
+    const given = new Set<string>(
+      Array.isArray(saved.seededSongs)
+        ? (saved.seededSongs as string[])
+        : saved.seeded === true
+          ? seed.filter((song) => song.original).map((song) => song.name)
+          : [],
+    );
+    const fresh = seed.filter((song) => !given.has(song.name));
+    if (fresh.length > 0 || !Array.isArray(saved.seededSongs)) {
+      // An example whose id is already taken (the musician has their own file) is not added.
+      const taken = new Set(data.state.songs.map((song) => song.id));
+      await data.importSongs(fresh.filter((song) => !taken.has(slugify(song.name))));
+      await store.setSetting("seededSongs", [...given, ...fresh.map((song) => song.name)]);
     }
     return data;
   }

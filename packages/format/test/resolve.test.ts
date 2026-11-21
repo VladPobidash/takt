@@ -163,6 +163,53 @@ describe("parts", () => {
   });
 });
 
+describe("examples/vdiachnist.takt", () => {
+  const text = exampleSong("vdiachnist.takt");
+
+  test("section names as the band writes them get their types and labels", () => {
+    const harmony = song(text);
+    expect(harmony.sections.map((s) => `${s.abbr}:${s.type}`)).toEqual([
+      "I:intro",
+      "V1,2:verse",
+      "C:chorus",
+      "I:interlude",
+      "V3:verse",
+      "C2:chorus",
+      "I:interlude",
+      "B1:bridge",
+      "B2:bridge",
+      "B3:bridge",
+      "Inst:instrumental",
+      "C3:chorus",
+    ]);
+    expect(harmony.form.map((f) => `${f.bars}×${f.repeat}`)).toEqual([
+      "2×1",
+      "8×2",
+      "8×2",
+      "2×1",
+      "8×1",
+      "8×2",
+      "4×1",
+      "8×1",
+      "8×1",
+      "8×1",
+      "5×1",
+      "9×1",
+    ]);
+  });
+
+  test("F sharp in 6/8 with a capo on the fourth fret", () => {
+    const harmony = song(text);
+    expect(harmony.key && formatKey(harmony.key, "H")).toBe("F#");
+    expect(harmony).toMatchObject({
+      tempo: 78,
+      capo: 4,
+      time: { beats: 6, unit: 8 },
+      notation: "H",
+    });
+  });
+});
+
 describe("section types", () => {
   test("English and Ukrainian names", () => {
     const table: [string, string][] = [
@@ -183,10 +230,38 @@ describe("section types", () => {
       ["Solo", "instrumental"],
       ["Outro", "outro"],
       ["Кінцівка", "outro"],
+      // The band writes the number first, and "Interludio".
+      ["3 Verse", "verse"],
+      ["1, 2 Verse", "verse"],
+      ["1 Bridge", "bridge"],
+      ["2. Приспів", "chorus"],
+      ["Interludio", "interlude"],
       ["Tag", "other"],
       ["", "other"],
     ];
     for (const [name, type] of table) expect(sectionType(name), name).toBe(type);
+  });
+
+  test("abbreviations: a number written first works like one written last", () => {
+    const names = [
+      "1, 2 Verse",
+      "Chorus",
+      "3 Verse",
+      "Chorus 2",
+      "1 Bridge",
+      "2 Bridge",
+      "Chorus 3",
+    ];
+    const text = `# T\n${names.map((n) => `## ${n}\n| D |\n`).join("")}`;
+    expect(song(text).sections.map((s) => s.abbr)).toEqual([
+      "V1,2",
+      "C",
+      "V3",
+      "C2",
+      "B1",
+      "B2",
+      "C3",
+    ]);
   });
 
   test("abbreviations: explicit numbers win, unnumbered repeats are counted", () => {
