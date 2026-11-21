@@ -301,6 +301,76 @@ test.describe("compact mode", () => {
   });
 });
 
+test.describe("compact mode on an installed iPhone app", () => {
+  // The web view of a 393 x 852 pt iPhone below its status bar, with the home-indicator inset.
+  test.use({ locale: "en-US", colorScheme: "dark", viewport: { width: 393, height: 797 } });
+
+  for (const [song, first, last] of [
+    ["bozhe-ia-vdiachnyi-tobi", "Intro", "Chorus 3"],
+    ["vdiachnist", "Intro", "Chorus 3"],
+  ] as const) {
+    test(`${song}: the whole song is on one screen, across the full width`, async ({ page }) => {
+      const session = await page.context().newCDPSession(page);
+      await session.send("Emulation.setSafeAreaInsetsOverride", { insets: { bottom: 34 } });
+      await page.goto(`/songs/${song}`);
+      await page.getByRole("button", { name: "Compact mode" }).click();
+      await expect(page.getByRole("region", { name: first }).first()).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole("region", { name: last })).toBeInViewport({ ratio: 1 });
+      const main = page.getByRole("main");
+      expect(await main.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeLessThanOrEqual(1);
+      expect(await main.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0);
+      await page.screenshot({ path: test.info().outputPath(`compact-${song}.png`) });
+    });
+  }
+
+  test("a line keeps all its bars in one row; the bars of a section share their columns", async ({
+    page,
+  }) => {
+    await page.goto("/songs/bozhe-ia-vdiachnyi-tobi");
+    await page.getByRole("button", { name: "Compact mode" }).click();
+    const rows = (name: string) =>
+      page
+        .getByRole("region", { name, exact: true })
+        .locator(".grid > div.relative")
+        .evaluateAll((bars) => {
+          const tops = bars.map((bar) => Math.round(bar.getBoundingClientRect().top));
+          const lefts = bars.map((bar) => Math.round(bar.getBoundingClientRect().left));
+          return { rows: new Set(tops).size, columns: new Set(lefts).size, bars: bars.length };
+        });
+    // Two lines of five bars: two rows of five, not 4 + 1 + 4 + 1.
+    expect(await rows("Chorus")).toEqual({ rows: 2, columns: 5, bars: 10 });
+    // Four lines of three bars fill the width in three columns.
+    expect(await rows("1 Verse")).toEqual({ rows: 4, columns: 3, bars: 12 });
+    expect(await rows("Bridge")).toEqual({ rows: 2, columns: 7, bars: 14 });
+  });
+
+  test("a row too dense for the screen falls back to fewer columns instead of overflowing", async ({
+    page,
+  }) => {
+    await page.goto("/library");
+    await page.getByRole("button", { name: "New song" }).click();
+    const dense = "| D/F#** Gsus4** | Asus4** Hm7** ".repeat(4);
+    await page
+      .getByRole("textbox", { name: "Song text" })
+      .fill(`# Dense\nkey: D\nnotation: H\n\n## Verse\n${dense}|\n`);
+    await page.getByRole("button", { name: "Done" }).click();
+    await page.getByRole("button", { name: "Compact mode" }).click();
+    const verse = page.getByRole("region", { name: "Verse" });
+    await expect
+      .poll(() =>
+        verse
+          .locator(".grid > div.relative")
+          .evaluateAll(
+            (bars) => new Set(bars.map((bar) => Math.round(bar.getBoundingClientRect().top))).size,
+          ),
+      )
+      .toBe(2);
+    expect(
+      await page.getByRole("main").evaluate((el) => el.scrollWidth - el.clientWidth),
+    ).toBeLessThanOrEqual(0);
+  });
+});
+
 test.describe("Ukrainian UI", () => {
   test.use({ locale: "uk-UA", colorScheme: "light" });
 

@@ -77,7 +77,7 @@ Blue vs orange (verse vs chorus) also differ in lightness, so they stay distingu
 
 - Touch targets ≥ 44 × 44 px (40 px wide is acceptable inside a grouped control). No element taller than it needs to be: top bar 52 px, tabs 40 px, player toolbar 56 px.
 - Phone screen padding 10–12 px; section tiles 10 / 8 px inside (6 / 8 compact); 4–6 px between tiles; list rows 9–10 px vertical padding.
-- Bars per row: 4 on phone, 8 on laptop (normal mode); 4 per column in compact mode. Bar lines 2 px in the section's bar colour; the last bar of a line also gets a closing line.
+- Bars per row: 4 on phone, 8 on laptop (normal mode); in compact mode as many as the section's longest line has (see "Compact mode"). Bar lines 2 px in the section's bar colour; the last bar of a line also gets a closing line.
 
 ## Key components
 
@@ -91,7 +91,7 @@ Blue vs orange (verse vs chorus) also differ in lightness, so they stay distingu
 - **Personal note** — yellow dot in the bar's corner + highlighted chip under the line.
 - **Player toolbar (song screen, 56 px)** — previous (icon) · play/pause auto-scroll · status (section, "bar 2 of 4 · pass 3 of 4") · transposer (`−` key `+`) · next (icon).
 - **Auto-scroll** — driven by the metronome (tempo, time signature, optional one-bar count-in). It counts bars and repeats, **highlights and scrolls to the current section only** (3 px inset outline in the section ink + "Now" badge). Chords and beats are never highlighted — that would distract.
-- **Compact mode** — the whole song on one screen: chords 17 px, no beat dots, a 34 px label column (abbr, ×N, tag, "now" marker) instead of a header row. Phone: 1 column; laptop and tablets: 2–3 columns (CSS columns, sections never split).
+- **Compact mode** — the whole song on one screen: chords 17 px, no beat dots, a 34 px label column (abbr, ×N, tag, "now" marker) instead of a header row. Phone: 1 column; laptop and tablets: 2–3 columns (CSS columns, sections never split). A section has as many bars per row as its longest line (up to 8; longer lines are split into equal rows), so a three-bar line fills the width and a five-bar line never leaves one bar on a row of its own; all lines of a section share the columns. If a row is too dense for the screen, the section falls back to half as many columns. If the song is still taller than the screen, rows and chords shrink step by step, never below 80%.
 - **View options (sheet)** — opened from the song's sliders icon. Scope tabs: *This song · This setlist · Everywhere*. Values cascade song → setlist → everywhere; each row shows its source ("From this setlist", "Set for this song" in `signal`) and a Reset link for overrides. Options: beat dots, guitar sounding chords under shapes, band notes, notes for my instrument, personal notes, open in compact mode. The "Everywhere" layer is also editable in Settings.
 - **Setlist row** — number, title, key, meta + "tonight" note on one line, mini form strip (4 px); rows separated by lines, current song marked by `signal` number. "Start" is a compact button in the sub-header, not a full-width CTA.
 
