@@ -87,7 +87,7 @@ Blue vs orange (verse vs chorus) also differ in lightness, so they stay distingu
 - **Instrument tabs** — text tabs (40 px) with a 3 px `signal` underline on the active one; scroll horizontally if labels are long.
 - **Capo control** (guitar view) — `−` / value / `+` plus suggested capos (`2 → C`, `7 → G`).
 - **Section tile** — badge (abbr) + name + tag (`яма`) + `×N` on the right; band notes; bar grid.
-- **Chord cell** — width ∝ beats; root large, quality and slash bass small; beat dots underneath; in guitar view shape large, sounding chord small below.
+- **Chord cell** — width ∝ beats; root large, quality and slash bass small; beat dots underneath; in guitar view shape large, sounding chord small below. A bar is exactly as tall as what it shows: with beat dots and sounding chords switched off it is the chord plus 4 px, with no empty room underneath. The bar's tap target (personal notes) also takes 3 px of the gap above and below it.
 - **Personal note** — yellow dot in the bar's corner + highlighted chip under the line.
 - **Player toolbar (song screen, 56 px)** — previous (icon) · play/pause auto-scroll · status (section, "bar 2 of 4 · pass 3 of 4") · transposer (`−` key `+`) · next (icon).
 - **Auto-scroll** — driven by the metronome (tempo, time signature, optional one-bar count-in). It counts bars and repeats, **highlights and scrolls to the current section only** (3 px inset outline in the section ink + "Now" badge). Chords and beats are never highlighted — that would distract.
