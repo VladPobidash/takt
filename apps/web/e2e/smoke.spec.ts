@@ -248,6 +248,40 @@ test.describe("a song from the band's chart", () => {
   });
 });
 
+test.describe("a second song from the band's chart", () => {
+  test.use({ locale: "uk-UA", colorScheme: "light" });
+
+  test("«Боже, я вдячний Тобі»: empty sections borrow their bars; the chorus has Dmaj on the fourth beat", async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto("/songs/bozhe-ia-vdiachnyi-tobi");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Боже, я вдячний Тобі");
+    const form = page.getByRole("navigation", { name: "Форма пісні" });
+    await expect(form.getByRole("button")).toHaveText([
+      "I",
+      "V1",
+      "C",
+      "I",
+      "V2",
+      "C2",
+      "Inst",
+      "B",
+      "C3",
+    ]);
+
+    // "Verse 2" and "Chorus 2" are written without bars in the chart.
+    await expect(page.getByRole("region", { name: "Verse 2" })).toContainText("D/F#");
+    const chorus2 = page.getByRole("region", { name: "Chorus 2" });
+    await expect(chorus2).toContainText("×2");
+    await expect(chorus2).toContainText("Dmaj");
+    await expect(page.getByRole("region", { name: "Interludio" })).toContainText("пауза на такт");
+    await page.getByRole("button", { name: "Компактний режим" }).click();
+    await page.screenshot({ path: test.info().outputPath("bozhe-compact.png") });
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("compact mode", () => {
   test.use({ locale: "en-US", colorScheme: "dark" });
 
@@ -590,7 +624,7 @@ test.describe("backup", () => {
     await expect(second.getByRole("link", { name: /Silent Night/ })).toHaveCount(0);
 
     await second.locator('input[type="file"]').setInputFiles(path);
-    await expect(second.getByRole("status")).toContainText("1 song imported · 2 were already here");
+    await expect(second.getByRole("status")).toContainText("1 song imported · 3 were already here");
     await expect(second.getByRole("link", { name: /Silent Night/ })).toBeVisible();
     await other.close();
   });

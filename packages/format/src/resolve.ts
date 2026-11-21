@@ -1,4 +1,5 @@
 import { readHeader } from "./header.ts";
+import { LEADING_NUMBERS, sectionType } from "./section-type.ts";
 import { baseBars, partBars, sourceIndex } from "./sections.ts";
 import type {
   BarsLine,
@@ -12,18 +13,6 @@ import type {
   SectionType,
   SongDoc,
 } from "./types.ts";
-
-/** Name prefixes per section type, English and Ukrainian. Order matters: pre-chorus before chorus. */
-const TYPE_NAMES: [SectionType, string[]][] = [
-  ["pre-chorus", ["pre-chorus", "prechorus", "pre chorus", "pre", "передприспів", "перед приспів"]],
-  ["chorus", ["chorus", "refrain", "приспів", "рефрен"]],
-  ["verse", ["verse", "куплет", "строфа"]],
-  ["bridge", ["bridge", "брідж", "бридж"]],
-  ["intro", ["intro", "вступ", "інтро"]],
-  ["interlude", ["interlud", "програш", "інтерлюд"]],
-  ["instrumental", ["instrumental", "inst", "solo", "інструментал", "соло"]],
-  ["outro", ["outro", "ending", "coda", "кінцівка", "аутро", "кода"]],
-];
 
 const ABBREVIATION: Record<SectionType, string> = {
   intro: "I",
@@ -39,22 +28,6 @@ const ABBREVIATION: Record<SectionType, string> = {
 
 /** Section types that are numbered when they occur more than once (`C`, `C2`, `C3`). */
 const COUNTED = new Set<SectionType>(["verse", "pre-chorus", "chorus", "bridge"]);
-
-/** Detects the section type from its name: `Verse 2` → `verse`, `Приспів` → `chorus`. */
-export function sectionType(name: string): SectionType {
-  const lower = withoutLeadingNumbers(name).toLowerCase();
-  for (const [type, prefixes] of TYPE_NAMES) {
-    if (prefixes.some((prefix) => lower.startsWith(prefix))) return type;
-  }
-  return "other";
-}
-
-/** Numbers written before the name, as in `3 Verse` or `1, 2 Verse`. */
-const LEADING_NUMBERS = /^\s*(\d+(?:\s*[,&+–-]\s*\d+)*)[.):]?\s+/;
-
-function withoutLeadingNumbers(name: string): string {
-  return name.replace(LEADING_NUMBERS, "").trim();
-}
 
 function abbreviation(name: string, type: SectionType, occurrence: number): string {
   if (type === "other") return (name.trim().split(/\s+/)[0] ?? "").slice(0, 4);
@@ -156,3 +129,5 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
     form,
   };
 }
+
+export { sectionType };

@@ -210,6 +210,75 @@ describe("examples/vdiachnist.takt", () => {
   });
 });
 
+describe("examples/bozhe-ia-vdiachnyi-tobi.takt", () => {
+  const harmony = song(exampleSong("bozhe-ia-vdiachnyi-tobi.takt"));
+  const byName = (name: string) => harmony.sections.find((s) => s.name === name);
+
+  test("an empty Verse 2 plays the bars of the verse before it, an empty Chorus 2 those of the chorus", () => {
+    expect(harmony.sections.map((s) => `${s.abbr}:${s.bars}×${s.repeat}`)).toEqual([
+      "I:3×1",
+      "V1:12×1",
+      "C:10×1",
+      "I:1×1",
+      "V2:12×1",
+      "C2:10×2",
+      "Inst:6×1",
+      "B:14×2",
+      "C3:10×2",
+    ]);
+    expect(byName("Verse 2")?.reusedFrom).toBe(1);
+    expect(byName("Chorus 2")?.reusedFrom).toBe(2);
+    expect(byName("Verse 2")?.lines.map(chords)).toEqual(byName("1 Verse")?.lines.map(chords));
+  });
+
+  test("the chorus: three beats of D and Dmaj on the fourth, then a bar that holds it", () => {
+    const first = byName("Chorus")?.lines[0];
+    expect(first?.bars[0]?.cells.map((c) => [c.text, c.beats])).toEqual([
+      ["D", 3],
+      ["Dmaj", 1],
+    ]);
+    expect(first?.bars[1]?.kind).toBe("empty");
+    expect(chords(first)).toEqual(["D Dmaj", "-", "A G", "-", "A G"]);
+  });
+
+  test("a bar of silence is a bar: the pause counts in the form", () => {
+    const pause = harmony.sections[3];
+    expect(pause?.lines[0]?.bars[0]?.cells[0]?.kind).toBe("no-chord");
+    expect(pause?.notes.map((n) => n.text)).toEqual(["пауза на такт"]);
+  });
+});
+
+describe("reuse by kind of section", () => {
+  test("the same name wins over the same kind", () => {
+    const text = "# T\n## Chorus\n| D |\n## Chorus 2\n| G | A |\n## Chorus\n## Chorus 3\n";
+    const resolved = song(text);
+    // "Chorus 3" follows the chorus before it, which itself plays the first one again.
+    expect(resolved.sections.map((s) => s.reusedFrom)).toEqual([null, null, 0, 0]);
+    expect(resolved.sections.map((s) => s.bars)).toEqual([1, 2, 1, 1]);
+  });
+
+  test("a chain of empty sections ends at the one with bars; its repeat is taken unless written", () => {
+    const resolved = song("# T\n## 1 Verse x2\n| D | A |\n## Verse 2\n## Verse 3 x1\n");
+    expect(resolved.sections.map((s) => [s.reusedFrom, s.bars, s.repeat])).toEqual([
+      [null, 2, 2],
+      [0, 2, 2],
+      [0, 2, 1],
+    ]);
+  });
+
+  test("nothing is borrowed across kinds, and sections of no known kind reuse only by name", () => {
+    const resolved = song("# T\n## Verse\n| D |\n## Chorus\n## Tag\n| G |\n## Tag 2\n");
+    expect(resolved.sections.map((s) => s.reusedFrom)).toEqual([null, null, null, null]);
+    expect(resolved.sections.map((s) => s.bars)).toEqual([1, 0, 1, 0]);
+  });
+
+  test("notes written under the reusing section stay its own", () => {
+    const resolved = song("# T\n## 1 Verse\n| D |\n> all in\n## Verse 2\n> voices only\n");
+    expect(resolved.sections[1]?.notes.map((n) => n.text)).toEqual(["voices only"]);
+    expect(resolved.sections[1]?.bars).toBe(1);
+  });
+});
+
 describe("section types", () => {
   test("English and Ukrainian names", () => {
     const table: [string, string][] = [

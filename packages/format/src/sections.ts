@@ -1,3 +1,4 @@
+import { sectionType } from "./section-type.ts";
 import type { BarsLine, Section } from "./types.ts";
 
 export function sameName(a: string, b: string): boolean {
@@ -17,9 +18,10 @@ export function partBars(section: Section, instrument: string): BarsLine[] {
 }
 
 /**
- * The section whose bars `sections[index]` plays: itself if it has base bar lines,
- * otherwise the section it references (`## A = B`) or the most recent earlier section
- * with the same name. Returns null when there is nothing to reuse.
+ * The section whose bars `sections[index]` plays: itself if it has base bar lines, otherwise
+ * the section it references (`## A = B`), or the most recent earlier section with the same
+ * name, or — as musicians write `Verse 2` under `1 Verse` — the most recent earlier section
+ * of the same kind. Returns null when there is nothing to reuse.
  */
 export function sourceIndex(sections: Section[], index: number): number | null {
   const seen = new Set<number>();
@@ -40,6 +42,18 @@ export function sourceIndex(sections: Section[], index: number): number | null {
     // A reference may also point forward (`## Intro = Outro`).
     if (next === -1 && section.ref !== null) {
       next = sections.findIndex((s, i) => i !== current && sameName(s.name, wanted));
+    }
+    // No section of that name: an empty `Chorus 2` means "the chorus again".
+    if (next === -1 && section.ref === null) {
+      const kind = sectionType(section.name);
+      if (kind !== "other") {
+        for (let i = current - 1; i >= 0; i--) {
+          if (sectionType((sections[i] as Section).name) === kind) {
+            next = i;
+            break;
+          }
+        }
+      }
     }
     if (next === -1) return null;
     current = next;

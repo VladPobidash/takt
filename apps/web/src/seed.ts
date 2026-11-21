@@ -1,3 +1,4 @@
+import thankful from "../../../examples/bozhe-ia-vdiachnyi-tobi.takt?raw";
 import worthy from "../../../examples/dostoinyi-ty-odyn.takt?raw";
 import silentNight from "../../../examples/silent-night.takt?raw";
 import gratitude from "../../../examples/vdiachnist.takt?raw";
@@ -11,4 +12,5 @@ export const SEED_SONGS: SeedSong[] = [
   { name: "silent-night.takt", text: silentNight, original: true },
   { name: "dostoinyi-ty-odyn.takt", text: worthy, original: true },
   { name: "vdiachnist.takt", text: gratitude },
+  { name: "bozhe-ia-vdiachnyi-tobi.takt", text: thankful },
 ];
