@@ -33,7 +33,7 @@ Facts checked on 2026-11-19:
 
 Found by the author on an installed app on iOS 26:
 
-- **The top of the screen is blurred.** iOS 26 and later draw a progressive blur over the top of a Home Screen web app, for about 40 pt below the status bar; no meta tag or CSS switches it off. The app keeps a 32 px band free above its header there (installed, iOS 26+, not an iPhone in landscape). iOS versions are told apart by a CSS feature that arrived in Safari 26, because an installed app's user agent does not say.
+- **The top of the screen is blurred.** iOS 26 and later draw a progressive blur over the top of a Home Screen web app, for about 40 pt below the status bar; no meta tag or CSS switches it off. The first fix kept a 32 px band free above the header, which cost exactly the height the band's phones lack. Since 2026-11-21 the app instead puts a thin opaque `position: fixed` strip (11 px, full width, the page's background) at the top edge — another project confirmed on an iPhone with iOS 26 that WebKit leaves the blur out when the box at the top edge is fixed, opaque and nearly full width — and starts only 8 px lower, so the strip covers nothing (installed, iOS 26+, not an iPhone in landscape). This rests on that report, not on Apple documentation; a later iOS may change it. iOS versions are told apart by a CSS feature that arrived in Safari 26, because an installed app's user agent does not say.
 - **The keyboard does not resize the page on iOS** — only the visual viewport shrinks. The app root is sized and positioned after `window.visualViewport`, so the editor's symbol bar and the bottom sheets stay above the keyboard. Android gets the same result from `interactive-widget=resizes-content`.
 - **A fixed height plus a safe-area padding squeezes the content.** Bars at the bottom use `box-content` so the home-indicator inset is added below the controls, and read the inset from `--safe-bottom`, which is zero while the keyboard is open.
 
@@ -55,3 +55,4 @@ All three are covered by tests that emulate the inset and the keyboard in Chromi
 - `vite-plugin-pwa` peer dependencies: npm registry, 2026-11-19.
 - [qui — keep the top of the iOS Home Screen app clear of the status bar fade](https://github.com/autobrr/qui/pull/4261) and [herdr-web-ui — header clear of iOS 26's edge blur](https://github.com/devswha/herdr-web-ui/pull/106): other projects' reports of the blurred band and its size.
 - [WebKit bug 230225 — visual viewport and the virtual keyboard](https://bugs.webkit.org/show_bug.cgi?id=230225); [Safari 26 release notes](https://developer.apple.com/documentation/safari-release-notes/safari-26-release-notes).
+- [planestro — fixed edge strip, confirmed on an iPhone](https://github.com/gravesisme/planestro/pull/574).

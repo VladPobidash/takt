@@ -44,7 +44,7 @@ describe("viewportMetrics", () => {
 describe("topFade", () => {
   const installed = { appleMobile: true, standalone: true, blursTop: true, viewportHeight: 812 };
 
-  test("an installed app on iOS 26 keeps the blurred band free", () => {
+  test("an installed app on iOS 26 starts just below the edge strip", () => {
     expect(topFade(installed)).toBe(TOP_FADE_PX);
   });
 

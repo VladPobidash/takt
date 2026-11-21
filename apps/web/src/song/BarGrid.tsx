@@ -31,53 +31,76 @@ export function BarLine({
   line,
   options,
   personal,
+  shared = false,
 }: {
   line: ResolvedLine;
   options: BarGridOptions;
   personal?: LineNotes;
+  /**
+   * The bars are placed straight into the section's grid (compact mode), so all lines of
+   * the section share the same columns. Otherwise the line is a grid of its own.
+   */
+  shared?: boolean;
 }) {
   const extras = [line.repeat > 1 ? `×${line.repeat}` : null, line.cue].filter(Boolean).join(" · ");
+  const bars = line.bars.map((bar, index) => (
+    <BarCell
+      // Bars have no identity of their own: the position in the line is the key.
+      // biome-ignore lint/suspicious/noArrayIndexKey: static list, never reordered
+      key={index}
+      bar={bar}
+      first={index === 0}
+      last={index === line.bars.length - 1}
+      options={options}
+      noted={Boolean(personal?.visible && personal.notes[index])}
+      onTap={personal ? () => personal.onTap(index) : undefined}
+      tapLabel={personal?.label(index)}
+    />
+  ));
+  const chips =
+    personal?.visible &&
+    personal.notes
+      .flatMap((note, bar) => (note ? [{ bar, note }] : []))
+      .map((item) => (
+        <button
+          type="button"
+          key={item.bar}
+          onClick={() => personal.onTap(item.bar)}
+          className="mr-1 mt-1 inline-flex max-w-full items-center gap-1.5 rounded-badge bg-mine-bg px-1.5 py-0.5 text-left text-[12px] font-semibold text-mine-fg"
+        >
+          <span aria-hidden="true" className="size-2 shrink-0 bg-mine-dot" />
+          <span className="min-w-0 break-words">{item.note}</span>
+        </button>
+      ));
+  const hasChips = Array.isArray(chips) && chips.length > 0;
+
+  if (shared) {
+    return (
+      <>
+        {line.label && (
+          <p className="col-span-full text-[12px] font-semibold opacity-80">{line.label}</p>
+        )}
+        {bars}
+        {extras && (
+          <p className="col-span-full text-right text-[12px] font-bold opacity-80">{extras}</p>
+        )}
+        {hasChips && <div className="col-span-full">{chips}</div>}
+      </>
+    );
+  }
   return (
     <div>
       {line.label && <p className="mb-0.5 text-[12px] font-semibold opacity-80">{line.label}</p>}
-      <div
-        className={`grid grid-cols-4 ${options.compact ? "gap-y-1" : "gap-y-1.5 wide:grid-cols-8"}`}
-      >
-        {line.bars.map((bar, index) => (
-          <BarCell
-            // Bars have no identity of their own: the position in the line is the key.
-            // biome-ignore lint/suspicious/noArrayIndexKey: static list, never reordered
-            key={index}
-            bar={bar}
-            last={index === line.bars.length - 1}
-            options={options}
-            noted={Boolean(personal?.visible && personal.notes[index])}
-            onTap={personal ? () => personal.onTap(index) : undefined}
-            tapLabel={personal?.label(index)}
-          />
-        ))}
-      </div>
+      <div className="grid grid-cols-4 gap-y-1.5 wide:grid-cols-8">{bars}</div>
       {extras && <p className="mt-0.5 text-right text-[12px] font-bold opacity-80">{extras}</p>}
-      {personal?.visible &&
-        personal.notes
-          .flatMap((note, bar) => (note ? [{ bar, note }] : []))
-          .map((item) => (
-            <button
-              type="button"
-              key={item.bar}
-              onClick={() => personal.onTap(item.bar)}
-              className="mr-1 mt-1 inline-flex max-w-full items-center gap-1.5 rounded-badge bg-mine-bg px-1.5 py-0.5 text-left text-[12px] font-semibold text-mine-fg"
-            >
-              <span aria-hidden="true" className="size-2 shrink-0 bg-mine-dot" />
-              <span className="min-w-0 break-words">{item.note}</span>
-            </button>
-          ))}
+      {chips}
     </div>
   );
 }
 
 function BarCell({
   bar,
+  first,
   last,
   options,
   noted,
@@ -85,6 +108,8 @@ function BarCell({
   tapLabel,
 }: {
   bar: Bar;
+  /** The first bar of a line starts a new row of the grid. */
+  first: boolean;
   last: boolean;
   options: BarGridOptions;
   /** The bar has a personal note: a yellow dot in its corner. */
@@ -97,7 +122,7 @@ function BarCell({
   const dots = Math.max(1, Math.round(bar.beats));
   let position = 0;
   return (
-    <div className="relative min-w-0">
+    <div className={`relative min-w-0 ${first ? "col-start-1" : ""}`}>
       {onTap && (
         // The whole bar is the tap target; the chords stay plain text underneath.
         <button
@@ -109,7 +134,7 @@ function BarCell({
       )}
       {noted && <span aria-hidden="true" className="absolute right-1 top-0 size-2 bg-mine-dot" />}
       <div
-        className={`flex flex-col justify-between border-l-2 border-bar pl-1.5 ${options.compact ? "min-h-6" : "min-h-11"} ${last ? "border-r-2" : ""}`}
+        className={`flex flex-col justify-between border-l-2 border-bar pl-1.5 ${options.compact ? "min-h-[calc(22px*var(--compact-scale,1))]" : "min-h-11"} ${last ? "border-r-2" : ""}`}
         style={{ width: `${width * 100}%` }}
       >
         <div className="flex min-w-0 items-start gap-x-1.5">

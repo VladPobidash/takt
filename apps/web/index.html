@@ -11,6 +11,8 @@
     <title>Takt</title>
   </head>
   <body>
+    <!-- A fixed opaque box at the top edge keeps iOS 26 from blurring the header (ui/viewport.ts). -->
+    <div id="edge-strip" aria-hidden="true">&nbsp;</div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

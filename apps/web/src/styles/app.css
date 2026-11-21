@@ -215,6 +215,21 @@
     top: var(--app-top, 0px);
     height: var(--app-height, 100dvh);
     padding-top: var(--top-fade, 0px);
+    background: var(--bg);
+  }
+  #edge-strip {
+    display: none;
+  }
+  :root[data-edge-strip] #edge-strip {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 40;
+    height: max(env(safe-area-inset-top, 0px), 11px);
+    overflow: hidden;
+    background: var(--bg);
+    font-size: 0;
+    pointer-events: none;
   }
   :root {
     /* The home-indicator inset; not needed while the keyboard covers that area. */

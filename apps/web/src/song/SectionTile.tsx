@@ -2,6 +2,7 @@ import type { ResolvedSection } from "@takt/format";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import { type BarGridOptions, BarLine } from "./BarGrid.tsx";
+import { compactColumns, useFittingColumns } from "./compact.ts";
 
 const INSTRUMENT_LABEL: Record<string, MessageKey> = {
   guitar: "instrument.guitar",
@@ -58,28 +59,44 @@ export function SectionTile({
       <span className="min-w-0 break-words">{personal.sectionNote}</span>
     </button>
   );
-  const lines = (
-    <div className={`flex flex-col ${options.compact ? "gap-1" : "gap-2.5"}`}>
-      {section.lines.map((line, index) => (
-        <BarLine
-          // biome-ignore lint/suspicious/noArrayIndexKey: lines are positional
-          key={index}
-          line={line}
-          options={options}
-          personal={
-            personal && {
-              notes: line.bars.map((_, bar) => personal.barNote(index, bar)),
-              onTap: (bar) => personal.onTap(index, bar),
-              label: (bar) => personal.barLabel(index, bar),
-              visible: personal.visible,
-            }
-          }
-        />
-      ))}
+  const lineOf = (line: ResolvedSection["lines"][number], index: number, shared: boolean) => (
+    <BarLine
+      // Lines are positional: a line has no identity of its own.
+      key={index}
+      line={line}
+      options={options}
+      shared={shared}
+      personal={
+        personal && {
+          notes: line.bars.map((_, bar) => personal.barNote(index, bar)),
+          onTap: (bar) => personal.onTap(index, bar),
+          label: (bar) => personal.barLabel(index, bar),
+          visible: personal.visible,
+        }
+      }
+    />
+  );
+  // Compact: one grid for the whole section, with as many columns as its longest line.
+  const fitting = useFittingColumns(compactColumns(section.lines));
+  const lines = options.compact ? (
+    <div
+      ref={fitting.grid}
+      className="grid gap-y-0.5"
+      style={{ gridTemplateColumns: `repeat(${fitting.columns}, minmax(min-content, 1fr))` }}
+    >
+      {section.lines.map((line, index) => lineOf(line, index, true))}
+    </div>
+  ) : (
+    <div className="flex flex-col gap-2.5">
+      {section.lines.map((line, index) => lineOf(line, index, false))}
     </div>
   );
   const badge = section.abbr && (
-    <span className="grid h-6 min-w-6 place-items-center rounded-badge bg-ink px-1 text-[12px] font-extrabold text-tile">
+    <span
+      className={`grid min-w-6 place-items-center rounded-badge bg-ink px-1 text-[12px] font-extrabold text-tile ${
+        options.compact ? "h-[calc(24px*var(--compact-scale,1))]" : "h-6"
+      }`}
+    >
       {section.abbr}
     </span>
   );
@@ -92,7 +109,7 @@ export function SectionTile({
         data-section={section.type}
         aria-label={section.name}
         aria-current={now ? "step" : undefined}
-        className={`mb-1 flex break-inside-avoid gap-1.5 rounded-tile bg-tile px-1.5 py-1.5 text-ink ${now ? "shadow-[inset_0_0_0_3px_var(--ink)]" : ""}`}
+        className={`mb-[calc(4px*var(--compact-scale,1))] flex break-inside-avoid gap-1.5 rounded-tile bg-tile px-1.5 py-[calc(4px*var(--compact-scale,1))] text-ink ${now ? "shadow-[inset_0_0_0_3px_var(--ink)]" : ""}`}
       >
         <div className="flex w-[34px] shrink-0 flex-col items-start gap-0.5">
           {badge}
