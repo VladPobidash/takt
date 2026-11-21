@@ -50,6 +50,12 @@ test.describe("view options", () => {
     await page.goto("/songs/dostoinyi-ty-odyn");
     const dots = page.locator("[data-beat-dots]");
     await expect(dots.first()).toBeVisible();
+    const barHeight = () =>
+      page
+        .locator("[data-bar]")
+        .first()
+        .evaluate((bar) => bar.getBoundingClientRect().height);
+    const withDots = await barHeight();
 
     await page.getByRole("button", { name: "View options" }).click();
     const sheet = page.getByRole("dialog", { name: "View options" });
@@ -57,6 +63,9 @@ test.describe("view options", () => {
     await sheet.getByRole("switch", { name: /Beat dots under chords/ }).uncheck();
     await expect(sheet.getByText("Set for this song")).toBeVisible();
     await expect(dots).toHaveCount(0);
+    // Without its dots a bar is only as tall as the chord: no empty room is left under it.
+    expect(await barHeight()).toBeLessThan(withDots - 4);
+    expect(await barHeight()).toBeLessThan(32);
     await page.screenshot({ path: test.info().outputPath("view-options.png") });
     await sheet.getByRole("button", { name: "Close" }).click();
 

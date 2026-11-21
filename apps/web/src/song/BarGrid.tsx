@@ -131,14 +131,17 @@ function BarCell({
           type="button"
           aria-label={tapLabel}
           onClick={onTap}
-          className="absolute inset-0 z-10 rounded-badge"
+          // A bar is only as tall as its content, so the target also takes half of the gap
+          // above and below it.
+          className={`absolute inset-x-0 z-10 rounded-badge ${options.compact ? "inset-y-0" : "-inset-y-[3px]"}`}
         />
       )}
       {noted && <span aria-hidden="true" className="absolute right-1 top-0 size-2 bg-mine-dot" />}
       <div
-        // Compact: the closing line is drawn just outside the bar, exactly where the next
-        // column's line would be, so it meets the bar lines of the other sections.
-        className={`flex flex-col justify-between border-l-2 border-bar ${options.compact ? "min-h-[calc(22px*var(--compact-scale,1))] pl-1" : "min-h-11 pl-1.5"} ${last ? (options.compact ? "shadow-[2px_0_0_var(--bar)]" : "border-r-2") : ""}`}
+        // A bar is as tall as what it shows: without beat dots and sounding chords it is just
+        // the chord. Compact: the closing line is drawn just outside the bar, exactly where the
+        // next column's line would be, so it meets the bar lines of the other sections.
+        className={`flex flex-col justify-between border-l-2 border-bar ${options.compact ? "min-h-[calc(22px*var(--compact-scale,1))] pl-1" : "min-h-[calc(var(--chord-size,25px)+4px)] pl-1.5"} ${last ? (options.compact ? "shadow-[2px_0_0_var(--bar)]" : "border-r-2") : ""}`}
         style={{ width: `${width * 100}%` }}
       >
         <div className={`flex min-w-0 items-start ${options.compact ? "gap-x-1" : "gap-x-1.5"}`}>
