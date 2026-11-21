@@ -51,7 +51,7 @@ Synchronous pure functions over plain JSON-serialisable data (no classes, no I/O
 
 ### Sections and instruments
 
-- `## Name [tag] x2`, `## A = B`, and reuse by name are resolved in `resolveSong`, not in `parse`. A section without base bar lines reuses the most recent earlier section with the same name; its own notes are kept.
+- `## Name [tag] x2`, `## A = B`, and reuse by name are resolved in `resolveSong`, not in `parse`. A section without base bar lines reuses the most recent earlier section with the same name, or failing that of the same kind (an empty `Verse 2` under `1 Verse`); its own notes are kept.
 - A reusing section also takes the repeat of its source unless it writes its own.
 - Repeats stay folded (`×4`); the form carries bars × repeats so a timeline and a metronome can unroll them.
 - The n-th `@instrument` bar line of a section replaces the n-th base bar line in that instrument's view (as in format v0, and it matches the planned per-instrument files). A different bar count than the replaced line gives an `info` diagnostic.

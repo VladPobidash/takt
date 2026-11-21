@@ -227,6 +227,18 @@ describe("diagnostics instead of exceptions", () => {
     ]);
   });
 
+  test("an empty section of a known kind is not a problem when an earlier one of that kind has bars", () => {
+    expect(codes("# T\n## 1 Verse\n| D | A |\n## Verse 2\n## Chorus 2\n")).toEqual([
+      "empty-section",
+    ]);
+    expect(
+      parse("# T\n## 1 Verse\n| D | A |\n## Verse 2\n## Chorus 2\n").diagnostics[0]?.span.start
+        .line,
+    ).toBe(5);
+    // An instrument line in the reusing section is checked against the borrowed bars.
+    expect(codes("# T\n## 1 Verse\n| D | A |\n## Verse 2\n@bass | D | E |\n")).toEqual([]);
+  });
+
   test("instrument lines must have a base line to replace", () => {
     const { diagnostics } = parse(
       "# T\n## A\n| D | A |\n@bass | D | A |\n@bass | D |\n@keys | D |\n",

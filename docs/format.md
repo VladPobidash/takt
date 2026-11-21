@@ -61,7 +61,7 @@ time: 4/4
 
 - **Tag** — a cue for everyone ("dip", "powerful").
 - **Repeat:** `x2`, `2x` or `(2x)`.
-- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name; notes written under it are kept. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`). The reusing section also takes the repeat, unless it writes its own (`## Interlude = Intro x1` plays once).
+- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name — or, when there is none, of the same kind: an empty `## Verse 2` under `## 1 Verse` plays that verse, an empty `## Chorus 2 x2` plays the chorus twice. Notes written under it are kept. A section of no known kind (`## Tag`) reuses only by name. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`). The reusing section also takes the repeat, unless it writes its own (`## Interlude = Intro x1` plays once).
 - Repeats are shown folded (`×4`), never unrolled; the form timeline is sized by bars × repeats.
 - **Section type** (color and abbreviation) is detected from the name, in English and Ukrainian: intro/вступ, verse/куплет, pre-chorus/передприспів, chorus/приспів, bridge/брідж, interlude/програш, instrumental, outro/кінцівка.
 - **Numbers** may stand after the name or before it, as in the band's charts: `## Chorus 2`, `## 3 Verse`, `## 1, 2 Verse`, `## 1 Bridge`. They become part of the short label on the form timeline (`C2`, `V3`, `V1,2`, `B1`). "Interludio" is read as an interlude.
@@ -165,6 +165,15 @@ Real lines from our band's PDF that v0 must parse:
 | G*** Hm* | A | D/F# | Hm*** A*|
 | Hm** D** | G** A** | (2x)
 | F# | F# | F#sus | F#sus |
+```
+
+From the band's chart of «Боже, я вдячний Тобі» ([examples/bozhe-ia-vdiachnyi-tobi.takt](../examples/bozhe-ia-vdiachnyi-tobi.takt)) — three-bar lines, bars that hold the chord before them, a chord on the fourth beat only, a bar of silence:
+
+```
+| Hm | G | D/F# |
+| G | A | D/F# | | Hm | | A |
+| D*** Dmaj* | | A** G** | | D/F#** Em** |
+| N.C. |
 ```
 
 From the band's chart of «Вдячність» in 6/8 ([examples/vdiachnist.takt](../examples/vdiachnist.takt)):
