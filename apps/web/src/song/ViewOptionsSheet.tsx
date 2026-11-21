@@ -101,7 +101,7 @@ export function ViewOptionsSheet(props: {
       }}
       className="mx-auto mt-auto mb-0 max-h-[85dvh] w-full max-w-xl overflow-y-auto rounded-t-[12px] bg-bg p-0 text-text shadow-xl backdrop:bg-black/40"
     >
-      <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2">
+      <div className="px-4 pb-[max(1rem,var(--safe-bottom))] pt-2">
         <div className="flex items-center">
           <h2 className="flex-1 text-[17px] font-extrabold">{t("view.title")}</h2>
           <IconButton label={t("common.close")} onClick={props.onClose}>

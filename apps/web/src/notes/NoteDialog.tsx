@@ -35,7 +35,7 @@ export function NoteDialog(props: {
       className="mx-auto mt-auto mb-0 w-full max-w-xl rounded-t-[12px] bg-bg p-0 text-text shadow-xl backdrop:bg-black/40"
     >
       <form
-        className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4"
+        className="px-4 pb-[max(1rem,var(--safe-bottom))] pt-4"
         onSubmit={(event) => {
           event.preventDefault();
           props.onSave(text);

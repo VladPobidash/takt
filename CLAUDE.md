@@ -91,5 +91,6 @@ examples/            sample .takt files (no copyrighted lyrics); also parser fix
 - `pnpm e2e` — Playwright smoke tests in a phone viewport against the production build (CI runs them after `verify`).
 - One package: `pnpm --filter @takt/format test`. Run the app: `pnpm --filter @takt/web dev` (or `build` + `preview`).
 - UI strings go through `t()` with keys from `apps/web/src/i18n/en.ts`; `uk.ts` must have the same keys (the type checker enforces it). Colours come from the tokens in `apps/web/src/styles/app.css`, never from literals in components.
+- Screen edges and keyboard (`apps/web/src/ui/viewport.ts`, ADR 0007): the app root follows `window.visualViewport`. For the home-indicator inset use `var(--safe-bottom)`, never `env(safe-area-inset-bottom)` directly; a bar with a fixed height and that padding needs `box-content`. Do not size anything with `100vh` / `100dvh` — use `h-full` inside the root or `var(--app-height)`.
 - Base UI (`@base-ui/react`) is heavy: any screen that imports it is loaded with `React.lazy` (see `App.tsx`), so the song screen stays inside its JavaScript budget.
 - Relative imports use the `.ts` extension; no enums or namespaces (`erasableSyntaxOnly`).

@@ -351,7 +351,8 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
         </div>
       </main>
 
-      <footer className="flex h-14 shrink-0 items-center gap-2 border-t border-line px-3 pb-[env(safe-area-inset-bottom)]">
+      {/* box-content: the 56 px are for the controls; the home-indicator inset is added below them. */}
+      <footer className="box-content flex h-14 shrink-0 items-center gap-2 border-t border-line px-3 pb-[var(--safe-bottom)]">
         {context && (
           <NavButton href={previousHref} label={t("setlist.previous")}>
             <PreviousIcon />
