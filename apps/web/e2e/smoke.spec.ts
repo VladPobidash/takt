@@ -489,6 +489,82 @@ test.describe("install and screen hints", () => {
   });
 });
 
+test.describe("phone screen edges and keyboard", () => {
+  test.use({ locale: "en-US", colorScheme: "dark" });
+
+  test("the player toolbar keeps its controls whole above the home indicator", async ({ page }) => {
+    // An installed app on an iPhone: 34 px at the bottom belong to the home indicator.
+    const session = await page.context().newCDPSession(page);
+    await session.send("Emulation.setSafeAreaInsetsOverride", { insets: { bottom: 34 } });
+    await page.goto("/songs/silent-night");
+    const footer = page.getByRole("contentinfo");
+    const play = page.getByRole("button", { name: "Start auto-scroll" });
+    await expect(play).toBeVisible();
+    const bar = await footer.boundingBox();
+    const button = await play.boundingBox();
+    if (!bar || !button) throw new Error("no layout");
+    expect(bar.height).toBe(56 + 34 + 1);
+    // The 44 px button sits inside the 56 px row, not across the top border.
+    expect(button.y).toBeGreaterThanOrEqual(bar.y + 1);
+    expect(button.y + button.height).toBeLessThanOrEqual(bar.y + 1 + 56);
+    await page.screenshot({ path: test.info().outputPath("footer-safe-area.png") });
+  });
+
+  test("the quick-symbol bar stays above the keyboard while typing", async ({ page }) => {
+    // iOS keeps the page height and shrinks only the visual viewport when the keyboard opens.
+    await page.addInitScript(() => {
+      // The page height is read when asked for: at this point the viewport meta is not applied yet.
+      const state = { keyboard: 0, offsetTop: 0 };
+      const fake = new EventTarget();
+      Object.defineProperties(fake, {
+        height: { get: () => window.innerHeight - state.keyboard },
+        width: { get: () => window.innerWidth },
+        offsetTop: { get: () => state.offsetTop },
+        offsetLeft: { get: () => 0 },
+        scale: { get: () => 1 },
+      });
+      Object.defineProperty(window, "visualViewport", { get: () => fake });
+      Object.assign(window, {
+        openKeyboard: (height: number, offsetTop = 0) => {
+          state.keyboard = height;
+          state.offsetTop = offsetTop;
+          fake.dispatchEvent(new Event("resize"));
+        },
+      });
+    });
+    await page.goto("/songs/silent-night/edit");
+    const bar = page.getByRole("toolbar", { name: "Quick symbols" });
+    const bottom = async () => {
+      const box = await bar.boundingBox();
+      return box ? Math.round(box.y + box.height) : -1;
+    };
+    expect(await bottom()).toBe(844);
+
+    await page.evaluate(() =>
+      (window as unknown as { openKeyboard: (h: number) => void }).openKeyboard(340),
+    );
+    await expect(page.locator("html")).toHaveAttribute("data-keyboard", "");
+    expect(await bottom()).toBe(844 - 340);
+    await expect(page.getByRole("textbox", { name: "Song text" })).toBeInViewport();
+    await page.screenshot({ path: test.info().outputPath("editor-keyboard.png") });
+
+    // iOS scrolled the page by 100 px to show the caret: the app follows the visible area.
+    await page.evaluate(() =>
+      (window as unknown as { openKeyboard: (h: number, top: number) => void }).openKeyboard(
+        340,
+        100,
+      ),
+    );
+    expect(await bottom()).toBe(100 + 844 - 340);
+
+    await page.evaluate(() =>
+      (window as unknown as { openKeyboard: (h: number) => void }).openKeyboard(0),
+    );
+    await expect(page.locator("html")).not.toHaveAttribute("data-keyboard", "");
+    expect(await bottom()).toBe(844);
+  });
+});
+
 test.describe("backup", () => {
   test.use({ locale: "en-US" });
 

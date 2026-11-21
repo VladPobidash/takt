@@ -303,7 +303,7 @@ function SongPicker(props: {
         event.preventDefault();
         props.onClose();
       }}
-      className="m-auto h-[min(32rem,calc(100dvh-2rem))] w-[min(26rem,calc(100vw-1.5rem))] rounded-control bg-bg p-0 text-text shadow-xl backdrop:bg-black/50"
+      className="m-auto h-[min(32rem,calc(var(--app-height,100dvh)-2rem))] w-[min(26rem,calc(100vw-1.5rem))] rounded-control bg-bg p-0 text-text shadow-xl backdrop:bg-black/50"
     >
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-1 border-b border-line p-2">

@@ -29,6 +29,16 @@ Facts checked on 2026-11-19:
 - The screen is kept awake with the Screen Wake Lock API while a song is open. Where it is refused, the app says so and suggests the system setting.
 - Recommended minimum for stage use on Apple devices: **iOS / iPadOS 18.4**, installed to the Home Screen.
 
+## What real iPhones taught us (2026-11-21)
+
+Found by the author on an installed app on iOS 26:
+
+- **The top of the screen is blurred.** iOS 26 and later draw a progressive blur over the top of a Home Screen web app, for about 40 pt below the status bar; no meta tag or CSS switches it off. The app keeps a 32 px band free above its header there (installed, iOS 26+, not an iPhone in landscape). iOS versions are told apart by a CSS feature that arrived in Safari 26, because an installed app's user agent does not say.
+- **The keyboard does not resize the page on iOS** — only the visual viewport shrinks. The app root is sized and positioned after `window.visualViewport`, so the editor's symbol bar and the bottom sheets stay above the keyboard. Android gets the same result from `interactive-widget=resizes-content`.
+- **A fixed height plus a safe-area padding squeezes the content.** Bars at the bottom use `box-content` so the home-indicator inset is added below the controls, and read the inset from `--safe-bottom`, which is zero while the keyboard is open.
+
+All three are covered by tests that emulate the inset and the keyboard in Chromium; the blur itself can only be seen on a device.
+
 ## Consequences
 
 - No store accounts, no review, the band gets a link.
@@ -43,3 +53,5 @@ Facts checked on 2026-11-19:
 - [WebKit — Updates to Storage Policy](https://webkit.org/blog/14403/updates-to-storage-policy/)
 - [MDN — Storage quotas and eviction criteria](https://developer.mozilla.org/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)
 - `vite-plugin-pwa` peer dependencies: npm registry, 2026-11-19.
+- [qui — keep the top of the iOS Home Screen app clear of the status bar fade](https://github.com/autobrr/qui/pull/4261) and [herdr-web-ui — header clear of iOS 26's edge blur](https://github.com/devswha/herdr-web-ui/pull/106): other projects' reports of the blurred band and its size.
+- [WebKit bug 230225 — visual viewport and the virtual keyboard](https://bugs.webkit.org/show_bug.cgi?id=230225); [Safari 26 release notes](https://developer.apple.com/documentation/safari-release-notes/safari-26-release-notes).

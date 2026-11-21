@@ -196,7 +196,7 @@ export function EditorScreen({ id }: { id: string }) {
           <div
             role="toolbar"
             aria-label={t("editor.symbols")}
-            className="flex shrink-0 gap-1.5 border-t border-line px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+            className="flex shrink-0 gap-1.5 border-t border-line px-2 py-2 pb-[max(0.5rem,var(--safe-bottom))]"
           >
             {SYMBOLS.map((symbol) => (
               <button

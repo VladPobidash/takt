@@ -199,9 +199,29 @@
   }
 
   html,
-  body,
-  #root {
+  body {
     height: 100%;
+  }
+  body {
+    overflow: hidden;
+  }
+  /*
+   * The app fills the visible part of the screen (ui/viewport.ts): it ends above the
+   * keyboard, and on an installed iOS 26 app it starts below the system's blurred band.
+   */
+  #root {
+    position: fixed;
+    inset-inline: 0;
+    top: var(--app-top, 0px);
+    height: var(--app-height, 100dvh);
+    padding-top: var(--top-fade, 0px);
+  }
+  :root {
+    /* The home-indicator inset; not needed while the keyboard covers that area. */
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root[data-keyboard] {
+    --safe-bottom: 0px;
   }
   body {
     background: var(--bg);
@@ -227,4 +247,14 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/*
+ * Dialogs live in the top layer and are placed against the layout viewport, which on iOS
+ * does not shrink for the keyboard. While it is open they sit just above it.
+ */
+:root[data-keyboard] dialog[open] {
+  margin-top: auto;
+  margin-bottom: var(--keyboard-inset, 0px);
+  max-height: calc(var(--app-height, 100dvh) - 0.5rem);
 }
