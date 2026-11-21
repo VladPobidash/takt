@@ -323,25 +323,68 @@ test.describe("compact mode on an installed iPhone app", () => {
     });
   }
 
-  test("a line keeps all its bars in one row; the bars of a section share their columns", async ({
+  /** Left edges of the bars of every section, measured from the section's tile. */
+  const barLines = (page: Page) =>
+    page.getByRole("main").evaluate((main) => {
+      const sections: Record<string, number[]> = {};
+      for (const tile of main.querySelectorAll("section")) {
+        const origin = tile.getBoundingClientRect().left;
+        const lefts = [...tile.querySelectorAll("[data-bar]")].map(
+          (bar) => Math.round((bar.getBoundingClientRect().left - origin) * 2) / 2,
+        );
+        sections[tile.getAttribute("aria-label") ?? ""] = [...new Set(lefts)].sort((a, b) => a - b);
+      }
+      return sections;
+    });
+
+  /** Bars wider or narrower than the first bar of the song (there must be none). */
+  const unevenBars = (page: Page) =>
+    page
+      .getByRole("main")
+      .locator("[data-bar]")
+      .evaluateAll((bars) => {
+        const widths = bars.map((bar) => bar.getBoundingClientRect().width);
+        return widths.filter((width) => Math.abs(width - (widths[0] ?? 0)) > 0.5).length;
+      });
+
+  test("every bar has the same width and bar lines of all sections meet: four columns", async ({
+    page,
+  }) => {
+    await page.goto("/songs/vdiachnist");
+    await page.getByRole("button", { name: "Compact mode" }).click();
+    const lines = await barLines(page);
+    const grid = lines.Chorus ?? [];
+    expect(grid).toHaveLength(4);
+    // The last chorus has a line of five bars: it uses the same four columns; the fifth bar wraps.
+    expect(lines["Chorus 3"]).toEqual(grid);
+    expect(lines.Instrumental).toEqual(grid);
+    expect(lines["3 Verse"]).toEqual(grid);
+    // Two bars of the intro are as wide as any other bar.
+    expect(lines.Intro).toEqual(grid.slice(0, 2));
+    expect(await unevenBars(page)).toBe(0);
+  });
+
+  test("a verse bar is as wide as a chorus bar in a song of three-, five- and seven-bar lines", async ({
     page,
   }) => {
     await page.goto("/songs/bozhe-ia-vdiachnyi-tobi");
     await page.getByRole("button", { name: "Compact mode" }).click();
-    const rows = (name: string) =>
-      page
-        .getByRole("region", { name, exact: true })
-        .locator(".grid > div.relative")
-        .evaluateAll((bars) => {
-          const tops = bars.map((bar) => Math.round(bar.getBoundingClientRect().top));
-          const lefts = bars.map((bar) => Math.round(bar.getBoundingClientRect().left));
-          return { rows: new Set(tops).size, columns: new Set(lefts).size, bars: bars.length };
-        });
-    // Two lines of five bars: two rows of five, not 4 + 1 + 4 + 1.
-    expect(await rows("Chorus")).toEqual({ rows: 2, columns: 5, bars: 10 });
-    // Four lines of three bars fill the width in three columns.
-    expect(await rows("1 Verse")).toEqual({ rows: 4, columns: 3, bars: 12 });
-    expect(await rows("Bridge")).toEqual({ rows: 2, columns: 7, bars: 14 });
+    const lines = await barLines(page);
+    const grid = lines.Chorus ?? [];
+    expect(grid).toHaveLength(5);
+    expect(lines["1 Verse"]).toEqual(grid.slice(0, 3));
+    expect(lines["Chorus 3"]).toEqual(grid);
+    // Six and seven bars: five in a row, the rest wraps to the first columns.
+    expect(lines.Instrumental).toEqual(grid);
+    expect(lines.Bridge).toEqual(grid);
+    expect(await unevenBars(page)).toBe(0);
+    // No chord is wider than its bar.
+    expect(
+      await page
+        .getByRole("main")
+        .locator("[data-bar]")
+        .evaluateAll((bars) => bars.filter((bar) => bar.scrollWidth > bar.clientWidth + 1).length),
+    ).toBe(0);
   });
 
   test("a row too dense for the screen falls back to fewer columns instead of overflowing", async ({
@@ -359,12 +402,20 @@ test.describe("compact mode on an installed iPhone app", () => {
     await expect
       .poll(() =>
         verse
-          .locator(".grid > div.relative")
+          .locator("[data-bar]")
           .evaluateAll(
-            (bars) => new Set(bars.map((bar) => Math.round(bar.getBoundingClientRect().top))).size,
+            (bars) => bars.filter((bar) => bar.scrollWidth > bar.clientWidth + 1).length,
           ),
       )
-      .toBe(2);
+      .toBe(0);
+    // Eight bars do not stay in one row of eight.
+    expect(
+      await verse
+        .locator("[data-bar]")
+        .evaluateAll(
+          (bars) => new Set(bars.map((bar) => Math.round(bar.getBoundingClientRect().top))).size,
+        ),
+    ).toBeGreaterThan(1);
     expect(
       await page.getByRole("main").evaluate((el) => el.scrollWidth - el.clientWidth),
     ).toBeLessThanOrEqual(0);

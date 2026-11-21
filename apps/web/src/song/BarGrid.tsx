@@ -8,8 +8,10 @@ export interface BarGridOptions {
   beatDots: boolean;
   /** Under a capo shape, also show the sounding chord. */
   soundingChords: boolean;
-  /** Compact mode: the whole song on one screen — small chords, no beat dots, always 4 bars per row. */
+  /** Compact mode: the whole song on one screen — small chords, no beat dots, one grid for the song. */
   compact?: boolean;
+  /** Compact mode: columns of the song's grid (see `compact.ts`). */
+  columns?: number;
 }
 
 /**
@@ -37,8 +39,8 @@ export function BarLine({
   options: BarGridOptions;
   personal?: LineNotes;
   /**
-   * The bars are placed straight into the section's grid (compact mode), so all lines of
-   * the section share the same columns. Otherwise the line is a grid of its own.
+   * The bars are placed straight into the section's grid (compact mode), which has the
+   * columns of the whole song: one bar, one column. Otherwise the line is a grid of its own.
    */
   shared?: boolean;
 }) {
@@ -122,7 +124,7 @@ function BarCell({
   const dots = Math.max(1, Math.round(bar.beats));
   let position = 0;
   return (
-    <div className={`relative min-w-0 ${first ? "col-start-1" : ""}`}>
+    <div data-bar className={`relative min-w-0 ${first ? "col-start-1" : ""}`}>
       {onTap && (
         // The whole bar is the tap target; the chords stay plain text underneath.
         <button
@@ -134,10 +136,12 @@ function BarCell({
       )}
       {noted && <span aria-hidden="true" className="absolute right-1 top-0 size-2 bg-mine-dot" />}
       <div
-        className={`flex flex-col justify-between border-l-2 border-bar pl-1.5 ${options.compact ? "min-h-[calc(22px*var(--compact-scale,1))]" : "min-h-11"} ${last ? "border-r-2" : ""}`}
+        // Compact: the closing line is drawn just outside the bar, exactly where the next
+        // column's line would be, so it meets the bar lines of the other sections.
+        className={`flex flex-col justify-between border-l-2 border-bar ${options.compact ? "min-h-[calc(22px*var(--compact-scale,1))] pl-1" : "min-h-11 pl-1.5"} ${last ? (options.compact ? "shadow-[2px_0_0_var(--bar)]" : "border-r-2") : ""}`}
         style={{ width: `${width * 100}%` }}
       >
-        <div className="flex min-w-0 items-start gap-x-1.5">
+        <div className={`flex min-w-0 items-start ${options.compact ? "gap-x-1" : "gap-x-1.5"}`}>
           {bar.kind === "repeat" && (
             <span className="text-[22px] font-extrabold leading-none opacity-60">%</span>
           )}
