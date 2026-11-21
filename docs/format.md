@@ -64,6 +64,7 @@ time: 4/4
 - **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name; notes written under it are kept. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`). The reusing section also takes the repeat, unless it writes its own (`## Interlude = Intro x1` plays once).
 - Repeats are shown folded (`×4`), never unrolled; the form timeline is sized by bars × repeats.
 - **Section type** (color and abbreviation) is detected from the name, in English and Ukrainian: intro/вступ, verse/куплет, pre-chorus/передприспів, chorus/приспів, bridge/брідж, interlude/програш, instrumental, outro/кінцівка.
+- **Numbers** may stand after the name or before it, as in the band's charts: `## Chorus 2`, `## 3 Verse`, `## 1, 2 Verse`, `## 1 Bridge`. They become part of the short label on the form timeline (`C2`, `V3`, `V1,2`, `B1`). "Interludio" is read as an interlude.
 
 ## Bar line
 
@@ -101,6 +102,8 @@ time: 6/8
 Root `A`–`H`, accidental `#` or `b`, quality (`m`, `sus4`, `7`, `maj7`…), bass note after `/`.
 
 Notation: with `notation: H`, H = B natural and B = B♭; with `notation: B`, B = B natural. If not set, any H in the file implies H-notation; otherwise the personal setting applies and the editor points at every ambiguous `B`. Other flats are written with `b` (`Eb`, `Ab`), also in H-notation; `Bb` is accepted as B♭. Evidence from our .xlsx: "Краса Хреста" in "B" with chords Gm, Eb, F — that is B♭.
+
+A sharp typed after a space still belongs to the chord before it: `| C # |` is C♯.
 
 A token the parser does not recognise as a chord is kept and shown as written, with a warning.
 
@@ -162,6 +165,15 @@ Real lines from our band's PDF that v0 must parse:
 | G*** Hm* | A | D/F# | Hm*** A*|
 | Hm** D** | G** A** | (2x)
 | F# | F# | F#sus | F#sus |
+```
+
+From the band's chart of «Вдячність» in 6/8 ([examples/vdiachnist.takt](../examples/vdiachnist.takt)):
+
+```
+| F# | F# | D#m | D#m |
+| F# | F# | F#sus | F#sus |
+| H | H | Hm | Hm | F# |
+| C # |
 ```
 
 In 6/8, from [examples/silent-night.takt](../examples/silent-night.takt):

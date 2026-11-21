@@ -123,6 +123,18 @@ function parseBar(
     const name = starred ? (starred[1] as string) : word.text;
     const stars = starred ? (starred[2] as string).length : 0;
     if (stars > 0) hasStars = true;
+    // "C #": a sharp typed after a space still belongs to the chord before it.
+    if ((name === "#" || name === "♯") && previous?.kind === "chord" && previous.stars === 0) {
+      const sharpened = parseChord(`${previous.text}#`, context.notation);
+      if (sharpened) {
+        const from = previous.span.start.offset - span(0, 0).start.offset;
+        previous.text = `${previous.text}#`;
+        previous.chord = sharpened;
+        previous.stars = stars;
+        previous.span = span(from, word.from + name.length);
+        continue;
+      }
+    }
     const cellSpan = span(word.from, word.from + name.length);
     const cell: Cell = {
       kind: "text",

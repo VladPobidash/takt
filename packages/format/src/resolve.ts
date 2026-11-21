@@ -20,7 +20,7 @@ const TYPE_NAMES: [SectionType, string[]][] = [
   ["verse", ["verse", "куплет", "строфа"]],
   ["bridge", ["bridge", "брідж", "бридж"]],
   ["intro", ["intro", "вступ", "інтро"]],
-  ["interlude", ["interlude", "програш", "інтерлюдія"]],
+  ["interlude", ["interlud", "програш", "інтерлюд"]],
   ["instrumental", ["instrumental", "inst", "solo", "інструментал", "соло"]],
   ["outro", ["outro", "ending", "coda", "кінцівка", "аутро", "кода"]],
 ];
@@ -42,16 +42,26 @@ const COUNTED = new Set<SectionType>(["verse", "pre-chorus", "chorus", "bridge"]
 
 /** Detects the section type from its name: `Verse 2` → `verse`, `Приспів` → `chorus`. */
 export function sectionType(name: string): SectionType {
-  const lower = name.trim().toLowerCase();
+  const lower = withoutLeadingNumbers(name).toLowerCase();
   for (const [type, prefixes] of TYPE_NAMES) {
     if (prefixes.some((prefix) => lower.startsWith(prefix))) return type;
   }
   return "other";
 }
 
+/** Numbers written before the name, as in `3 Verse` or `1, 2 Verse`. */
+const LEADING_NUMBERS = /^\s*(\d+(?:\s*[,&+–-]\s*\d+)*)[.):]?\s+/;
+
+function withoutLeadingNumbers(name: string): string {
+  return name.replace(LEADING_NUMBERS, "").trim();
+}
+
 function abbreviation(name: string, type: SectionType, occurrence: number): string {
   if (type === "other") return (name.trim().split(/\s+/)[0] ?? "").slice(0, 4);
   const short = ABBREVIATION[type];
+  // The band numbers sections either way: `Chorus 2` or `3 Verse`, also `1, 2 Verse`.
+  const leading = LEADING_NUMBERS.exec(name);
+  if (leading) return short + (leading[1] as string).replace(/\s+/g, "");
   const numbered = /(\d+)\s*$/.exec(name);
   if (numbered) return short + numbered[1];
   return COUNTED.has(type) && occurrence > 1 ? short + occurrence : short;

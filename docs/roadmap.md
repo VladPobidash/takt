@@ -20,7 +20,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 ## Open questions
 
 - [ ] Product name and file extension (`.takt` is a working name).
-- [x] 6/8 time: one asterisk is an eighth note (6 per bar); `tempo` counts the dotted-quarter pulse ([ADR 0005](decisions/0005-format-library.md)). To confirm on the band's own 6/8 songs.
+- [x] 6/8 time: one asterisk is an eighth note (6 per bar); `tempo` counts the dotted-quarter pulse ([ADR 0005](decisions/0005-format-library.md)). The band's first 6/8 song, «Вдячність» at 78 BPM, is entered that way; to confirm by ear with auto-scroll.
 - [x] Empty bar `| |` and `%` are different: keep the last chord vs play the previous bar again ([ADR 0005](decisions/0005-format-library.md)).
 - [ ] How to write small keys parts: text, note names, mini-tab? (v0: plain-text cues, `@keys > …`.)
 - [ ] Rhythm cues for cajón and drums: just notes or a dedicated notation? (v0: plain-text cues, `@drums > …`.)
