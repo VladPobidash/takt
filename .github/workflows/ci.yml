@@ -18,6 +18,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Two commits: the change and what it is compared with (the tip of main under a
+          # pull request's merge commit, or the commit before a push to main).
+          fetch-depth: 2
+      - name: A change to the app raises its version (ADR 0014)
+        run: node scripts/check-version.mjs HEAD^1
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

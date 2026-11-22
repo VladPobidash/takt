@@ -120,7 +120,7 @@ export const uk: Messages = {
   "settings.chordSize.m": "Середній",
   "settings.chordSize.l": "Великий",
   "settings.chordSize.l.hint": "Для телефона на пюпітрі",
-  "settings.version": "Версія",
+  "settings.app": "Застосунок",
 
   "library.new": "Нова пісня",
   "library.newTitle": "Нова пісня",
@@ -289,4 +289,8 @@ export const uk: Messages = {
 
   "update.available": "Нова версія Takt готова.",
   "update.apply": "Оновити зараз",
+  "update.check": "Перевірити оновлення",
+  "update.checking": "Перевіряю…",
+  "update.current": "У вас найновіша версія.",
+  "update.failed": "Не вдалося перевірити. Перевірте з’єднання і спробуйте ще раз.",
 };

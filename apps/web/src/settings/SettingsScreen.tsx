@@ -1,8 +1,9 @@
 import { VOICE_PARTS } from "@takt/format";
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
 import { LANGUAGES } from "../i18n/index.ts";
+import { applyUpdate, checkForUpdate, useUpdateAvailable } from "../pwa.ts";
 import type { InstrumentChoice, Settings, Theme } from "../storage/app-state.ts";
 import { backupFileName, formatBundle } from "../storage/bundle.ts";
 import { SearchableSelect } from "../ui/SearchableSelect.tsx";
@@ -32,6 +33,47 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
       </h2>
       {children}
     </section>
+  );
+}
+
+/** The version of the app on this device, and a way to ask for a newer one now (ADR 0014). */
+function AppVersion() {
+  const { t } = useApp();
+  const available = useUpdateAvailable();
+  const [check, setCheck] = useState<"idle" | "checking" | "current" | "failed">("idle");
+  const run = async () => {
+    setCheck("checking");
+    const result = await checkForUpdate();
+    setCheck(result === "available" ? "idle" : result);
+  };
+  return (
+    <Group title={t("settings.app")}>
+      <p className="mb-2 text-[15px] font-semibold">
+        Takt v{__APP_VERSION__}
+        <span className="font-medium text-muted"> · {__APP_BUILD_DATE__}</span>
+      </p>
+      <button
+        type="button"
+        disabled={check === "checking"}
+        onClick={available ? applyUpdate : () => void run()}
+        className={`h-12 w-full rounded-control text-[15px] font-bold disabled:text-muted ${
+          available ? "bg-accent text-accent-fg" : "bg-surface"
+        }`}
+      >
+        {available ? t("update.apply") : t("update.check")}
+      </button>
+      <p role="status" className="mt-2 min-h-5 text-[13px] font-medium text-muted">
+        {available
+          ? t("update.available")
+          : check === "checking"
+            ? t("update.checking")
+            : check === "current"
+              ? t("update.current")
+              : check === "failed"
+                ? t("update.failed")
+                : ""}
+      </p>
+    </Group>
   );
 }
 
@@ -243,9 +285,7 @@ export function SettingsScreen() {
             {t("settings.restoreHint")}
           </p>
         </Group>
-        <p className="text-[13px] font-medium text-muted">
-          {t("settings.version")} {__APP_VERSION__}
-        </p>
+        <AppVersion />
       </main>
     </div>
   );

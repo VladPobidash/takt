@@ -1,5 +1,6 @@
 import { registerSW } from "virtual:pwa-register";
 import { useSyncExternalStore } from "react";
+import { checkRegistration, type UpdateCheck } from "./update-check.ts";
 
 /**
  * Service-worker updates (ADR 0007): a new version downloads in the background and waits.
@@ -33,6 +34,22 @@ export function useUpdateAvailable(): boolean {
 
 export function applyUpdate(): void {
   void apply?.(true);
+}
+
+/**
+ * Asks the server for a newer version now, instead of waiting for the browser's own check
+ * (ADR 0014). A version it finds is downloaded and waits, like any other update.
+ */
+export async function checkForUpdate(): Promise<UpdateCheck> {
+  if (waiting) return "available";
+  const registration = await navigator.serviceWorker?.getRegistration().catch(() => undefined);
+  if (!registration) return "failed";
+  const result = await checkRegistration(registration);
+  if (result === "available" && !waiting) {
+    waiting = true;
+    for (const listener of listeners) listener();
+  }
+  return result;
 }
 
 /** Asks the browser not to evict the app's data under storage pressure. Safe to call repeatedly. */

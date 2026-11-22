@@ -253,6 +253,19 @@ test.describe("auto-scroll", () => {
 test.describe("settings", () => {
   test.use({ locale: "en-US" });
 
+  test("the app's version is shown and a newer one can be asked for", async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto("/settings");
+    await expect(page.getByText(/^Takt v0\.\d+\.\d+ · \d{4}-\d{2}-\d{2}$/)).toBeVisible();
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await page.getByRole("button", { name: "Check for updates" }).click();
+    await expect(page.getByText("You have the latest version.")).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath("settings-version.png"), fullPage: true });
+    // The "could not check" answer is covered by unit tests: the browser's offline emulation
+    // does not reach the request for a new service worker.
+    expect(errors).toEqual([]);
+  });
+
   test("language and instrument are chosen from searchable lists", async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto("/settings");

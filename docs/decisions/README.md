@@ -37,3 +37,4 @@ What it gives us and what it costs.
 | [0011](0011-hosting.md) | Hosting: a static site on Railway | accepted |
 | [0012](0012-timing.md) | Timing: auto-scroll follows a time anchor, section by section | accepted (delegated) |
 | [0013](0013-song-forms.md) | Song forms: named versions over the same sections | accepted |
+| [0014](0014-app-version.md) | App version numbers (`v0.x.y`) and a manual check for updates | accepted |
