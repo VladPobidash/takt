@@ -8,6 +8,8 @@ import type {
   BarsLine,
   Chord,
   DiffSummary,
+  FormChange,
+  FormEntry,
   Line,
   LineChange,
   LyricsLine,
@@ -22,6 +24,7 @@ import type {
   SongChange,
   SongDiff,
   SongDoc,
+  SongForm,
   TextChange,
   TitleChange,
 } from "./types.ts";
@@ -496,7 +499,14 @@ function movedSections(pairs: Map<number, number>): Set<number> {
 // The diff.
 
 /** A change before it knows which section pair it belongs to. */
-type Draft = TitleChange | MetaChange | SectionChange | LineChange | BarChange | TextChange;
+type Draft =
+  | TitleChange
+  | MetaChange
+  | FormChange
+  | SectionChange
+  | LineChange
+  | BarChange
+  | TextChange;
 
 /** Streams of a section: base bar lines, each instrument's bar lines, notes per instrument, lyrics. */
 function streamIds(linesA: Line[], linesB: Line[], kind: "bars" | "note"): (string | null)[] {
@@ -660,7 +670,7 @@ function diffBars(
   }
 }
 
-function diffHeader(a: Side, b: Side, out: Draft[]): void {
+function diffHeader(a: Side, b: Side, sections: Map<number, number>, out: Draft[]): void {
   const docA = a.doc;
   const docB = b.doc;
   if ((docA.title ?? null) !== (docB.title ?? null)) {
@@ -688,13 +698,70 @@ function diffHeader(a: Side, b: Side, out: Draft[]): void {
     if ((x ?? y)?.key === "notation" && docA.notation === docB.notation) continue;
     out.push({ kind: "meta", key: (x ?? y)?.key ?? "", before: x, after: y });
   }
+  diffForms(a.doc, b.doc, sections, out);
   diffLines(a, b, null, null, docA.headerLines, docB.headerLines, out);
+}
+
+/**
+ * Forms by name (case-insensitive). A removed and an added form with the same entries are one
+ * renamed form. Entries are the same when they name paired sections with the same repeat.
+ */
+function diffForms(
+  docA: SongDoc,
+  docB: SongDoc,
+  sections: Map<number, number>,
+  out: Draft[],
+): void {
+  const sameEntry = (x: FormEntry, y: FormEntry) =>
+    x.repeat === y.repeat &&
+    (x.section === null || y.section === null
+      ? x.section === y.section && nameKey(collapse(x.text)) === nameKey(collapse(y.text))
+      : sections.get(x.section) === y.section);
+  const sameEntries = (x: SongForm, y: SongForm) =>
+    x.entries.length === y.entries.length &&
+    x.entries.every((entry, i) => sameEntry(entry, y.entries[i] as FormEntry));
+  const pairs = new Map<number, number>();
+  const byName = new Map<string, number>();
+  docB.forms.forEach((form, j) => {
+    if (!byName.has(nameKey(form.name))) byName.set(nameKey(form.name), j);
+  });
+  const pairedB = new Set<number>();
+  docA.forms.forEach((form, i) => {
+    const j = byName.get(nameKey(form.name));
+    if (j !== undefined && !pairedB.has(j)) {
+      pairs.set(i, j);
+      pairedB.add(j);
+    }
+  });
+  docB.forms.forEach((form, j) => {
+    if (pairedB.has(j)) return;
+    const i = docA.forms.findIndex((old, k) => !pairs.has(k) && sameEntries(old, form));
+    if (i !== -1) {
+      pairs.set(i, j);
+      pairedB.add(j);
+    }
+  });
+  for (const { before: i, after: j } of inNewOrder(pairs, docA.forms.length, docB.forms.length)) {
+    const before = i === null ? null : { index: i, value: docA.forms[i] as SongForm };
+    const after = j === null ? null : { index: j, value: docB.forms[j] as SongForm };
+    if (!before || !after) {
+      out.push({ kind: before ? "form-removed" : "form-added", before, after });
+      continue;
+    }
+    if (before.value.name !== after.value.name) {
+      out.push({ kind: "form-renamed", before, after });
+    }
+    if (!sameEntries(before.value, after.value)) {
+      out.push({ kind: "form-changed", before, after });
+    }
+  }
 }
 
 function summarize(changes: SongChange[]): DiffSummary {
   const summary: DiffSummary = {
     total: changes.length,
     header: 0,
+    forms: 0,
     sections: 0,
     lines: 0,
     bars: 0,
@@ -704,6 +771,7 @@ function summarize(changes: SongChange[]): DiffSummary {
   for (const change of changes) {
     const group = change.kind.split("-")[0];
     if (group === "title" || group === "meta") summary.header++;
+    else if (group === "form") summary.forms++;
     else if (group === "section") summary.sections++;
     else if (group === "line") summary.lines++;
     else if (group === "bar") summary.bars++;
@@ -738,12 +806,12 @@ function summarize(changes: SongChange[]): DiffSummary {
 export function diffSongs(before: string, after: string, options: ParseOptions = {}): SongDiff {
   const a = makeSide(parse(before, options).doc);
   const b = makeSide(parse(after, options).doc);
+  const pairs = matchSections(a, b);
   const changes: SongChange[] = [];
   const header: Draft[] = [];
-  diffHeader(a, b, header);
+  diffHeader(a, b, pairs, header);
   for (const change of header) changes.push({ ...change, sectionPair: null } as SongChange);
 
-  const pairs = matchSections(a, b);
   const moved = movedSections(pairs);
   const sections = inNewOrder(pairs, a.doc.sections.length, b.doc.sections.length);
   sections.forEach(({ before: x, after: y }, sectionPair) => {

@@ -316,6 +316,7 @@ describe("diffSongs: summary and robustness", () => {
     expect(diffSongs(a, b).summary).toEqual({
       total: 6,
       header: 1,
+      forms: 0,
       sections: 1,
       lines: 1,
       bars: 1,
@@ -473,5 +474,38 @@ describe("diffSongs: review follow-ups", () => {
     const lines = (chord: string) => Array.from({ length: 30 }, () => bars(chord)).join("\n");
     diffSongs(`# T\n## V\n${lines("D")}\n`, `# T\n## V\n${lines("E")}\n`);
     expect(performance.now() - started).toBeLessThan(3000);
+  });
+});
+
+describe("diffSongs: named versions (form lines)", () => {
+  const sections = "## Intro\n| D |\n## Verse 1\n| A |\n## Chorus\n| G |\n## Bridge\n| Em |\n";
+  const withForms = (...forms: string[]) => `# T\n${forms.join("\n")}\n\n${sections}`;
+
+  test("a form added, removed, changed and renamed", () => {
+    expect(briefs(withForms(), withForms("form short: Intro, Chorus"))).toEqual([
+      "form-added - header",
+    ]);
+    expect(briefs(withForms("form short: Intro, Chorus"), withForms())).toEqual([
+      "form-removed header -",
+    ]);
+    expect(
+      briefs(withForms("form short: Intro, Chorus"), withForms("form short: Intro, Chorus x2")),
+    ).toEqual(["form-changed header header"]);
+    expect(
+      briefs(withForms("form short: Intro, Chorus"), withForms("form коротка: Intro, Chorus")),
+    ).toEqual(["form-renamed header header"]);
+    const diff = diffSongs(withForms("form a: Intro"), withForms("form b: Bridge"));
+    expect(diff.changes.map((c) => c.kind)).toEqual(["form-removed", "form-added"]);
+    expect(diff.summary.forms).toBe(2);
+  });
+
+  test("spelling of a form is no change; renaming a section it names is no form change", () => {
+    expect(
+      briefs(withForms("form Short: intro,chorus"), withForms("FORM  Short :  Intro , Chorus")),
+    ).toEqual([]);
+    const renamed = withForms("form short: Intro, Refrain").replace("## Chorus", "## Refrain");
+    expect(briefs(withForms("form short: Intro, Chorus"), renamed)).toEqual([
+      "section-renamed Chorus#1 Refrain#1",
+    ]);
   });
 });

@@ -206,8 +206,9 @@ describe("edits of an example song", () => {
   test("a section renamed, content unchanged", () => {
     const after = dostoinyi.replace("## Bridge [яма] x4", "## Breakdown [яма] x4");
     const diff = diffSongs(dostoinyi, after);
-    expect(kinds(diff)).toEqual(["section-renamed"]);
-    const change = diff.changes[0] as SectionChange;
+    // Both form lines name "Bridge", which no longer exists: they play less now (ADR 0013).
+    expect(kinds(diff)).toEqual(["form-changed", "form-changed", "section-renamed"]);
+    const change = diff.changes[2] as SectionChange;
     expect([change.before?.name, change.after?.name]).toEqual(["Bridge", "Breakdown"]);
   });
 
@@ -329,6 +330,7 @@ describe("edits of an example song", () => {
     expect(diff.summary).toEqual({
       total: 3,
       header: 1,
+      forms: 0,
       sections: 0,
       lines: 0,
       bars: 1,

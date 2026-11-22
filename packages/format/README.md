@@ -38,7 +38,7 @@ const diff = diffSongs(oldText, newText);
 | `transposeText(text, semitones)` | rewrite a file in another key without touching its formatting |
 | `setForm`, `renameForm`, `removeForm`, `formatFormEntries`, `findForm`, `cleanFormName` | add, change, rename and delete `form` lines (named versions) without touching the rest of the file |
 | `parseSetlist`, `formatSetlist` | `.taktset` setlists |
-| `diffSongs(before, after, options?)` | what changed between two texts of a song, in musical terms: header, sections, bar lines and bars per instrument, notes, lyrics, with places and a summary |
+| `diffSongs(before, after, options?)` | what changed between two texts of a song, in musical terms: header, `form` lines, sections, bar lines and bars per instrument, notes, lyrics, with places and a summary |
 | `align(a, b, equal, similarity)` | the sequence alignment `diffSongs` uses: fewest changes, so an inserted item does not shift the ones after it |
 
 Tests are written first: `pnpm --filter @takt/format test`. Cases come from "Parser test cases" in the format spec and from [`examples/`](../../examples/).

@@ -363,6 +363,24 @@ export interface MetaChange {
   after: MetaEntry | null;
 }
 
+/** A named version of the song (`form <name>: …`) of one version of the file. */
+export interface FormPlace {
+  /** Index in `doc.forms`. */
+  index: number;
+  value: SongForm;
+}
+
+/**
+ * A `form` line added, removed, renamed (the same entries under another name) or changed (other
+ * entries or repeats). Entries are compared by the sections they name, so renaming a section
+ * that a form names is no change of the form.
+ */
+export interface FormChange {
+  kind: "form-added" | "form-removed" | "form-renamed" | "form-changed";
+  before: FormPlace | null;
+  after: FormPlace | null;
+}
+
 export interface SectionChange {
   /**
    * `section-moved`: its place among the other sections changed (`index`).
@@ -426,6 +444,7 @@ export interface ChangeBase {
 export type SongChange = (
   | TitleChange
   | MetaChange
+  | FormChange
   | SectionChange
   | LineChange
   | BarChange
@@ -441,6 +460,8 @@ export interface DiffSummary {
   total: number;
   /** `title` and `meta`. */
   header: number;
+  /** `form-*`. */
+  forms: number;
   /** `section-*`. */
   sections: number;
   /** `line-*`. */
