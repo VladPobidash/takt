@@ -719,6 +719,72 @@ test.describe("versions of a song", () => {
   });
 });
 
+test.describe("version editor", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("a version is made from the main one without typing, renamed with the setlists and deleted", async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto("/songs/silent-night");
+    await expect(page.getByRole("group", { name: "Versions" })).toHaveCount(0);
+    await page.getByRole("button", { name: "View options" }).click();
+    await page.getByRole("link", { name: "Versions of the song" }).click();
+    await expect(page.getByText("No versions yet.")).toBeVisible();
+
+    // A new version starts as the main one; the interlude is switched off, the outro played once
+    // and the third verse moved before the second.
+    await page.getByRole("button", { name: "New version" }).click();
+    await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue("Version 1");
+    await page.getByRole("checkbox", { name: "Play I Interlude" }).uncheck();
+    await page.getByRole("button", { name: "O Outro: fewer times" }).click();
+    await page.getByRole("button", { name: "Move V3 Verse 3 up" }).click();
+    await page.getByRole("button", { name: "Move V3 Verse 3 up" }).click();
+    await page.getByRole("textbox", { name: "Name" }).fill("для  молоді");
+    await page.getByRole("textbox", { name: "Name" }).press("Enter");
+    await page.screenshot({ path: test.info().outputPath("version-editor.png") });
+
+    // The setlist plays it before a rename, and follows the rename.
+    await page.goto("/library?tab=setlists");
+    await page.getByRole("button", { name: "New setlist" }).click();
+    await page.getByRole("button", { name: "Add a song" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Silent Night" }).click();
+    await page.getByRole("button", { name: "Edit the setlist" }).click();
+    await page.getByRole("group", { name: "Versions" }).getByText("для молоді").click();
+    await page.getByRole("button", { name: "Finish editing" }).click();
+    const setlistUrl = page.url();
+
+    await page.goto("/songs/silent-night/versions");
+    await page.getByRole("button", { name: /для молоді/ }).click();
+    await page.getByRole("textbox", { name: "Name" }).fill("Christmas Eve");
+    await page.getByRole("textbox", { name: "Name" }).blur();
+    await page.getByRole("link", { name: "Done" }).click();
+    const versions = page.getByRole("group", { name: "Versions" });
+    await versions.getByText("Christmas Eve").click();
+    await expect(
+      page.getByRole("navigation", { name: "Song form" }).getByRole("button"),
+    ).toHaveCount(5);
+    const regions = page.locator("section[id]");
+    await expect(regions.nth(2)).toHaveAccessibleName("Verse 3");
+    await expect(page.getByRole("region", { name: "Outro" })).not.toContainText("×2");
+
+    await page.goto(setlistUrl);
+    const row = page.getByRole("listitem").first();
+    await expect(row).toContainText("Christmas Eve");
+
+    // Deleting the version sends the setlist back to the main one.
+    await page.goto("/songs/silent-night/versions");
+    await page.getByRole("button", { name: /Christmas Eve/ }).click();
+    await page.getByRole("button", { name: "Delete this version" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
+    await expect(page.getByText("No versions yet.")).toBeVisible();
+    await page.goto(setlistUrl);
+    await expect(row).not.toContainText("Christmas Eve");
+    await expect(row).not.toContainText("no version");
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("laptop layout", () => {
   test.use({
     locale: "en-US",

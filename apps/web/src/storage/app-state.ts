@@ -1,6 +1,14 @@
-import type { VoicePart } from "@takt/format";
+import {
+  cleanFormName,
+  formatSetlist,
+  parseSetlist,
+  removeForm,
+  renameForm,
+  type VoicePart,
+} from "@takt/format";
 import { useSyncExternalStore } from "react";
 import { detectLanguage, type Language } from "../i18n/index.ts";
+import { retargetForm } from "../setlist/model.ts";
 import { type Bundle, createBundle } from "./bundle.ts";
 import { slugify, uniqueId } from "./slug.ts";
 import type { SongStore, StoredFile } from "./types.ts";
@@ -272,6 +280,39 @@ export class AppData {
   async saveSong(song: StoredFile): Promise<void> {
     this.update({ songs: [...this.state.songs.filter((s) => s.id !== song.id), song] });
     await this.store.putSong(song);
+  }
+
+  /** Renames a version of a song (ADR 0013); setlists on this device that play it follow. */
+  async renameSongForm(id: string, from: string, to: string, now = Date.now()): Promise<void> {
+    const song = this.state.songs.find((s) => s.id === id);
+    if (!song) return;
+    const text = renameForm(song.text, from, to);
+    if (text === song.text) return;
+    await this.saveSong({ id, text, updatedAt: now });
+    await this.retargetSetlists(id, from, cleanFormName(to), now);
+  }
+
+  /** Deletes a version of a song; setlists on this device that play it go back to the main one. */
+  async removeSongForm(id: string, name: string, now = Date.now()): Promise<void> {
+    const song = this.state.songs.find((s) => s.id === id);
+    if (!song) return;
+    const text = removeForm(song.text, name);
+    if (text === song.text) return;
+    await this.saveSong({ id, text, updatedAt: now });
+    await this.retargetSetlists(id, name, null, now);
+  }
+
+  private async retargetSetlists(
+    song: string,
+    from: string,
+    to: string | null,
+    now: number,
+  ): Promise<void> {
+    for (const stored of this.state.setlists) {
+      const next = retargetForm(parseSetlist(stored.text).setlist, song, from, to);
+      if (next)
+        await this.saveSetlist({ id: stored.id, text: formatSetlist(next), updatedAt: now });
+    }
   }
 
   async deleteSong(id: string): Promise<void> {

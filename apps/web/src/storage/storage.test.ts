@@ -115,4 +115,23 @@ describe("AppData", () => {
     expect(calls).toBe(2);
     expect(await store.listSongs()).toEqual([]);
   });
+
+  test("renaming or deleting a version of a song updates the setlists that play it", async () => {
+    const store = createMemoryStore();
+    const data = await AppData.load(store, { preferredLanguages: ["en"], seed: [] });
+    await data.saveSong({ id: "a", text: "# A\nform short: V\n## V\n| D |\n", updatedAt: 1 });
+    await data.saveSetlist({
+      id: "s",
+      text: "# S\n- a | form: short\n- b | form: short\n",
+      updatedAt: 1,
+    });
+    await data.renameSongForm("a", "Short", "  дуже  коротка ", 2);
+    const song = () => data.getState().songs.find((s) => s.id === "a")?.text;
+    const setlist = () => data.getState().setlists.find((s) => s.id === "s")?.text;
+    expect(song()).toBe("# A\nform дуже коротка: V\n## V\n| D |\n");
+    expect(setlist()).toBe("# S\n- a | form: дуже коротка\n- b | form: short\n");
+    await data.removeSongForm("a", "дуже коротка", 3);
+    expect(song()).toBe("# A\n## V\n| D |\n");
+    expect(setlist()).toBe("# S\n- a\n- b | form: short\n");
+  });
 });

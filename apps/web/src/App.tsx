@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo } from "react";
 import { Redirect, Route, Switch } from "wouter";
 import { AppContext, type App as AppValue } from "./app-context.tsx";
 import { EditorScreen } from "./editor/EditorScreen.tsx";
+import { VersionsScreen } from "./editor/VersionsScreen.tsx";
 import { type Translate, translate } from "./i18n/index.ts";
 import { LibraryScreen } from "./library/LibraryScreen.tsx";
 import { ServiceMapScreen } from "./setlist/ServiceMapScreen.tsx";
@@ -57,6 +58,9 @@ export function App({ data }: { data: AppData }) {
         </Route>
         <Route path="/setlists/:id">
           {(params) => <ServiceMapScreen key={params.id} id={params.id} />}
+        </Route>
+        <Route path="/songs/:id/versions">
+          {(params) => <VersionsScreen key={params.id} id={params.id} />}
         </Route>
         <Route path="/songs/:id/edit">
           {(params) => <EditorScreen key={params.id} id={params.id} />}
