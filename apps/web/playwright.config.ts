@@ -18,7 +18,8 @@ export default defineConfig({
   webServer: {
     // The same server that runs in production (ADR 0011).
     command: "pnpm build && node server.mjs",
-    env: { PORT: String(PORT) },
+    // The tests play the band's three example charts, which the released app no longer ships.
+    env: { PORT: String(PORT), VITE_SEED_FIXTURES: "1" },
     port: PORT,
     reuseExistingServer: !process.env.CI,
   },

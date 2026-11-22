@@ -22,14 +22,15 @@ The app is a static build ([ADR 0001](0001-local-first.md), [ADR 0007](0007-plat
 
 ## Deployment (2026-11-19)
 
-- Railway project `takt`, environment `production`, service `web`, connected to the GitHub repository `VladPobidash/takt`, branch `main`. Railway builds with the root `build` script and starts with the root `start` script; nothing else is configured on the service.
-- Address: <https://vtakt.me> since 2026-11-22 («в такт», "in time"): the author bought the domain through Railway and it is attached to the `web` service as a custom domain; Railway manages its DNS records and certificate. The Railway-generated address of the first deploy, <https://web-production-e41cbcc9.up.railway.app>, keeps serving the same build.
+- Railway project `takt` (renamed `vtakt` on 2026-11-22), environment `production`, service `web`, connected to the GitHub repository `VladPobidash/takt` (renamed `VladPobidash/vtakt` the same day), branch `main`. Railway builds with the root `build` script and starts with the root `start` script; nothing else is configured on the service.
+- Address: <https://vtakt.me> since 2026-11-22 («в такт», "in time"): the author bought the domain through Railway and it is attached to the `web` service as a custom domain; Railway manages its DNS records and certificate. The Railway-generated address of the first deploy (`web-production-e41cbcc9.up.railway.app`) was deleted by the author on the same day; `vtakt.me` is the only address.
 - Checked after the first deploy: the home page, an app route, `sw.js` and the manifest are served with `no-cache`, hashed assets with `immutable`, text with Brotli; in a real browser the library and a song open and the service worker registers.
 
 ## Consequences
 
-- Two addresses are two origins for a browser: an app installed from the old address keeps its own storage and service worker and does not move to `vtakt.me` by itself. The old address is therefore not redirected for now — a redirect would stop the installed copies from updating while their songs stay behind. People who installed from it export a backup there and import it in the app installed from `vtakt.me`.
-- Railway's GitHub app has no access to the repository yet, so Railway does not release on push. Until the author connects it (Railway → project → service → Settings → Source), a release is started through the Railway API with `scripts/deploy-railway.sh` after a merge to `main`.
+- A new address is a new origin for a browser: an app installed from the first address kept its own storage and service worker and did not move to `vtakt.me` by itself. That address is gone, so such a copy still opens offline but never updates; its songs come over with a backup made there and imported in the app installed from `vtakt.me`.
+- Until 2026-11-22 Railway's GitHub app had no access to the repository and a release was started through the Railway API with `scripts/deploy-railway.sh` after each merge. The author then gave it access and the `production` environment was connected to `main` with "wait for CI": **every push to `main` is released by Railway once its checks are green.** The script stays as a manual release for when that fails.
+- The release rhythm above is now a rule for merging, not for deploying: what must not go out on a Saturday before the service is not merged until after it.
 - Preview deploys per pull request are not set up for now.
 
 ## Sources
