@@ -1,14 +1,16 @@
-import { formatKey, parse, type ResolvedSong, resolveSong, transposeKey } from "@takt/format";
+import { formatKey, parse, resolveSong, type SongDoc, transposeKey } from "@takt/format";
 import { useMemo } from "react";
 import { Link, Redirect } from "wouter";
 import { useApp } from "../app-context.tsx";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
 import { type SetlistContext, SongScreen } from "../song/SongScreen.tsx";
 import {
+  entryForm,
   entryKeyFor,
   formatSetlist,
   readEntryKey,
   readSetlist,
+  setEntryForm,
   transposeFor,
   updateEntry,
 } from "./model.ts";
@@ -29,22 +31,30 @@ export function SetlistSongScreen({
   );
   const entry = read?.setlist.entries[position - 1];
 
-  // Every song of the setlist, resolved once: the sidebar needs titles, keys and forms.
-  const resolved = useMemo(() => {
+  // Every song of the setlist, parsed once; each entry resolves the version it plays.
+  const docs = useMemo(() => {
     const wanted = new Set(read?.setlist.entries.map((item) => item.song));
-    const map = new Map<string, ResolvedSong>();
+    const map = new Map<string, SongDoc>();
     for (const song of songs) {
       if (wanted.has(song.id))
-        map.set(song.id, resolveSong(parse(song.text, { defaultNotation: settings.notation }).doc));
+        map.set(song.id, parse(song.text, { defaultNotation: settings.notation }).doc);
     }
     return map;
   }, [read, songs, settings.notation]);
+  const resolved = useMemo(
+    () =>
+      (read?.setlist.entries ?? []).map((item) => {
+        const doc = docs.get(item.song);
+        return doc ? resolveSong(doc, { form: entryForm(item) }) : undefined;
+      }),
+    [read, docs],
+  );
 
   const base = `/setlists/${encodeURIComponent(setlistId)}`;
   if (!read || !entry) return <Redirect to={stored ? base : "/library"} replace />;
 
   const { setlist, notation, date } = read;
-  const songKey = resolved.get(entry.song)?.key ?? null;
+  const songKey = resolved[position - 1]?.key ?? null;
   const count = setlist.entries.length;
   const context: SetlistContext = {
     backHref: base,
@@ -53,6 +63,11 @@ export function SetlistSongScreen({
       const next = updateEntry(setlist, position - 1, {
         key: entryKeyFor(songKey, semitones, notation),
       });
+      void data.saveSetlist({ id: setlistId, text: formatSetlist(next), updatedAt: Date.now() });
+    },
+    form: entryForm(entry),
+    onForm: (form) => {
+      const next = setEntryForm(setlist, position - 1, form);
       void data.saveSetlist({ id: setlistId, text: formatSetlist(next), updatedAt: Date.now() });
     },
     previousHref: position > 1 ? `${base}/${position - 1}` : null,
@@ -88,7 +103,7 @@ export function SetlistSongScreen({
         <nav aria-label={t("setlist.songs")} className="min-h-0 flex-1 overflow-y-auto px-4">
           <ol>
             {setlist.entries.map((item, index) => {
-              const song = resolved.get(item.song);
+              const song = resolved[index];
               const itemKey = readEntryKey(item, notation);
               const key = song?.key
                 ? transposeKey(song.key, transposeFor(song.key, itemKey))
@@ -114,6 +129,11 @@ export function SetlistSongScreen({
                         >
                           {song?.title ?? item.song}
                         </span>
+                        {song?.formName && (
+                          <span className="min-w-0 max-w-[40%] truncate text-[13px] font-bold text-muted">
+                            {song.formName}
+                          </span>
+                        )}
                         {key && (
                           <span className="text-[15px] font-extrabold">
                             {formatKey(key, settings.notation)}

@@ -13,6 +13,7 @@ export const en = {
   "library.songs": "Songs",
   "library.sections": { one: "{count} section", other: "{count} sections" },
   "library.imported": { one: "{count} song imported", other: "{count} songs imported" },
+  "library.versions": { one: "{count} version", other: "{count} versions" },
   "library.warnings": { one: "{count} warning", other: "{count} warnings" },
   "library.onDevice": "Songs live only on this device.",
 
@@ -26,6 +27,11 @@ export const en = {
   "song.capoUp": "Capo up",
   "song.capoDown": "Capo down",
   "song.form": "Song form",
+  "song.versions": "Versions",
+  "song.versionMain": "Main",
+  "song.versionMissing": "This song has no version “{name}”. The main version is shown.",
+  "song.versionSearch": "Search versions",
+  "song.versionNone": "No such version",
   "song.instruments": "Instrument view",
   "song.bandNote": "Band",
 
@@ -165,6 +171,8 @@ export const en = {
   "setlist.title": "Title",
   "setlist.date": "Date",
   "setlist.note": "Note for the night",
+  "setlist.version": "Version",
+  "setlist.versionMissing": "The song has no version “{name}”: the main one is played",
   "setlist.moveUp": "Move “{title}” up",
   "setlist.moveDown": "Move “{title}” down",
   "setlist.remove": "Remove “{title}”",

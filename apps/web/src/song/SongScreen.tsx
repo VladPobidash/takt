@@ -1,4 +1,4 @@
-import { parse, resolveSong } from "@takt/format";
+import { parse, type ResolvedSection, resolveSong } from "@takt/format";
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
@@ -24,6 +24,7 @@ import { FormTimeline } from "./FormTimeline.tsx";
 import { type SectionNotes, SectionTile, sectionAnchor } from "./SectionTile.tsx";
 import { usePlayback } from "./usePlayback.ts";
 import { useWakeLock } from "./useWakeLock.ts";
+import { VersionPicker } from "./VersionPicker.tsx";
 import { everywhereOptions, ViewOptionsSheet } from "./ViewOptionsSheet.tsx";
 import { capoLabel, keyLabel, songDisplay } from "./view.ts";
 
@@ -44,6 +45,10 @@ export interface SetlistContext {
   transpose: number;
   /** Stores a new transposition in the setlist. */
   onTranspose: (semitones: number) => void;
+  /** Version chosen for this song in the setlist; null for the main one. */
+  form: string | null;
+  /** Stores a new version in the setlist. */
+  onForm: (form: string | null) => void;
   previousHref: string | null;
   nextHref: string | null;
   /** "2 of 6" */
@@ -60,6 +65,9 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   const [ownTranspose, setOwnTranspose] = useState(0);
   const transpose = context ? context.transpose : ownTranspose;
   const setTranspose = context ? context.onTranspose : setOwnTranspose;
+  const [ownForm, setOwnForm] = useState<string | null>(null);
+  const form = context ? context.form : ownForm;
+  const setForm = context ? context.onForm : setOwnForm;
   const [capoChoice, setCapoChoice] = useState<number | null>(null);
   const view = resolveViewOptions(
     everywhereOptions(settings),
@@ -123,9 +131,10 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
         ? resolveSong(doc, {
             instrument: instrument === "harmony" ? null : instrument,
             voice: instrument === "vocals" ? settings.voicePart : null,
+            form,
           })
         : null,
-    [doc, instrument, settings.voicePart],
+    [doc, instrument, settings.voicePart, form],
   );
 
   const playback = usePlayback(song);
@@ -135,7 +144,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
     scroller,
     compact,
     candidates,
-    `${id}/${instrument}/${capoChoice}/${transpose}/${stored?.updatedAt}`,
+    `${id}/${instrument}/${capoChoice}/${transpose}/${form}/${stored?.updatedAt}`,
   );
   const nowSection = playback.step?.section ?? null;
   // Auto-scroll follows sections only: when the section changes, it is brought to the top.
@@ -147,7 +156,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
     }
   }, [nowSection]);
 
-  if (!song) {
+  if (!song || !doc) {
     return (
       <div className="flex h-full flex-col">
         <header className="flex h-[52px] items-center px-1">
@@ -165,15 +174,14 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   }
 
   const songNotes = personalNotes[id] ?? {};
-  const occurrences = sectionOccurrences(song.sections);
+  // Notes are anchored to the file's sections, not to the play order: they stay on their
+  // section whichever version is shown (ADR 0013).
+  const occurrences = sectionOccurrences(doc.sections);
   /** Personal notes of one section: what is on each bar, and what a tap opens. */
-  const personalFor = (index: number): SectionNotes => {
-    const place = occurrences[index] ?? { section: "", occurrence: 1 };
-    const section = song.sections[index];
+  const personalFor = (section: ResolvedSection): SectionNotes => {
+    const place = occurrences[section.docIndex] ?? { section: "", occurrence: 1 };
     const barNumber = (line: number, bar: number) =>
-      (section?.lines.slice(0, line).reduce((sum, item) => sum + item.bars.length, 0) ?? 0) +
-      bar +
-      1;
+      section.lines.slice(0, line).reduce((sum, item) => sum + item.bars.length, 0) + bar + 1;
     return {
       barNote: (line, bar) => songNotes[anchorKey({ ...place, line, bar })],
       barLabel: (line, bar) => t("notes.barLabel", { bar: barNumber(line, bar) }),
@@ -259,6 +267,14 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
             )}
           </button>
         </div>
+        {song.forms.length > 0 && (
+          <VersionPicker forms={song.forms} value={song.formName ?? form} onChange={setForm} />
+        )}
+        {form !== null && song.formName === null && (
+          <p role="status" className="px-3 pb-1.5 text-[12px] font-semibold text-signal">
+            {t("song.versionMissing", { name: form })}
+          </p>
+        )}
         <FormTimeline
           form={song.form}
           sections={song.sections}
@@ -371,7 +387,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
               }}
               options={options}
               now={section.index === nowSection}
-              personal={personalFor(section.index)}
+              personal={personalFor(section)}
               // The words are what the vocal view is for: the option hides them in chord views only.
               lyrics={vocal || view.lyrics}
               vocal={vocal}

@@ -1,3 +1,4 @@
+import { parse, resolveSong } from "@takt/format";
 import { describe, expect, test } from "vitest";
 import { AppData } from "../storage/app-state.ts";
 import { formatBundle, parseBundle } from "../storage/bundle.ts";
@@ -34,6 +35,23 @@ describe("anchors", () => {
     expect(before && anchorKey({ ...before, line: 0, bar: 1 })).toBe(
       after && anchorKey({ ...after, line: 0, bar: 1 }),
     );
+  });
+});
+
+describe("anchors in a version of the song", () => {
+  const { doc } = parse(
+    "# T\nform short: Chorus #2, Verse, Chorus #1\n## Chorus\n| D |\n## Verse\n| G |\n## Chorus\n",
+  );
+  const occurrences = sectionOccurrences(doc.sections);
+  const keys = (form: string | null) =>
+    resolveSong(doc, { form }).sections.map((section) => {
+      const place = occurrences[section.docIndex];
+      return place && anchorKey({ ...place, line: null, bar: null });
+    });
+
+  test("a note stays on its section of the file, whatever the play order", () => {
+    expect(keys(null)).toEqual(["chorus#1", "verse#1", "chorus#2"]);
+    expect(keys("short")).toEqual(["chorus#2", "verse#1", "chorus#1"]);
   });
 });
 
