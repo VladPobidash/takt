@@ -2,6 +2,7 @@ import { parseKey } from "@takt/format";
 import { describe, expect, test } from "vitest";
 import {
   addSong,
+  entryForm,
   entryKeyFor,
   formatSetlist,
   move,
@@ -9,6 +10,7 @@ import {
   readEntryKey,
   readSetlist,
   removeAt,
+  setEntryForm,
   setMeta,
   transposeFor,
   updateEntry,
@@ -67,5 +69,18 @@ describe("keys per entry", () => {
   test("a stored key round-trips through the naming it was written in", () => {
     const stored = entryKeyFor(key("A"), 1, "H");
     expect(transposeFor(key("A"), readEntryKey({ key: stored }, "H"))).toBe(1);
+  });
+});
+
+describe("the version of an entry", () => {
+  const { setlist } = readSetlist("# S\n- a | key: D | form: без програшу\n- b\n", "B");
+
+  test("is read from `form:`", () => {
+    expect(setlist.entries.map(entryForm)).toEqual(["без програшу", null]);
+  });
+
+  test("is written back, and the main version leaves no trace", () => {
+    const chosen = setEntryForm(setEntryForm(setlist, 1, "коротка"), 0, null);
+    expect(formatSetlist(chosen)).toBe("# S\n- a | key: D\n- b | form: коротка\n");
   });
 });
