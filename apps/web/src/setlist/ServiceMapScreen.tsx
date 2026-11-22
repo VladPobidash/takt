@@ -1,8 +1,9 @@
-import { formatKey, parse, type ResolvedSong, resolveSong, transposeKey } from "@takt/format";
+import { formatKey, parse, resolveSong, type SongDoc, transposeKey } from "@takt/format";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useApp } from "../app-context.tsx";
 import { MiniFormStrip } from "../song/FormTimeline.tsx";
+import { VersionPicker } from "../song/VersionPicker.tsx";
 import { BUNDLE_EXTENSION, formatBundle } from "../storage/bundle.ts";
 import { ConfirmDialog } from "../ui/ConfirmDialog.tsx";
 import {
@@ -18,11 +19,13 @@ import { saveFile } from "../ui/save-file.ts";
 import { IconButton, MainTopBar } from "../ui/TopBar.tsx";
 import {
   addSong,
+  entryForm,
   formatSetlist,
   move,
   readEntryKey,
   readSetlist,
   removeAt,
+  setEntryForm,
   setMeta,
   transposeFor,
   updateEntry,
@@ -41,10 +44,10 @@ export function ServiceMapScreen({ id }: { id: string }) {
     if (stored && settings.lastSetlistId !== id) void data.setSetting("lastSetlistId", id);
   }, [stored, settings.lastSetlistId, id, data]);
 
-  const resolved = useMemo(() => {
-    const map = new Map<string, ResolvedSong>();
+  const docs = useMemo(() => {
+    const map = new Map<string, SongDoc>();
     for (const song of songs)
-      map.set(song.id, resolveSong(parse(song.text, { defaultNotation: settings.notation }).doc));
+      map.set(song.id, parse(song.text, { defaultNotation: settings.notation }).doc);
     return map;
   }, [songs, settings.notation]);
 
@@ -148,7 +151,11 @@ export function ServiceMapScreen({ id }: { id: string }) {
         {setlist.entries.length === 0 && <p className="py-4 text-muted">{t("setlist.empty")}</p>}
         <ol>
           {setlist.entries.map((entry, index) => {
-            const song = resolved.get(entry.song);
+            const doc = docs.get(entry.song);
+            const form = entryForm(entry);
+            // Each entry plays its own version; a version the song does not have plays the main one.
+            const song = doc ? resolveSong(doc, { form }) : undefined;
+            const formMissing = song !== undefined && form !== null && song.formName === null;
             const name = song?.title ?? entry.song;
             const entryKey = readEntryKey(entry, notation);
             const key = song?.key
@@ -158,6 +165,7 @@ export function ServiceMapScreen({ id }: { id: string }) {
               ? [
                   song.tempo !== null ? `${song.tempo} ${t("song.bpm")}` : null,
                   `${song.time.beats}/${song.time.unit}`,
+                  formMissing ? t("setlist.versionMissing", { name: form }) : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")
@@ -174,6 +182,16 @@ export function ServiceMapScreen({ id }: { id: string }) {
                       <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold">
                         {name}
                       </span>
+                      {form !== null && (
+                        <span
+                          title={
+                            formMissing ? t("setlist.versionMissing", { name: form }) : undefined
+                          }
+                          className={`min-w-0 max-w-[40%] truncate text-[14px] font-bold ${formMissing ? "text-signal" : "text-muted"}`}
+                        >
+                          {form}
+                        </span>
+                      )}
                       {key && (
                         <span className="text-[17px] font-extrabold">
                           {formatKey(key, settings.notation)}
@@ -181,7 +199,7 @@ export function ServiceMapScreen({ id }: { id: string }) {
                       )}
                     </span>
                     <span className="mb-1.5 flex items-center gap-2 text-[13px] font-semibold text-muted">
-                      <span className="shrink-0">{meta}</span>
+                      <span className="min-w-0 truncate">{meta}</span>
                       {entry.note && !editing && (
                         <span className="truncate rounded-badge bg-surface2 px-1.5 py-0.5 text-[12px] font-bold text-text">
                           {entry.note}
@@ -191,6 +209,16 @@ export function ServiceMapScreen({ id }: { id: string }) {
                     {song && <MiniFormStrip form={song.form} />}
                   </span>
                 </Link>
+                {editing && song && (song.forms.length > 0 || formMissing) && (
+                  <div className="mt-2 pl-8">
+                    <VersionPicker
+                      variant="field"
+                      forms={song.forms}
+                      value={song.formName ?? form}
+                      onChange={(next) => save(setEntryForm(setlist, index, next))}
+                    />
+                  </div>
+                )}
                 {editing && (
                   <div className="mt-2 flex items-center gap-1 pl-8">
                     <input
@@ -249,7 +277,7 @@ export function ServiceMapScreen({ id }: { id: string }) {
 
       <SongPicker
         open={picking}
-        songs={[...resolved].map(([songId, song]) => ({ id: songId, title: song.title ?? songId }))}
+        songs={[...docs].map(([songId, doc]) => ({ id: songId, title: doc.title ?? songId }))}
         onClose={() => setPicking(false)}
         onPick={(songId) => {
           save(addSong(setlist, songId));

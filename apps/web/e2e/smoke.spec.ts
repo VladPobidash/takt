@@ -648,6 +648,77 @@ test.describe("service map", () => {
   });
 });
 
+test.describe("versions of a song", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("a version plays its own form, keeps personal notes on their sections and is chosen per setlist entry", async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto("/library");
+    await expect(page.getByRole("link", { name: /Достойний Ти Один/ })).toContainText("3 versions");
+
+    await page.goto("/songs/dostoinyi-ty-odyn");
+    const versions = page.getByRole("group", { name: "Versions" });
+    const timeline = page.getByRole("navigation", { name: "Song form" }).getByRole("button");
+    await expect(versions.getByRole("radio", { name: "Main" })).toBeChecked();
+    await expect(timeline).toHaveCount(7);
+    const bridge = page.getByRole("region", { name: "Bridge" });
+    await bridge.getByRole("button", { name: "Personal note, bar 4" }).click();
+    const dialog = page.getByRole("dialog", { name: "Bar 4 · Bridge" });
+    await dialog.getByRole("textbox", { name: "Personal note" }).fill("breathe");
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    // The short version: no interlude, the bridge twice; the note is still on the bridge.
+    await versions.getByText("коротка").click();
+    await expect(versions.getByRole("radio", { name: "коротка" })).toBeChecked();
+    await expect(timeline).toHaveCount(6);
+    await expect(page.getByRole("region", { name: "Interlude" })).toHaveCount(0);
+    await expect(bridge).toContainText("×2");
+    await expect(bridge.getByRole("button", { name: "breathe" })).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath("song-version.png") });
+
+    // A setlist entry holds its own version.
+    await page.goto("/library?tab=setlists");
+    await page.getByRole("button", { name: "New setlist" }).click();
+    await page.getByRole("button", { name: "Add a song" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Достойний Ти Один" }).click();
+    await page.getByRole("button", { name: "Edit the setlist" }).click();
+    await page.getByRole("group", { name: "Versions" }).getByText("без програшу").click();
+    await page.getByRole("button", { name: "Finish editing" }).click();
+    const row = page.getByRole("listitem").first();
+    await expect(row).toContainText("без програшу");
+    await page.screenshot({ path: test.info().outputPath("service-map-version.png") });
+    await page.getByRole("link", { name: "Start" }).click();
+    await expect(
+      page.getByRole("group", { name: "Versions" }).getByRole("radio", { name: "без програшу" }),
+    ).toBeChecked();
+    await expect(timeline).toHaveCount(6);
+    await expect(page.getByRole("region", { name: "Intro" })).toContainText("×2");
+
+    // The song loses that version: the main one is played, and the app says so.
+    const inSetlist = page.url();
+    await page.getByRole("button", { name: "View options" }).click();
+    await page.getByRole("link", { name: "Edit the song" }).click();
+    const text = page.getByRole("textbox", { name: "Song text" });
+    await text.fill((await text.inputValue()).replace("form без програшу:", "form довга:"));
+    await page.getByRole("button", { name: "Done" }).click();
+    await page.goto(inSetlist);
+    await expect(page.getByRole("status").first()).toContainText(
+      "This song has no version “без програшу”",
+    );
+    await expect(timeline).toHaveCount(7);
+    await page.getByRole("link", { name: "Back" }).click();
+    await expect(row).toContainText("The song has no version “без програшу”");
+    // Choosing the main version clears the stale one.
+    await page.getByRole("button", { name: "Edit the setlist" }).click();
+    await page.getByRole("group", { name: "Versions" }).getByText("Main").click();
+    await page.getByRole("button", { name: "Finish editing" }).click();
+    await expect(row).not.toContainText("без програшу");
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("laptop layout", () => {
   test.use({
     locale: "en-US",

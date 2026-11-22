@@ -24,6 +24,12 @@ export const uk: Messages = {
     many: "Імпортовано {count} пісень",
     other: "Імпортовано {count} пісні",
   },
+  "library.versions": {
+    one: "{count} версія",
+    few: "{count} версії",
+    many: "{count} версій",
+    other: "{count} версії",
+  },
   "library.warnings": {
     one: "{count} попередження",
     few: "{count} попередження",
@@ -42,6 +48,11 @@ export const uk: Messages = {
   "song.capoUp": "Капо вище",
   "song.capoDown": "Капо нижче",
   "song.form": "Форма пісні",
+  "song.versions": "Версії",
+  "song.versionMain": "Основна",
+  "song.versionMissing": "У цій пісні немає версії «{name}». Показано основну.",
+  "song.versionSearch": "Пошук версії",
+  "song.versionNone": "Такої версії немає",
   "song.instruments": "Вигляд для інструмента",
   "song.bandNote": "Гурт",
 
@@ -200,6 +211,8 @@ export const uk: Messages = {
   "setlist.title": "Назва",
   "setlist.date": "Дата",
   "setlist.note": "Нотатка на цей вечір",
+  "setlist.version": "Версія",
+  "setlist.versionMissing": "У пісні немає версії «{name}»: грається основна",
   "setlist.moveUp": "Підняти «{title}»",
   "setlist.moveDown": "Опустити «{title}»",
   "setlist.remove": "Прибрати «{title}»",

@@ -18,7 +18,11 @@ export function anchorKey(anchor: NoteAnchor): string {
   return `${anchor.section.trim().toLowerCase()}#${anchor.occurrence}${place}`;
 }
 
-/** For every section: its name and which section of that name it is. */
+/**
+ * For every section of the file, in file order (`doc.sections`): its name and which section of
+ * that name it is. A resolved section finds its place by `docIndex`, so a note stays on its
+ * section in every version of the song.
+ */
 export function sectionOccurrences(
   sections: Pick<ResolvedSection, "name">[],
 ): { section: string; occurrence: number }[] {

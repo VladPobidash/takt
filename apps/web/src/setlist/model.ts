@@ -81,6 +81,23 @@ export function updateEntry(
   );
 }
 
+/** The version an entry plays (`| form: коротка`); null for the main one. */
+export function entryForm(entry: Pick<SetlistEntry, "options">): string | null {
+  return entry.options.form?.trim() || null;
+}
+
+/** Chooses the version of an entry; null goes back to the main version. */
+export function setEntryForm(setlist: Setlist, index: number, form: string | null): Setlist {
+  return withEntries(
+    setlist,
+    setlist.entries.map((entry, i) => {
+      if (i !== index) return entry;
+      const { form: _old, ...options } = entry.options;
+      return { ...entry, options: form ? { ...options, form } : options };
+    }),
+  );
+}
+
 export function setMeta(setlist: Setlist, key: string, value: string): Setlist {
   const entry = { key, value, span: NO_SPAN, valueSpan: NO_SPAN };
   const exists = setlist.meta.some((m) => m.key === key);

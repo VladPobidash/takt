@@ -197,6 +197,9 @@ export function LibraryScreen() {
                         song.tempo !== null ? `${song.tempo} ${t("song.bpm")}` : null,
                         `${song.time.beats}/${song.time.unit}`,
                         t("library.sections", { count: song.sections.length }),
+                        song.forms.length > 0
+                          ? t("library.versions", { count: song.forms.length + 1 })
+                          : null,
                         warnings > 0 ? t("library.warnings", { count: warnings }) : null,
                       ]
                         .filter(Boolean)
