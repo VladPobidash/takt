@@ -39,6 +39,8 @@ Found by the author on an installed app on iOS 26:
 
 All three are covered by tests that emulate the inset and the keyboard in Chromium; the blur itself can only be seen on a device.
 
+Found on 2026-11-22, when the band's first file was shared: **the iOS file picker greys out a file whose extension it does not know.** The import control listed `.takt` and `.taktbundle` in `accept`, so a bundle saved from a messenger could not be chosen. The control has no `accept` now; the app decides by the file's content. A device is the only place this shows.
+
 ## Consequences
 
 - No store accounts, no review, the band gets a link.
