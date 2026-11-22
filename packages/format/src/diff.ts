@@ -4,20 +4,26 @@ import { sectionType } from "./section-type.ts";
 import { parseKey } from "./transpose.ts";
 import type {
   Bar,
+  BarChange,
   BarsLine,
   Chord,
   DiffSummary,
   Line,
+  LineChange,
   LyricsLine,
+  MetaChange,
   MetaEntry,
   NoteLine,
   ParseOptions,
   Section,
+  SectionChange,
   SectionPair,
   SectionPlace,
   SongChange,
   SongDiff,
   SongDoc,
+  TextChange,
+  TitleChange,
 } from "./types.ts";
 
 // ---------------------------------------------------------------------------------------------
@@ -26,12 +32,17 @@ import type {
 /** One step of an alignment: a pair, an item only in `a` (removed) or only in `b` (added). */
 export type AlignStep = { a: number; b: number } | { a: number; b: null } | { a: null; b: number };
 
+/** Above this many cells (items of `a` × items of `b`, after the common ends) `align` gives up pairing. */
+const ALIGN_LIMIT = 1_000_000;
+
 /**
  * Aligns two sequences the way a musician reads them: with the fewest changes (an item added,
  * removed or changed counts one), so that an inserted item does not shift the ones after it.
  * Among alignments with as few changes, the one with the most equal items wins, then the one
  * whose changed pairs are the most alike by `similarity` (0…1). Paired steps may hold items
- * that are not equal: the caller reports them as changed.
+ * that are not equal: the caller reports them as changed. Equal items at both ends are paired
+ * first; a middle larger than a million cells (far beyond any song) is reported as removed
+ * and added, so that memory stays bounded.
  */
 export function align<T>(
   a: readonly T[],
@@ -39,8 +50,38 @@ export function align<T>(
   equal: (x: T, y: T) => boolean,
   similarity: (x: T, y: T) => number,
 ): AlignStep[] {
-  const n = a.length;
-  const m = b.length;
+  let start = 0;
+  while (start < a.length && start < b.length && equal(a[start] as T, b[start] as T)) start++;
+  let endA = a.length;
+  let endB = b.length;
+  while (endA > start && endB > start && equal(a[endA - 1] as T, b[endB - 1] as T)) {
+    endA--;
+    endB--;
+  }
+  const steps: AlignStep[] = [];
+  for (let i = 0; i < start; i++) steps.push({ a: i, b: i });
+  const n = endA - start;
+  const m = endB - start;
+  if (n === 0 || m === 0 || n * m > ALIGN_LIMIT) {
+    for (let i = start; i < endA; i++) steps.push({ a: i, b: null });
+    for (let j = start; j < endB; j++) steps.push({ a: null, b: j });
+  } else {
+    alignMiddle(a, b, start, n, m, equal, similarity, steps);
+  }
+  for (let i = endA, j = endB; i < a.length; i++, j++) steps.push({ a: i, b: j });
+  return steps;
+}
+
+function alignMiddle<T>(
+  a: readonly T[],
+  b: readonly T[],
+  offset: number,
+  n: number,
+  m: number,
+  equal: (x: T, y: T) => boolean,
+  similarity: (x: T, y: T) => number,
+  steps: AlignStep[],
+): void {
   const width = m + 1;
   // Cost of aligning the suffixes a[i…] and b[j…]: changes, then equal items, then likeness.
   const edits = new Float64Array((n + 1) * width);
@@ -52,46 +93,51 @@ export function align<T>(
   const ADD = 2;
   for (let i = n; i >= 0; i--) {
     for (let j = m; j >= 0; j--) {
-      const at = i * width + j;
       if (i === n && j === m) continue;
+      const at = i * width + j;
       let bestEdits = Number.POSITIVE_INFINITY;
       let bestEquals = 0;
       let bestAlike = 0;
-      let bestChoice = PAIR;
-      const consider = (kind: number, e: number, q: number, s: number) => {
-        const better =
+      let bestChoice = ADD;
+      if (j < m) {
+        const next = at + 1;
+        bestEdits = (edits[next] as number) + 1;
+        bestEquals = equals[next] as number;
+        bestAlike = alike[next] as number;
+      }
+      if (i < n) {
+        // Removing wins over adding on a tie: removed items come first.
+        const next = at + width;
+        const e = (edits[next] as number) + 1;
+        const q = equals[next] as number;
+        const s = alike[next] as number;
+        if (
           e < bestEdits ||
-          (e === bestEdits && (q > bestEquals || (q === bestEquals && s > bestAlike + 1e-9)));
-        if (better) {
+          (e === bestEdits && (q > bestEquals || (q === bestEquals && s >= bestAlike)))
+        ) {
           bestEdits = e;
           bestEquals = q;
           bestAlike = s;
-          bestChoice = kind;
+          bestChoice = REMOVE;
         }
-      };
+      }
       if (i < n && j < m) {
-        const next = (i + 1) * width + j + 1;
-        const isEqual = equal(a[i] as T, b[j] as T);
-        const likeness = isEqual ? 0 : similarity(a[i] as T, b[j] as T);
-        consider(
-          PAIR,
-          (edits[next] as number) + (isEqual ? 0 : 1),
-          (equals[next] as number) + (isEqual ? 1 : 0),
-          (alike[next] as number) + likeness,
-        );
-      }
-      if (i < n) {
-        const next = (i + 1) * width + j;
-        consider(
-          REMOVE,
-          (edits[next] as number) + 1,
-          equals[next] as number,
-          alike[next] as number,
-        );
-      }
-      if (j < m) {
-        const next = i * width + j + 1;
-        consider(ADD, (edits[next] as number) + 1, equals[next] as number, alike[next] as number);
+        // Pairing wins every tie. Similarity is asked for only when the pair can win.
+        const next = at + width + 1;
+        const x = a[offset + i] as T;
+        const y = b[offset + j] as T;
+        const isEqual = equal(x, y);
+        const e = (edits[next] as number) + (isEqual ? 0 : 1);
+        const q = (equals[next] as number) + (isEqual ? 1 : 0);
+        if (e < bestEdits || (e === bestEdits && q >= bestEquals)) {
+          const s = (alike[next] as number) + (isEqual ? 0 : similarity(x, y));
+          if (e < bestEdits || q > bestEquals || s >= bestAlike - 1e-9) {
+            bestEdits = e;
+            bestEquals = q;
+            bestAlike = s;
+            bestChoice = PAIR;
+          }
+        }
       }
       edits[at] = bestEdits;
       equals[at] = bestEquals;
@@ -99,27 +145,30 @@ export function align<T>(
       choice[at] = bestChoice;
     }
   }
-  const steps: AlignStep[] = [];
   let i = 0;
   let j = 0;
   while (i < n || j < m) {
     const kind = choice[i * width + j];
-    if (kind === PAIR) steps.push({ a: i++, b: j++ });
-    else if (kind === REMOVE) steps.push({ a: i++, b: null });
-    else steps.push({ a: null, b: j++ });
+    if (kind === PAIR) steps.push({ a: offset + i++, b: offset + j++ });
+    else if (kind === REMOVE) steps.push({ a: offset + i++, b: null });
+    else steps.push({ a: null, b: offset + j++ });
   }
-  return steps;
 }
 
-/** Share of the longer of `a` and `b` that is equal in their alignment, 0…1. */
-function overlap<T>(a: readonly T[], b: readonly T[], equal: (x: T, y: T) => boolean): number {
-  const longest = Math.max(a.length, b.length);
-  if (longest === 0) return 1;
-  return (
-    align(a, b, equal, () => 0).filter(
-      (s) => s.a !== null && s.b !== null && equal(a[s.a] as T, b[s.b] as T),
-    ).length / longest
-  );
+/** Dice coefficient of two lists taken as multisets, 0…1: how much they share, in any order. */
+function dice(a: readonly string[], b: readonly string[]): number {
+  if (a.length + b.length === 0) return 1;
+  const pool = new Map<string, number>();
+  for (const item of a) pool.set(item, (pool.get(item) ?? 0) + 1);
+  let common = 0;
+  for (const item of b) {
+    const left = pool.get(item) ?? 0;
+    if (left > 0) {
+      common++;
+      pool.set(item, left - 1);
+    }
+  }
+  return (2 * common) / (a.length + b.length);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -161,6 +210,9 @@ interface Side {
   doc: SongDoc;
   places: SectionPlace[];
   barKeys: Map<Bar, string>;
+  /** Memoised `lineKey` and `linesOf`: alignments ask for them many times. */
+  lineKeys: Map<BarsLine, string>;
+  sectionLines: Map<Section, string[]>;
 }
 
 function makeSide(doc: SongDoc): Side {
@@ -186,14 +238,19 @@ function makeSide(doc: SongDoc): Side {
       for (const bar of line.bars) barKeys.set(bar, barKey(bar, doc.time.beats));
     }
   }
-  return { doc, places, barKeys };
+  return { doc, places, barKeys, lineKeys: new Map(), sectionLines: new Map() };
 }
 
 const nameKey = (name: string) => name.trim().toLowerCase();
 
 function lineKey(side: Side, line: BarsLine): string {
-  const bars = line.bars.map((bar) => side.barKeys.get(bar) as string);
-  return JSON.stringify([collapse(line.label), bars, collapse(line.cue), line.repeat]);
+  let key = side.lineKeys.get(line);
+  if (key === undefined) {
+    const bars = line.bars.map((bar) => side.barKeys.get(bar) as string);
+    key = JSON.stringify([collapse(line.label), bars, collapse(line.cue), line.repeat]);
+    side.lineKeys.set(line, key);
+  }
+  return key;
 }
 
 /** Everything a section holds except comments, by stream, so that the order of streams does not matter. */
@@ -229,22 +286,9 @@ function words(text: string): string[] {
   return collapse(text).toLowerCase().split(" ").filter(Boolean);
 }
 
-/** Dice coefficient of the words of two texts. */
+/** How alike two texts are, by their words. */
 function textSimilarity(x: string, y: string): number {
-  const a = words(x);
-  const b = words(y);
-  if (a.length + b.length === 0) return 1;
-  const pool = new Map<string, number>();
-  for (const word of a) pool.set(word, (pool.get(word) ?? 0) + 1);
-  let common = 0;
-  for (const word of b) {
-    const left = pool.get(word) ?? 0;
-    if (left > 0) {
-      common++;
-      pool.set(word, left - 1);
-    }
-  }
-  return (2 * common) / (a.length + b.length);
+  return dice(words(x), words(y));
 }
 
 /** The meaning of a header value: typed where the format types it, otherwise the text. */
@@ -343,12 +387,7 @@ function matchSections(a: Side, b: Side): Map<number, number> {
       listA,
       listB,
       (x, y) => keysA[x] === keysB[y],
-      (x, y) =>
-        overlap(
-          linesOf(a, sectionsA[x] as Section),
-          linesOf(b, sectionsB[y] as Section),
-          (p, q) => p === q,
-        ),
+      (x, y) => dice(linesOf(a, sectionsA[x] as Section), linesOf(b, sectionsB[y] as Section)),
     );
     for (const step of steps) {
       if (step.a !== null && step.b !== null)
@@ -408,9 +447,14 @@ function matchSections(a: Side, b: Side): Map<number, number> {
 }
 
 function linesOf(side: Side, section: Section): string[] {
-  return section.lines
-    .filter((line) => line.kind !== "comment")
-    .map((line) => lineText(side, line));
+  let lines = side.sectionLines.get(section);
+  if (!lines) {
+    lines = section.lines
+      .filter((line) => line.kind !== "comment")
+      .map((line) => lineText(side, line));
+    side.sectionLines.set(section, lines);
+  }
+  return lines;
 }
 
 function lineText(side: Side, line: Line): string {
@@ -451,6 +495,9 @@ function movedSections(pairs: Map<number, number>): Set<number> {
 // ---------------------------------------------------------------------------------------------
 // The diff.
 
+/** A change before it knows which section pair it belongs to. */
+type Draft = TitleChange | MetaChange | SectionChange | LineChange | BarChange | TextChange;
+
 /** Streams of a section: base bar lines, each instrument's bar lines, notes per instrument, lyrics. */
 function streamIds(linesA: Line[], linesB: Line[], kind: "bars" | "note"): (string | null)[] {
   const ids: (string | null)[] = [null];
@@ -469,7 +516,7 @@ function diffLines(
   placeB: SectionPlace | null,
   linesA: Line[],
   linesB: Line[],
-  out: SongChange[],
+  out: Draft[],
 ): void {
   // Bar lines, base first, then each instrument.
   if (placeA && placeB) {
@@ -480,16 +527,13 @@ function diffLines(
       const barsB = pick(linesB);
       const keysA = barsA.map((line) => lineKey(a, line));
       const keysB = barsB.map((line) => lineKey(b, line));
+      const barKeysA = barsA.map((line) => line.bars.map((bar) => a.barKeys.get(bar) as string));
+      const barKeysB = barsB.map((line) => line.bars.map((bar) => b.barKeys.get(bar) as string));
       const steps = align(
         barsA.map((_, i) => i),
         barsB.map((_, i) => i),
         (x, y) => keysA[x] === keysB[y],
-        (x, y) =>
-          overlap(
-            (barsA[x] as BarsLine).bars.map((bar) => a.barKeys.get(bar)),
-            (barsB[y] as BarsLine).bars.map((bar) => b.barKeys.get(bar)),
-            (p, q) => p === q,
-          ),
+        (x, y) => dice(barKeysA[x] as string[], barKeysB[y] as string[]),
       );
       for (const step of steps) {
         const lineA =
@@ -578,7 +622,7 @@ function diffBars(
   lineA: { section: SectionPlace; line: number; value: BarsLine },
   lineB: { section: SectionPlace; line: number; value: BarsLine },
   instrument: string | null,
-  out: SongChange[],
+  out: Draft[],
 ): void {
   const barsA = lineA.value.bars;
   const barsB = lineB.value.bars;
@@ -586,7 +630,7 @@ function diffBars(
     barsA,
     barsB,
     (x, y) => a.barKeys.get(x) === b.barKeys.get(y),
-    (x, y) => overlap(barChords(x), barChords(y), (p, q) => p === q),
+    (x, y) => dice(barChords(x), barChords(y)),
   );
   for (const step of steps) {
     const before =
@@ -616,7 +660,7 @@ function diffBars(
   }
 }
 
-function diffHeader(a: Side, b: Side, out: SongChange[]): void {
+function diffHeader(a: Side, b: Side, out: Draft[]): void {
   const docA = a.doc;
   const docB = b.doc;
   if ((docA.title ?? null) !== (docB.title ?? null)) {
@@ -640,6 +684,8 @@ function diffHeader(a: Side, b: Side, out: SongChange[]): void {
     const x = before === null ? null : (docA.meta[before] as MetaEntry);
     const y = after === null ? null : (docB.meta[after] as MetaEntry);
     if (x && y && metaMeaning(x, docA) === metaMeaning(y, docB)) continue;
+    // `notation:` written or dropped where it does not change how the file is read is no change.
+    if ((x ?? y)?.key === "notation" && docA.notation === docB.notation) continue;
     out.push({ kind: "meta", key: (x ?? y)?.key ?? "", before: x, after: y });
   }
   diffLines(a, b, null, null, docA.headerLines, docB.headerLines, out);
@@ -693,12 +739,38 @@ export function diffSongs(before: string, after: string, options: ParseOptions =
   const a = makeSide(parse(before, options).doc);
   const b = makeSide(parse(after, options).doc);
   const changes: SongChange[] = [];
-  diffHeader(a, b, changes);
+  const header: Draft[] = [];
+  diffHeader(a, b, header);
+  for (const change of header) changes.push({ ...change, sectionPair: null } as SongChange);
 
   const pairs = matchSections(a, b);
   const moved = movedSections(pairs);
   const sections = inNewOrder(pairs, a.doc.sections.length, b.doc.sections.length);
-  for (const { before: x, after: y } of sections) {
+  sections.forEach(({ before: x, after: y }, sectionPair) => {
+    const found: Draft[] = [];
+    diffSection(a, b, x, y, moved, found);
+    for (const change of found) changes.push({ ...change, sectionPair } as SongChange);
+  });
+
+  return {
+    identical: before === after,
+    changes,
+    summary: summarize(changes),
+    sections,
+    before: a.doc,
+    after: b.doc,
+  };
+}
+
+function diffSection(
+  a: Side,
+  b: Side,
+  x: number | null,
+  y: number | null,
+  moved: Set<number>,
+  changes: Draft[],
+): void {
+  {
     const placeA = x === null ? null : (a.places[x] as SectionPlace);
     const placeB = y === null ? null : (b.places[y] as SectionPlace);
     if (!placeA || !placeB) {
@@ -707,7 +779,7 @@ export function diffSongs(before: string, after: string, options: ParseOptions =
         before: placeA,
         after: placeB,
       });
-      continue;
+      return;
     }
     const section = (
       kind: "section-moved" | "section-renamed" | "section-repeat" | "section-tag" | "section-ref",
@@ -726,13 +798,4 @@ export function diffSongs(before: string, after: string, options: ParseOptions =
     const linesB = (b.doc.sections[placeB.index] as Section).lines;
     diffLines(a, b, placeA, placeB, linesA, linesB, changes);
   }
-
-  return {
-    identical: before === after,
-    changes,
-    summary: summarize(changes),
-    sections,
-    before: a.doc,
-    after: b.doc,
-  };
 }

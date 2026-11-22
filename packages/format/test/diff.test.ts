@@ -431,3 +431,47 @@ describe("diffSongs: properties", () => {
     );
   });
 });
+
+describe("diffSongs: review follow-ups", () => {
+  test("a notation: line that does not change how the file is read is no change", () => {
+    expect(briefs("# T\n## V\n| B |\n", "# T\nnotation: B\n## V\n| B |\n")).toEqual([]);
+    expect(briefs("# T\n## V\n| H | B |\n", "# T\nnotation: H\n## V\n| H | B |\n")).toEqual([]);
+    // The same text with another naming is another chord.
+    expect(briefs("# T\nnotation: H\n## V\n| B |\n", "# T\nnotation: B\n## V\n| B |\n")).toEqual([
+      "meta notation H → B",
+      "bar-changed V#1/l1/b1 V#1/l1/b1",
+    ]);
+  });
+
+  test("every change names its section pair; header changes have none", () => {
+    const a = "# T\nkey: D\n## Intro\n| D |\n## Verse\n| A |\n## Bridge\n| G |\n";
+    const b = "# T\nkey: E\n## Intro\n| E |\n## Chorus\n| C |\n## Verse\n| A | A |\n";
+    const diff = diffSongs(a, b);
+    const grouped = diff.changes.map((change) => {
+      const pair = change.sectionPair === null ? null : diff.sections[change.sectionPair];
+      return [change.kind, pair ? [pair.before, pair.after] : null];
+    });
+    expect(grouped).toEqual([
+      ["meta", null],
+      ["bar-changed", [0, 0]],
+      ["section-added", [null, 1]],
+      ["bar-added", [1, 2]],
+      ["section-removed", [2, null]],
+    ]);
+  });
+
+  test("large inputs stay fast and bounded", () => {
+    const lyrics = (word: string, count: number) =>
+      Array.from({ length: count }, (_, i) => `${word} ${i}`).join("\n");
+    const started = performance.now();
+    const diff = diffSongs(
+      `# T\n## V\n${lyrics("a", 1500)}\n`,
+      `# T\n## V\n${lyrics("b", 1500)}\n`,
+    );
+    expect(diff.summary.lyrics).toBe(3000);
+    const bars = (chord: string) => `| ${Array.from({ length: 300 }, () => chord).join(" | ")} |`;
+    const lines = (chord: string) => Array.from({ length: 30 }, () => bars(chord)).join("\n");
+    diffSongs(`# T\n## V\n${lines("D")}\n`, `# T\n## V\n${lines("E")}\n`);
+    expect(performance.now() - started).toBeLessThan(3000);
+  });
+});

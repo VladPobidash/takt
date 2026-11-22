@@ -23,7 +23,7 @@ transposeText(text, 2); // the same file two semitones up; only chords and `key:
 const diff = diffSongs(oldText, newText);
 // diff.identical: same bytes; no changes and not identical = only reformatted.
 // diff.summary.total: for "3 changes". diff.changes: one record per change, e.g.
-// { kind: "bar-changed", instrument: null,
+// { kind: "bar-changed", instrument: null, sectionPair: 1, // index into diff.sections, for grouping
 //   before: { section: { name: "Verse 1", occurrence: 1, … }, line: 2, bar: 3, value: <Bar D/F#> },
 //   after:  { section: { name: "Verse 1", occurrence: 1, … }, line: 2, bar: 3, value: <Bar Dsus4/F#> } }
 ```

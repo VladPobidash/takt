@@ -414,13 +414,24 @@ export interface TextChange {
   after: TextPlace | null;
 }
 
-export type SongChange =
+/** What every change has. */
+export interface ChangeBase {
+  /**
+   * Index into `SongDiff.sections` of the section the change belongs to, null for the header.
+   * Changes of one section follow each other, so a screen can group them with one loop.
+   */
+  sectionPair: number | null;
+}
+
+export type SongChange = (
   | TitleChange
   | MetaChange
   | SectionChange
   | LineChange
   | BarChange
-  | TextChange;
+  | TextChange
+) &
+  ChangeBase;
 
 export type SongChangeKind = SongChange["kind"];
 
@@ -459,7 +470,11 @@ export interface SongDiff {
   summary: DiffSummary;
   /** Every section of both versions, paired, in the order of `changes`. */
   sections: SectionPair[];
-  /** The two documents the places in `changes` refer to. */
+  /**
+   * The two documents the places in `changes` refer to. A cell's `text` is as written in its own
+   * file: after a change of `notation:`, `| B |` can be the same text and a different chord (B♭,
+   * then B). Show chords with `formatChord(cell.chord, { notation })` in the musician's naming.
+   */
   before: SongDoc;
   after: SongDoc;
 }
