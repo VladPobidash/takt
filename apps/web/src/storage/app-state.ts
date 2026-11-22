@@ -282,37 +282,52 @@ export class AppData {
     await this.store.putSong(song);
   }
 
-  /** Renames a version of a song (ADR 0013); setlists on this device that play it follow. */
+  /**
+   * Renames a version of a song (ADR 0013); setlists on this device that play it follow.
+   * Resolves once the song and the setlists are stored together.
+   */
   async renameSongForm(id: string, from: string, to: string, now = Date.now()): Promise<void> {
     const song = this.state.songs.find((s) => s.id === id);
     if (!song) return;
     const text = renameForm(song.text, from, to);
     if (text === song.text) return;
-    await this.saveSong({ id, text, updatedAt: now });
-    await this.retargetSetlists(id, from, cleanFormName(to), now);
+    await this.saveWithSetlists({ id, text, updatedAt: now }, from, cleanFormName(to), now);
   }
 
-  /** Deletes a version of a song; setlists on this device that play it go back to the main one. */
+  /**
+   * Deletes a version of a song; setlists on this device that play it go back to the main one.
+   * Resolves once the song and the setlists are stored together.
+   */
   async removeSongForm(id: string, name: string, now = Date.now()): Promise<void> {
     const song = this.state.songs.find((s) => s.id === id);
     if (!song) return;
     const text = removeForm(song.text, name);
     if (text === song.text) return;
-    await this.saveSong({ id, text, updatedAt: now });
-    await this.retargetSetlists(id, name, null, now);
+    await this.saveWithSetlists({ id, text, updatedAt: now }, name, null, now);
   }
 
-  private async retargetSetlists(
-    song: string,
+  /**
+   * A song and the setlists that play one of its versions change as one: they are written in
+   * one transaction, and the state follows only once it is stored, so a reload or a closed app
+   * never finds the song changed and its setlists not (or the other way round).
+   */
+  private async saveWithSetlists(
+    song: StoredFile,
     from: string,
     to: string | null,
     now: number,
   ): Promise<void> {
+    const setlists: StoredFile[] = [];
     for (const stored of this.state.setlists) {
-      const next = retargetForm(parseSetlist(stored.text).setlist, song, from, to);
-      if (next)
-        await this.saveSetlist({ id: stored.id, text: formatSetlist(next), updatedAt: now });
+      const next = retargetForm(parseSetlist(stored.text).setlist, song.id, from, to);
+      if (next) setlists.push({ id: stored.id, text: formatSetlist(next), updatedAt: now });
     }
+    await this.store.putFiles({ songs: [song], setlists });
+    const changed = new Map(setlists.map((setlist) => [setlist.id, setlist]));
+    this.update({
+      songs: [...this.state.songs.filter((s) => s.id !== song.id), song],
+      setlists: this.state.setlists.map((setlist) => changed.get(setlist.id) ?? setlist),
+    });
   }
 
   async deleteSong(id: string): Promise<void> {

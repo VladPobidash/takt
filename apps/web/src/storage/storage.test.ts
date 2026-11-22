@@ -134,4 +134,39 @@ describe("AppData", () => {
     expect(song()).toBe("# A\n## V\n| D |\n");
     expect(setlist()).toBe("# S\n- a\n- b | form: short\n");
   });
+
+  test("a version and the setlists that play it are stored as one write, before the state changes", async () => {
+    const store = createMemoryStore();
+    const data = await AppData.load(store, { preferredLanguages: ["en"], seed: [] });
+    await data.saveSong({ id: "a", text: "# A\nform short: V\n## V\n| D |\n", updatedAt: 1 });
+    await data.saveSetlist({ id: "s", text: "# S\n- a | form: short\n", updatedAt: 1 });
+
+    // Hold the write: until it is stored, nothing has changed, on screen or on disk.
+    let release: () => void = () => {};
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const writes: { songs: string[]; setlists: string[] }[] = [];
+    const putFiles = store.putFiles;
+    store.putFiles = async (files) => {
+      writes.push({
+        songs: files.songs.map((f) => f.id),
+        setlists: files.setlists.map((f) => f.id),
+      });
+      await held;
+      await putFiles(files);
+    };
+    const removing = data.removeSongForm("a", "short", 2);
+    await Promise.resolve();
+    expect(data.getState().songs.find((s) => s.id === "a")?.text).toContain("form short");
+    expect(writes).toEqual([{ songs: ["a"], setlists: ["s"] }]);
+    release();
+    await removing;
+
+    // A reload finds the song and its setlist agreeing.
+    const reloaded = await AppData.load(store, { preferredLanguages: ["en"], seed: [] });
+    expect(reloaded.getState().songs.find((s) => s.id === "a")?.text).toBe("# A\n## V\n| D |\n");
+    expect(reloaded.getState().setlists.find((s) => s.id === "s")?.text).toBe("# S\n- a\n");
+    expect(data.getState().setlists.find((s) => s.id === "s")?.text).toBe("# S\n- a\n");
+  });
 });

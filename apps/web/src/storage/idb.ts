@@ -29,6 +29,14 @@ export async function openIdbStore(): Promise<SongStore> {
     listSetlists: () => db.getAll("setlists"),
     putSetlist: async (file) => void (await db.put("setlists", file)),
     deleteSetlist: (id) => db.delete("setlists", id),
+    putFiles: async ({ songs, setlists }) => {
+      const tx = db.transaction(["songs", "setlists"], "readwrite");
+      await Promise.all([
+        ...songs.map((file) => tx.objectStore("songs").put(file)),
+        ...setlists.map((file) => tx.objectStore("setlists").put(file)),
+        tx.done,
+      ]);
+    },
     getSettings: async () => {
       const [keys, values] = await Promise.all([db.getAllKeys("settings"), db.getAll("settings")]);
       return Object.fromEntries(keys.map((key, index) => [key, values[index]]));

@@ -12,6 +12,10 @@ export function createMemoryStore(): SongStore {
     listSetlists: async () => [...setlists.values()],
     putSetlist: async (file) => void setlists.set(file.id, file),
     deleteSetlist: async (id) => void setlists.delete(id),
+    putFiles: async (files) => {
+      for (const file of files.songs) songs.set(file.id, file);
+      for (const file of files.setlists) setlists.set(file.id, file);
+    },
     getSettings: async () => ({ ...settings }),
     setSetting: async (key, value) => {
       settings[key] = value;
