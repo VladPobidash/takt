@@ -142,7 +142,10 @@ test.describe("vocal view", () => {
     // The alto singer chooses their part on this device.
     await page.goto("/settings");
     await page.getByRole("radio", { name: "Alto" }).check();
-    await page.goto("/songs/silent-night");
+    // Within the app, as a musician would: a reload could come before the setting is stored.
+    await page.getByRole("button", { name: "Sections" }).click();
+    await page.getByRole("menuitem", { name: "Library" }).click();
+    await page.getByRole("link", { name: /Silent Night/ }).click();
     await page.getByRole("tab", { name: "Vocals" }).click();
     await expect(verse3).toContainText("Alto: hold the last note");
     await expect(verse3).not.toContainText("descant");
