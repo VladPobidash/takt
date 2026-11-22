@@ -18,6 +18,12 @@ export interface SongStore {
   listSetlists(): Promise<StoredFile[]>;
   putSetlist(file: StoredFile): Promise<void>;
   deleteSetlist(id: string): Promise<void>;
+  /**
+   * Writes songs and setlists together: either all of them are stored or none (one IndexedDB
+   * transaction). For changes that must not be half-done, such as renaming a version of a song
+   * together with the setlists that play it.
+   */
+  putFiles(files: { songs: StoredFile[]; setlists: StoredFile[] }): Promise<void>;
   /** Device settings and other small local values, by key. */
   getSettings(): Promise<Record<string, unknown>>;
   setSetting(key: string, value: unknown): Promise<void>;
