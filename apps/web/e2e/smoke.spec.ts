@@ -588,6 +588,7 @@ test.describe("editor", () => {
     await page.screenshot({ path: test.info().outputPath("editor-preview.png") });
 
     await page.getByRole("button", { name: "Done" }).click();
+    await expect(page).toHaveURL(/\/songs\/[^/]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Morning");
     await page.reload();
     await expect(page.getByRole("region", { name: "Chorus" })).toBeVisible();
@@ -716,6 +717,8 @@ test.describe("versions of a song", () => {
     const text = page.getByRole("textbox", { name: "Song text" });
     await text.fill((await text.inputValue()).replace("form без програшу:", "form довга:"));
     await page.getByRole("button", { name: "Done" }).click();
+    // The editor closes once the text is stored; only then is a reload safe.
+    await expect(page).toHaveURL(/\/songs\/[^/]+$/);
     await page.goto(inSetlist);
     await expect(page.getByRole("status").first()).toContainText(
       "This song has no version “без програшу”",

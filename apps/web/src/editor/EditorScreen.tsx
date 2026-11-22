@@ -27,21 +27,25 @@ export function EditorScreen({ id }: { id: string }) {
   const latest = useRef(text);
   latest.current = text;
 
+  const writing = useRef<Promise<void>>(Promise.resolve());
+  /** Saves the text if it changed; resolves when the latest text is stored on the device. */
   const save = useMemo(
-    () => () => {
-      if (latest.current === saved.current) return;
-      saved.current = latest.current;
-      void data.saveSong({ id, text: latest.current, updatedAt: Date.now() });
+    () => (): Promise<void> => {
+      if (latest.current !== saved.current) {
+        saved.current = latest.current;
+        writing.current = data.saveSong({ id, text: latest.current, updatedAt: Date.now() });
+      }
+      return writing.current;
     },
     [data, id],
   );
   // Every change is saved shortly after typing stops, and when the screen is left.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `text` is the trigger; `save` reads the latest text itself
   useEffect(() => {
-    const timer = setTimeout(save, SAVE_DELAY_MS);
+    const timer = setTimeout(() => void save(), SAVE_DELAY_MS);
     return () => clearTimeout(timer);
   }, [text, save]);
-  useEffect(() => save, [save]);
+  useEffect(() => () => void save(), [save]);
 
   const { doc, diagnostics } = useMemo(
     () => parse(text, { defaultNotation: settings.notation }),
@@ -131,8 +135,9 @@ export function EditorScreen({ id }: { id: string }) {
         <button
           type="button"
           onClick={() => {
-            save();
-            navigate(songPath);
+            // "Done" leaves the editor only once the text is stored: a reload or a closed
+            // app right after the tap must not lose the last edit.
+            void save().finally(() => navigate(songPath));
           }}
           className="mr-2 h-11 shrink-0 rounded-control bg-accent px-4 text-[15px] font-bold text-accent-fg"
         >
