@@ -107,7 +107,9 @@ export function LibraryScreen() {
             <input
               ref={input}
               type="file"
-              accept=".takt,.taktbundle,.txt,.json,text/plain,application/json"
+              // No `accept`: iOS greys out a file whose extension it does not know
+              // (`.taktbundle`, `.takt`), so the picker offers every file and
+              // `importFiles` decides by the content.
               multiple
               hidden
               onChange={(event) => {
