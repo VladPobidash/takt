@@ -10,6 +10,7 @@ import {
   readEntryKey,
   readSetlist,
   removeAt,
+  retargetForm,
   setEntryForm,
   setMeta,
   transposeFor,
@@ -82,5 +83,30 @@ describe("the version of an entry", () => {
   test("is written back, and the main version leaves no trace", () => {
     const chosen = setEntryForm(setEntryForm(setlist, 1, "коротка"), 0, null);
     expect(formatSetlist(chosen)).toBe("# S\n- a | key: D\n- b | form: коротка\n");
+  });
+});
+
+describe("a version renamed or deleted in the song", () => {
+  const { setlist } = readSetlist(
+    "# S\n- a | form: Short\n- b | form: short\n- a | form: long\n- a\n",
+    "B",
+  );
+
+  test("entries of that song and version follow a rename", () => {
+    const next = retargetForm(setlist, "a", "short ", "коротка");
+    expect(next && formatSetlist(next)).toBe(
+      "# S\n- a | form: коротка\n- b | form: short\n- a | form: long\n- a\n",
+    );
+  });
+
+  test("and go back to the main version after a delete", () => {
+    const next = retargetForm(setlist, "a", "long", null);
+    expect(next && formatSetlist(next)).toBe(
+      "# S\n- a | form: Short\n- b | form: short\n- a\n- a\n",
+    );
+  });
+
+  test("a setlist without such entries is left alone", () => {
+    expect(retargetForm(setlist, "c", "short", "x")).toBeNull();
   });
 });
