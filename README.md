@@ -44,7 +44,7 @@ pnpm e2e       # browser smoke tests in a phone viewport (needs Playwright's Chr
 - `packages/format` — `@takt/format`: the `.takt` parser and tools. No runtime dependencies, no DOM.
 - `apps/web` — the app (React, Vite, Tailwind CSS). `pnpm --filter @takt/web dev` starts it.
 
-Work is tracked in [issues](https://github.com/VladPobidash/takt/issues/1); changes reach `main` through pull requests.
+Work is tracked in [issues](https://github.com/VladPobidash/vtakt/issues/1); changes reach `main` through pull requests.
 
 ## License
 

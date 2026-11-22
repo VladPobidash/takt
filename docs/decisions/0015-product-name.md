@@ -14,7 +14,7 @@
 | The format and its files: `.takt`, `.taktset`, `.taktbundle`, `"format": "takt-bundle"` | No | «Такт» is a bar — the name describes the format; the band's files already exist; the extension is short |
 | Packages `@takt/format`, `@takt/web`, code identifiers | No | Invisible to users; a rename touches every import for no gain |
 | IndexedDB database `takt` | No | Renaming it would hide the songs already stored on devices |
-| Repository `VladPobidash/takt`, Railway project `takt`, cloud environment `takt` | Not now | The cloud sessions, the environment and Railway's link to GitHub are tied to the repository name. Only the author can rename it; if he does, it is a change of its own at a quiet moment |
+| Repository, Railway project | **Yes → `vtakt`**, by the author later the same day | `VladPobidash/vtakt` and the Railway project `vtakt`. GitHub redirects the old repository name. Only the author could do it: the cloud sessions and Railway's link to GitHub are tied to the repository |
 
 ## Decision
 
@@ -26,4 +26,4 @@
 
 - An app installed before the rename keeps the label "Takt" on the home screen until it is installed again; browsers read the manifest name at install time.
 - The app icons still show the letter T. A new mark is a design task, not part of this change.
-- Two names live side by side — vtakt the app, takt the format and the code. `CLAUDE.md` says which is which, so nobody "finishes" the rename in passing.
+- Two names live side by side — vtakt the app, the repository and the hosting project; takt the format, the packages and the database. `CLAUDE.md` says which is which, so nobody "finishes" the rename in passing.

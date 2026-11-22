@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # Releases the latest commit of `main` to Railway and waits for the result (ADR 0011).
 #
-# Railway cannot deploy on push by itself until its GitHub app is given access to this
-# repository, so a release is started through the Railway API.
+# Since 2026-11-22 Railway releases every push to `main` by itself once CI is green. This
+# script is the manual way, for when that does not happen: it starts a release through the
+# Railway API.
 #
 #   RAILWAY_API_TOKEN   an account or workspace token. In the project's cloud environment
 #                       the network proxy adds the token, so the variable is not needed.
-#   RAILWAY_PROJECT     project name   (default: takt)
+#   RAILWAY_PROJECT     project name   (default: vtakt)
 #   RAILWAY_SERVICE     service name   (default: web)
 #   RAILWAY_ENVIRONMENT environment    (default: production)
 set -euo pipefail
 
 API="https://backboard.railway.com/graphql/v2"
-PROJECT="${RAILWAY_PROJECT:-takt}"
+PROJECT="${RAILWAY_PROJECT:-vtakt}"
 SERVICE="${RAILWAY_SERVICE:-web}"
 ENVIRONMENT="${RAILWAY_ENVIRONMENT:-production}"
 
