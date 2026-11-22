@@ -193,8 +193,8 @@ function VersionEditor(props: {
       return;
     }
     if (clean === props.name) return;
-    void data.renameSongForm(props.songId, props.name, clean);
-    props.onRenamed(clean);
+    // The screen moves on once the song and its setlists are stored.
+    void data.renameSongForm(props.songId, props.name, clean).then(() => props.onRenamed(clean));
   }
 
   return (
@@ -325,8 +325,7 @@ function VersionEditor(props: {
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => {
           setConfirmDelete(false);
-          void data.removeSongForm(props.songId, props.name);
-          props.onDeleted();
+          void data.removeSongForm(props.songId, props.name).then(props.onDeleted);
         }}
       />
     </>
