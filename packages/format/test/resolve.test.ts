@@ -279,6 +279,35 @@ describe("reuse by kind of section", () => {
   });
 });
 
+describe("lyrics of a reused section", () => {
+  test("the same section again sings the same words", () => {
+    const text = "# T\n## Chorus\n| D |\nGlory, glory\n## Verse\n| G |\n## Chorus x2\n";
+    expect(song(text).sections[2]?.lyrics).toEqual(["Glory, glory"]);
+  });
+
+  test("the words follow a chain of sections with the same name", () => {
+    const text = "# T\n## Chorus\n| D |\nGlory\n## Chorus 2\n| G |\nPeace\n## Chorus\n## Chorus\n";
+    expect(song(text).sections.map((s) => s.lyrics)).toEqual([
+      ["Glory"],
+      ["Peace"],
+      ["Glory"],
+      ["Glory"],
+    ]);
+  });
+
+  test("a numbered or referencing section has words of its own: nothing is borrowed", () => {
+    const text = "# T\n## Verse 1\n| D |\nFirst words\n## Verse 2 = Verse 1\n## Verse 3\n";
+    const resolved = song(text);
+    expect(resolved.sections.map((s) => s.reusedFrom)).toEqual([null, 0, 0]);
+    expect(resolved.sections.map((s) => s.lyrics)).toEqual([["First words"], [], []]);
+  });
+
+  test("words written under the reusing section replace the borrowed ones", () => {
+    const text = "# T\n## Chorus\n| D |\nGlory\n## Chorus\nHallelujah\n";
+    expect(song(text).sections[1]?.lyrics).toEqual(["Hallelujah"]);
+  });
+});
+
 describe("section types", () => {
   test("English and Ukrainian names", () => {
     const table: [string, string][] = [

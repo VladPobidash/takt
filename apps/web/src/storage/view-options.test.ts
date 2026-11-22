@@ -30,6 +30,15 @@ describe("resolveViewOptions", () => {
     });
   });
 
+  test("lyrics are shown by default and can be hidden for one song", () => {
+    expect(DEFAULT_VIEW_OPTIONS.lyrics).toBe(true);
+    const { value, source } = resolveViewOptions(DEFAULT_VIEW_OPTIONS, undefined, {
+      lyrics: false,
+    });
+    expect(value.lyrics).toBe(false);
+    expect(source.lyrics).toBe("song");
+  });
+
   test("an override may repeat the inherited value and still counts as set", () => {
     expect(
       resolveViewOptions(DEFAULT_VIEW_OPTIONS, undefined, { beatDots: true }).source.beatDots,

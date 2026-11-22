@@ -365,6 +365,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
               options={options}
               now={section.index === nowSection}
               personal={personalFor(section.index)}
+              lyrics={view.lyrics}
             />
           ))}
         </div>

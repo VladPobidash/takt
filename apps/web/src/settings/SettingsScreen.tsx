@@ -188,6 +188,11 @@ export function SettingsScreen() {
             onChange={(value) => set("instrumentNotes", value)}
             label={t("view.instrumentNotes")}
           />
+          <SwitchRow
+            checked={settings.lyrics}
+            onChange={(value) => set("lyrics", value)}
+            label={t("view.lyrics")}
+          />
         </Group>
         <Group title={t("song.compact")}>
           <SwitchRow

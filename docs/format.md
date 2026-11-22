@@ -61,7 +61,7 @@ time: 4/4
 
 - **Tag** — a cue for everyone ("dip", "powerful").
 - **Repeat:** `x2`, `2x` or `(2x)`.
-- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name — or, when there is none, of the same kind: an empty `## Verse 2` under `## 1 Verse` plays that verse, an empty `## Chorus 2 x2` plays the chorus twice. Notes written under it are kept. A section of no known kind (`## Tag`) reuses only by name. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`). The reusing section also takes the repeat, unless it writes its own (`## Interlude = Intro x1` plays once).
+- **Reuse:** a section without bar lines of its own takes the bars of the most recent earlier section with the same name — or, when there is none, of the same kind: an empty `## Verse 2` under `## 1 Verse` plays that verse, an empty `## Chorus 2 x2` plays the chorus twice. Notes written under it are kept. Lyrics come along only when the name is the same — `## Chorus` again sings the chorus's words, while a numbered or referencing section (`## Verse 2`, `## Verse 2 = Verse 1`) has words of its own; lyrics written under the reusing section always win. A section of no known kind (`## Tag`) reuses only by name. `## A = B` is an explicit reference (`## Verse 2 = Verse 1`). The reusing section also takes the repeat, unless it writes its own (`## Interlude = Intro x1` plays once).
 - Repeats are shown folded (`×4`), never unrolled; the form timeline is sized by bars × repeats.
 - **Section type** (color and abbreviation) is detected from the name, in English and Ukrainian: intro/вступ, verse/куплет, pre-chorus/передприспів, chorus/приспів, bridge/брідж, interlude/програш, instrumental, outro/кінцівка.
 - **Numbers** may stand after the name or before it, as in the band's charts: `## Chorus 2`, `## 3 Verse`, `## 1, 2 Verse`, `## 1 Bridge`. They become part of the short label on the form timeline (`C2`, `V3`, `V1,2`, `B1`). "Interludio" is read as an interlude.
@@ -121,7 +121,22 @@ A line prefixed with `@instrument`:
 
 - `>` — a note for the whole band.
 - `//` — a comment, never shown.
-- Any other line in a section is lyrics: can be hidden; in v0 not aligned to bars.
+- Any other line in a section is lyrics: shown under the section's bars, can be hidden (view option), not shown in compact mode; in v0 not aligned to bars.
+
+```
+## Chorus
+| D | A | G | D |
+Glory to God in the highest
+> all in
+
+## Verse 2
+| D | A |
+Second verse words
+
+## Chorus
+```
+
+The last `## Chorus` plays the chorus's bars and shows its words.
 - Personal notes never go into the file (separate local layer).
 
 ## Transposition and capo

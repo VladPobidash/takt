@@ -1,6 +1,6 @@
 import { readHeader } from "./header.ts";
 import { LEADING_NUMBERS, sectionType } from "./section-type.ts";
-import { baseBars, partBars, sourceIndex } from "./sections.ts";
+import { baseBars, partBars, sameName, sourceIndex } from "./sections.ts";
 import type {
   BarsLine,
   FormItem,
@@ -102,7 +102,12 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
       reusedFrom: reused ? sourceAt : null,
       lines,
       notes,
-      lyrics,
+      // The same section again (`## Chorus` once more) sings the same words; a numbered or
+      // referencing one (`## Verse 2 = Verse 1`) has words of its own, written or not.
+      lyrics:
+        lyrics.length === 0 && reused && sameName(section.name, source.name)
+          ? source.lines.flatMap((line) => (line.kind === "lyrics" ? [line.text] : []))
+          : lyrics,
       bars: lines.reduce((sum, line) => sum + line.bars.length * line.repeat, 0),
     };
   });
