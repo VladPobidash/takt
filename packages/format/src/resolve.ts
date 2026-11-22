@@ -1,4 +1,5 @@
 import { readHeader } from "./header.ts";
+import { isVocal } from "./instruments.ts";
 import { LEADING_NUMBERS, sectionType } from "./section-type.ts";
 import { baseBars, partBars, sameName, sourceIndex } from "./sections.ts";
 import type {
@@ -51,6 +52,13 @@ function toLine(line: BarsLine, source: ResolvedLine["source"]): ResolvedLine {
  */
 export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): ResolvedSong {
   const instrument = options.instrument ?? null;
+  const voice = options.voice ?? null;
+  /** Whether a cue written for `target` (null: the band) is seen in this view. */
+  const sees = (target: string | null): boolean => {
+    if (target === null || target === instrument) return true;
+    // Singers read the cues for every singer, or — with a part chosen — for their own part.
+    return instrument === "vocals" && isVocal(target) && (voice === null || target === voice);
+  };
   const header = readHeader(doc.meta, doc.notation);
   const occurrences = new Map<SectionType, number>();
   const instruments: string[] = [];
@@ -80,7 +88,7 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
     const lyrics: string[] = [];
     for (const line of section.lines) {
       if (line.kind === "lyrics") lyrics.push(line.text);
-      if (line.kind === "note" && (line.instrument === null || line.instrument === instrument)) {
+      if (line.kind === "note" && sees(line.instrument)) {
         notes.push({
           text: line.text,
           instrument: line.instrument,

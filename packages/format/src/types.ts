@@ -1,3 +1,5 @@
+import type { VoicePart } from "./instruments.ts";
+
 /** A position in the source text. `line` and `column` are 1-based, `offset` is 0-based. */
 export interface Pos {
   offset: number;
@@ -252,6 +254,11 @@ export interface ResolvedSong {
 }
 
 export interface ResolveOptions {
-  /** Instrument id (`guitar`, `bass`, `keys`, `drums`, …); null or missing for the base harmony. */
+  /** Instrument id (`guitar`, `bass`, `keys`, `drums`, `vocals`, …); null or missing for the base harmony. */
   instrument?: string | null;
+  /**
+   * With `instrument: "vocals"`: the singer's part. The cues for `@vocals` and for this part are
+   * kept; null or missing keeps every singer's cue (`@vocals`, `@soprano`, `@alto`, `@tenor`).
+   */
+  voice?: VoicePart | null;
 }

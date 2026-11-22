@@ -336,6 +336,7 @@ describe("examples/", () => {
       "bars@keys",
       "bars@keys",
       "note@bass",
+      "note@vocals",
       "note",
       "lyrics",
       "lyrics",

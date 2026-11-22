@@ -4,7 +4,13 @@ export const FORMAT_VERSION = 0;
 export { extractRepeat, parseBars } from "./bars.ts";
 export { formatChord, formatNote, parseChord, semitone } from "./chord.ts";
 export { readHeader } from "./header.ts";
-export { type KnownInstrument, normalizeInstrument } from "./instruments.ts";
+export {
+  isVocal,
+  type KnownInstrument,
+  normalizeInstrument,
+  VOICE_PARTS,
+  type VoicePart,
+} from "./instruments.ts";
 export { parse } from "./parse.ts";
 export { resolveSong, sectionType } from "./resolve.ts";
 export { transposeText } from "./rewrite.ts";
