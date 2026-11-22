@@ -3,6 +3,7 @@ export const FORMAT_VERSION = 0;
 
 export { extractRepeat, parseBars } from "./bars.ts";
 export { formatChord, formatNote, parseChord, semitone } from "./chord.ts";
+export { type AlignStep, align, diffSongs } from "./diff.ts";
 export {
   cleanFormName,
   type FormStepInput,

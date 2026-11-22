@@ -1,0 +1,869 @@
+import { readCapo, readNotation, readTempo, readTime } from "./header.ts";
+import { parse } from "./parse.ts";
+import { sectionType } from "./section-type.ts";
+import { parseKey } from "./transpose.ts";
+import type {
+  Bar,
+  BarChange,
+  BarsLine,
+  Chord,
+  DiffSummary,
+  FormChange,
+  FormEntry,
+  Line,
+  LineChange,
+  LyricsLine,
+  MetaChange,
+  MetaEntry,
+  NoteLine,
+  ParseOptions,
+  Section,
+  SectionChange,
+  SectionPair,
+  SectionPlace,
+  SongChange,
+  SongDiff,
+  SongDoc,
+  SongForm,
+  TextChange,
+  TitleChange,
+} from "./types.ts";
+
+// ---------------------------------------------------------------------------------------------
+// Alignment of two sequences. Kept generic so that a later three-way merge can reuse it.
+
+/** One step of an alignment: a pair, an item only in `a` (removed) or only in `b` (added). */
+export type AlignStep = { a: number; b: number } | { a: number; b: null } | { a: null; b: number };
+
+/** Above this many cells (items of `a` × items of `b`, after the common ends) `align` gives up pairing. */
+const ALIGN_LIMIT = 1_000_000;
+
+/**
+ * Aligns two sequences the way a musician reads them: with the fewest changes (an item added,
+ * removed or changed counts one), so that an inserted item does not shift the ones after it.
+ * Among alignments with as few changes, the one with the most equal items wins, then the one
+ * whose changed pairs are the most alike by `similarity` (0…1). Paired steps may hold items
+ * that are not equal: the caller reports them as changed. Equal items at both ends are paired
+ * first; a middle larger than a million cells (far beyond any song) is reported as removed
+ * and added, so that memory stays bounded.
+ */
+export function align<T>(
+  a: readonly T[],
+  b: readonly T[],
+  equal: (x: T, y: T) => boolean,
+  similarity: (x: T, y: T) => number,
+): AlignStep[] {
+  let start = 0;
+  while (start < a.length && start < b.length && equal(a[start] as T, b[start] as T)) start++;
+  let endA = a.length;
+  let endB = b.length;
+  while (endA > start && endB > start && equal(a[endA - 1] as T, b[endB - 1] as T)) {
+    endA--;
+    endB--;
+  }
+  const steps: AlignStep[] = [];
+  for (let i = 0; i < start; i++) steps.push({ a: i, b: i });
+  const n = endA - start;
+  const m = endB - start;
+  if (n === 0 || m === 0 || n * m > ALIGN_LIMIT) {
+    for (let i = start; i < endA; i++) steps.push({ a: i, b: null });
+    for (let j = start; j < endB; j++) steps.push({ a: null, b: j });
+  } else {
+    alignMiddle(a, b, start, n, m, equal, similarity, steps);
+  }
+  for (let i = endA, j = endB; i < a.length; i++, j++) steps.push({ a: i, b: j });
+  return steps;
+}
+
+function alignMiddle<T>(
+  a: readonly T[],
+  b: readonly T[],
+  offset: number,
+  n: number,
+  m: number,
+  equal: (x: T, y: T) => boolean,
+  similarity: (x: T, y: T) => number,
+  steps: AlignStep[],
+): void {
+  const width = m + 1;
+  // Cost of aligning the suffixes a[i…] and b[j…]: changes, then equal items, then likeness.
+  const edits = new Float64Array((n + 1) * width);
+  const equals = new Float64Array((n + 1) * width);
+  const alike = new Float64Array((n + 1) * width);
+  const choice = new Uint8Array((n + 1) * width);
+  const PAIR = 0;
+  const REMOVE = 1;
+  const ADD = 2;
+  for (let i = n; i >= 0; i--) {
+    for (let j = m; j >= 0; j--) {
+      if (i === n && j === m) continue;
+      const at = i * width + j;
+      let bestEdits = Number.POSITIVE_INFINITY;
+      let bestEquals = 0;
+      let bestAlike = 0;
+      let bestChoice = ADD;
+      if (j < m) {
+        const next = at + 1;
+        bestEdits = (edits[next] as number) + 1;
+        bestEquals = equals[next] as number;
+        bestAlike = alike[next] as number;
+      }
+      if (i < n) {
+        // Removing wins over adding on a tie: removed items come first.
+        const next = at + width;
+        const e = (edits[next] as number) + 1;
+        const q = equals[next] as number;
+        const s = alike[next] as number;
+        if (
+          e < bestEdits ||
+          (e === bestEdits && (q > bestEquals || (q === bestEquals && s >= bestAlike)))
+        ) {
+          bestEdits = e;
+          bestEquals = q;
+          bestAlike = s;
+          bestChoice = REMOVE;
+        }
+      }
+      if (i < n && j < m) {
+        // Pairing wins every tie. Similarity is asked for only when the pair can win.
+        const next = at + width + 1;
+        const x = a[offset + i] as T;
+        const y = b[offset + j] as T;
+        const isEqual = equal(x, y);
+        const e = (edits[next] as number) + (isEqual ? 0 : 1);
+        const q = (equals[next] as number) + (isEqual ? 1 : 0);
+        if (e < bestEdits || (e === bestEdits && q >= bestEquals)) {
+          const s = (alike[next] as number) + (isEqual ? 0 : similarity(x, y));
+          if (e < bestEdits || q > bestEquals || s >= bestAlike - 1e-9) {
+            bestEdits = e;
+            bestEquals = q;
+            bestAlike = s;
+            bestChoice = PAIR;
+          }
+        }
+      }
+      edits[at] = bestEdits;
+      equals[at] = bestEquals;
+      alike[at] = bestAlike;
+      choice[at] = bestChoice;
+    }
+  }
+  let i = 0;
+  let j = 0;
+  while (i < n || j < m) {
+    const kind = choice[i * width + j];
+    if (kind === PAIR) steps.push({ a: offset + i++, b: offset + j++ });
+    else if (kind === REMOVE) steps.push({ a: offset + i++, b: null });
+    else steps.push({ a: null, b: offset + j++ });
+  }
+}
+
+/** Dice coefficient of two lists taken as multisets, 0…1: how much they share, in any order. */
+function dice(a: readonly string[], b: readonly string[]): number {
+  if (a.length + b.length === 0) return 1;
+  const pool = new Map<string, number>();
+  for (const item of a) pool.set(item, (pool.get(item) ?? 0) + 1);
+  let common = 0;
+  for (const item of b) {
+    const left = pool.get(item) ?? 0;
+    if (left > 0) {
+      common++;
+      pool.set(item, left - 1);
+    }
+  }
+  return (2 * common) / (a.length + b.length);
+}
+
+// ---------------------------------------------------------------------------------------------
+// What counts as "the same": canonical keys that ignore spelling.
+
+const collapse = (text: string | null): string => (text ?? "").replace(/\s+/g, " ").trim();
+const fraction = (value: number, bar: number): string => (value / bar).toFixed(6);
+
+function chordKey(chord: Chord): string {
+  const bass = chord.bass ? `${chord.bass.letter}${chord.bass.accidental}` : "";
+  return JSON.stringify([chord.root.letter, chord.root.accidental, chord.quality, bass]);
+}
+
+/** A bar's meaning: its kind and its chords with where they fall, as fractions of the bar. */
+function barKey(bar: Bar, beatsPerBar: number): string {
+  if (bar.kind !== "chords") return bar.kind;
+  const cells = bar.cells.map((cell) => {
+    const what =
+      cell.kind === "chord" && cell.chord
+        ? chordKey(cell.chord)
+        : cell.kind === "text"
+          ? JSON.stringify(cell.text)
+          : "nc";
+    return `${what}@${fraction(cell.start, beatsPerBar)}+${fraction(cell.beats, beatsPerBar)}`;
+  });
+  return `${fraction(bar.beats, beatsPerBar)}[${cells.join(" ")}]`;
+}
+
+/** The chords of a bar without their timing, to tell how alike two bars are. */
+function barChords(bar: Bar): string[] {
+  if (bar.kind !== "chords") return [bar.kind];
+  return bar.cells.map((cell) =>
+    cell.kind === "chord" && cell.chord ? chordKey(cell.chord) : `${cell.kind}:${cell.text}`,
+  );
+}
+
+/** One version of the song with what the comparison needs from it. */
+interface Side {
+  doc: SongDoc;
+  places: SectionPlace[];
+  barKeys: Map<Bar, string>;
+  /** Memoised `lineKey` and `linesOf`: alignments ask for them many times. */
+  lineKeys: Map<BarsLine, string>;
+  sectionLines: Map<Section, string[]>;
+}
+
+function makeSide(doc: SongDoc): Side {
+  const seen = new Map<string, number>();
+  const places = doc.sections.map((section, index): SectionPlace => {
+    const name = nameKey(section.name);
+    const occurrence = (seen.get(name) ?? 0) + 1;
+    seen.set(name, occurrence);
+    return {
+      index,
+      name: section.name,
+      occurrence,
+      tag: section.tag,
+      repeat: section.repeat,
+      ref: section.ref,
+      span: section.span,
+    };
+  });
+  const barKeys = new Map<Bar, string>();
+  for (const section of doc.sections) {
+    for (const line of section.lines) {
+      if (line.kind !== "bars") continue;
+      for (const bar of line.bars) barKeys.set(bar, barKey(bar, doc.time.beats));
+    }
+  }
+  return { doc, places, barKeys, lineKeys: new Map(), sectionLines: new Map() };
+}
+
+const nameKey = (name: string) => name.trim().toLowerCase();
+
+function lineKey(side: Side, line: BarsLine): string {
+  let key = side.lineKeys.get(line);
+  if (key === undefined) {
+    const bars = line.bars.map((bar) => side.barKeys.get(bar) as string);
+    key = JSON.stringify([collapse(line.label), bars, collapse(line.cue), line.repeat]);
+    side.lineKeys.set(line, key);
+  }
+  return key;
+}
+
+/** Everything a section holds except comments, by stream, so that the order of streams does not matter. */
+function contentKey(side: Side, section: Section): string {
+  const streams = new Map<string, string[]>();
+  for (const line of section.lines) {
+    let stream: string;
+    let key: string;
+    if (line.kind === "bars") {
+      stream = `bars:${line.instrument ?? ""}`;
+      key = lineKey(side, line);
+    } else if (line.kind === "note") {
+      stream = `note:${line.instrument ?? ""}`;
+      key = collapse(line.text);
+    } else if (line.kind === "lyrics") {
+      stream = "lyrics";
+      key = collapse(line.text);
+    } else continue;
+    const list = streams.get(stream) ?? [];
+    list.push(key);
+    streams.set(stream, list);
+  }
+  return JSON.stringify([...streams.entries()].sort(([x], [y]) => (x < y ? -1 : 1)));
+}
+
+const hasContent = (section: Section) => section.lines.some((line) => line.kind !== "comment");
+
+function sectionKey(side: Side, section: Section): string {
+  return JSON.stringify([section.tag, section.repeat, section.ref, contentKey(side, section)]);
+}
+
+function words(text: string): string[] {
+  return collapse(text).toLowerCase().split(" ").filter(Boolean);
+}
+
+/** How alike two texts are, by their words. */
+function textSimilarity(x: string, y: string): number {
+  return dice(words(x), words(y));
+}
+
+/** The meaning of a header value: typed where the format types it, otherwise the text. */
+function metaMeaning(entry: MetaEntry, doc: SongDoc): string {
+  const text = collapse(entry.value);
+  switch (entry.key) {
+    case "key": {
+      const key = parseKey(entry.value, doc.notation);
+      return key ? `${key.tonic.letter}${key.tonic.accidental}${key.minor ? "m" : ""}` : text;
+    }
+    case "tempo":
+      return String(readTempo(entry.value) ?? text);
+    case "capo":
+      return String(readCapo(entry.value) ?? text);
+    case "time": {
+      const time = readTime(entry.value);
+      return time ? `${time.beats}/${time.unit}` : text;
+    }
+    case "notation":
+      return readNotation(entry.value) ?? text;
+    default:
+      return text;
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Matching sections and header entries.
+
+/**
+ * Puts paired, removed and added items in the order of the newer version; a removed item comes
+ * right after the item that preceded it in the older version.
+ */
+function inNewOrder(pairs: Map<number, number>, countA: number, countB: number): SectionPair[] {
+  const byB = new Map<number, number>();
+  for (const [a, b] of pairs) byB.set(b, a);
+  const removedAfter = new Map<number, number[]>();
+  let previous = -1;
+  for (let a = 0; a < countA; a++) {
+    if (pairs.has(a)) {
+      previous = a;
+      continue;
+    }
+    const list = removedAfter.get(previous) ?? [];
+    list.push(a);
+    removedAfter.set(previous, list);
+  }
+  const order: SectionPair[] = [];
+  const removed = (after: number) => {
+    for (const a of removedAfter.get(after) ?? []) order.push({ before: a, after: null });
+  };
+  removed(-1);
+  for (let b = 0; b < countB; b++) {
+    const a = byB.get(b);
+    order.push({ before: a ?? null, after: b });
+    if (a !== undefined) removed(a);
+  }
+  return order;
+}
+
+function groupBy<T>(items: readonly T[], key: (item: T) => string): Map<string, number[]> {
+  const groups = new Map<string, number[]>();
+  items.forEach((item, index) => {
+    const k = key(item);
+    const list = groups.get(k) ?? [];
+    list.push(index);
+    groups.set(k, list);
+  });
+  return groups;
+}
+
+/**
+ * Pairs the sections of two versions, older index → newer index.
+ *
+ * 1. By name (case-insensitive) and occurrence, as personal-note anchors do: the second
+ *    `Chorus` is the second `Chorus`. When the count of a name differs, its sections are aligned
+ *    by content instead, so the one that was added or removed is found.
+ * 2. A removed and an added section are one renamed section when their content is the same, or
+ *    when they are of the same known type and stand between the same neighbours.
+ */
+function matchSections(a: Side, b: Side): Map<number, number> {
+  const pairs = new Map<number, number>();
+  const sectionsA = a.doc.sections;
+  const sectionsB = b.doc.sections;
+  const keysA = sectionsA.map((s) => sectionKey(a, s));
+  const keysB = sectionsB.map((s) => sectionKey(b, s));
+  const groupsB = groupBy(sectionsB, (s) => nameKey(s.name));
+  for (const [name, listA] of groupBy(sectionsA, (s) => nameKey(s.name))) {
+    const listB = groupsB.get(name) ?? [];
+    if (listA.length === listB.length) {
+      listA.forEach((x, i) => {
+        pairs.set(x, listB[i] as number);
+      });
+      continue;
+    }
+    const steps = align(
+      listA,
+      listB,
+      (x, y) => keysA[x] === keysB[y],
+      (x, y) => dice(linesOf(a, sectionsA[x] as Section), linesOf(b, sectionsB[y] as Section)),
+    );
+    for (const step of steps) {
+      if (step.a !== null && step.b !== null)
+        pairs.set(listA[step.a] as number, listB[step.b] as number);
+    }
+  }
+
+  const pairedB = new Set(pairs.values());
+  const removed = sectionsA.map((_, i) => i).filter((i) => !pairs.has(i));
+  const added = sectionsB.map((_, i) => i).filter((i) => !pairedB.has(i));
+  const pair = (x: number, y: number) => {
+    pairs.set(x, y);
+    pairedB.add(y);
+  };
+
+  // Renamed with the same content.
+  for (const y of added) {
+    const content = contentKey(b, sectionsB[y] as Section);
+    if (!hasContent(sectionsB[y] as Section)) continue;
+    const x = removed.find(
+      (r) => !pairs.has(r) && contentKey(a, sectionsA[r] as Section) === content,
+    );
+    if (x !== undefined) pair(x, y);
+  }
+
+  // Renamed in place: the k-th removed and the k-th added section of one known type that stand
+  // after the same matched section. Neighbours are fixed before pairing, so the result does not
+  // depend on which version is called older.
+  const gapA = (x: number): number => {
+    for (let i = x - 1; i >= 0; i--) {
+      const partner = pairs.get(i);
+      if (partner !== undefined) return partner;
+    }
+    return -1;
+  };
+  const gapB = (y: number): number => {
+    for (let j = y - 1; j >= 0; j--) if (pairedB.has(j)) return j;
+    return -1;
+  };
+  const slot = (gap: number, name: string) => `${gap}:${sectionType(name)}`;
+  const waiting = new Map<string, number[]>();
+  for (const x of removed) {
+    if (pairs.has(x)) continue;
+    const name = (sectionsA[x] as Section).name;
+    if (sectionType(name) === "other") continue;
+    const key = slot(gapA(x), name);
+    waiting.set(key, [...(waiting.get(key) ?? []), x]);
+  }
+  const candidates = added
+    .filter((y) => !pairedB.has(y))
+    .map((y) => ({ y, key: slot(gapB(y), (sectionsB[y] as Section).name) }));
+  for (const { y, key } of candidates) {
+    const x = waiting.get(key)?.shift();
+    if (x !== undefined) pair(x, y);
+  }
+  return pairs;
+}
+
+function linesOf(side: Side, section: Section): string[] {
+  let lines = side.sectionLines.get(section);
+  if (!lines) {
+    lines = section.lines
+      .filter((line) => line.kind !== "comment")
+      .map((line) => lineText(side, line));
+    side.sectionLines.set(section, lines);
+  }
+  return lines;
+}
+
+function lineText(side: Side, line: Line): string {
+  if (line.kind === "bars") return `bars:${line.instrument ?? ""}:${lineKey(side, line)}`;
+  if (line.kind === "note") return `note:${line.instrument ?? ""}:${collapse(line.text)}`;
+  return `${line.kind}:${collapse(line.text)}`;
+}
+
+/** Older indices of the pairs whose order among the others changed: those outside the longest increasing run. */
+function movedSections(pairs: Map<number, number>): Set<number> {
+  const sorted = [...pairs.entries()].sort(([x], [y]) => x - y);
+  const values = sorted.map(([, b]) => b);
+  // Longest increasing subsequence, O(n²): a song has a few dozen sections at most.
+  const length = values.map(() => 1);
+  const previous = values.map(() => -1);
+  let bestEnd = -1;
+  for (let i = 0; i < values.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (
+        (values[j] as number) < (values[i] as number) &&
+        (length[j] as number) + 1 > (length[i] as number)
+      ) {
+        length[i] = (length[j] as number) + 1;
+        previous[i] = j;
+      }
+    }
+    if (bestEnd === -1 || (length[i] as number) > (length[bestEnd] as number)) bestEnd = i;
+  }
+  const kept = new Set<number>();
+  for (let i = bestEnd; i !== -1; i = previous[i] as number) kept.add(i);
+  const moved = new Set<number>();
+  sorted.forEach(([a], i) => {
+    if (!kept.has(i)) moved.add(a);
+  });
+  return moved;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The diff.
+
+/** A change before it knows which section pair it belongs to. */
+type Draft =
+  | TitleChange
+  | MetaChange
+  | FormChange
+  | SectionChange
+  | LineChange
+  | BarChange
+  | TextChange;
+
+/** Streams of a section: base bar lines, each instrument's bar lines, notes per instrument, lyrics. */
+function streamIds(linesA: Line[], linesB: Line[], kind: "bars" | "note"): (string | null)[] {
+  const ids: (string | null)[] = [null];
+  for (const line of [...linesB, ...linesA]) {
+    if (line.kind === kind && line.instrument !== null && !ids.includes(line.instrument)) {
+      ids.push(line.instrument);
+    }
+  }
+  return ids;
+}
+
+function diffLines(
+  a: Side,
+  b: Side,
+  placeA: SectionPlace | null,
+  placeB: SectionPlace | null,
+  linesA: Line[],
+  linesB: Line[],
+  out: Draft[],
+): void {
+  // Bar lines, base first, then each instrument.
+  if (placeA && placeB) {
+    for (const instrument of streamIds(linesA, linesB, "bars")) {
+      const pick = (lines: Line[]) =>
+        lines.filter((l): l is BarsLine => l.kind === "bars" && l.instrument === instrument);
+      const barsA = pick(linesA);
+      const barsB = pick(linesB);
+      const keysA = barsA.map((line) => lineKey(a, line));
+      const keysB = barsB.map((line) => lineKey(b, line));
+      const barKeysA = barsA.map((line) => line.bars.map((bar) => a.barKeys.get(bar) as string));
+      const barKeysB = barsB.map((line) => line.bars.map((bar) => b.barKeys.get(bar) as string));
+      const steps = align(
+        barsA.map((_, i) => i),
+        barsB.map((_, i) => i),
+        (x, y) => keysA[x] === keysB[y],
+        (x, y) => dice(barKeysA[x] as string[], barKeysB[y] as string[]),
+      );
+      for (const step of steps) {
+        const lineA =
+          step.a === null
+            ? null
+            : { section: placeA, line: step.a + 1, value: barsA[step.a] as BarsLine };
+        const lineB =
+          step.b === null
+            ? null
+            : { section: placeB, line: step.b + 1, value: barsB[step.b] as BarsLine };
+        if (!lineA || !lineB) {
+          out.push({
+            kind: lineA ? "line-removed" : "line-added",
+            instrument,
+            before: lineA,
+            after: lineB,
+          });
+          continue;
+        }
+        if (keysA[step.a as number] === keysB[step.b as number]) continue;
+        const x = lineA.value;
+        const y = lineB.value;
+        if (collapse(x.label) !== collapse(y.label)) {
+          out.push({ kind: "line-label", instrument, before: lineA, after: lineB });
+        }
+        if (collapse(x.cue) !== collapse(y.cue)) {
+          out.push({ kind: "line-cue", instrument, before: lineA, after: lineB });
+        }
+        if (x.repeat !== y.repeat) {
+          out.push({ kind: "line-repeat", instrument, before: lineA, after: lineB });
+        }
+        diffBars(a, b, lineA, lineB, instrument, out);
+      }
+    }
+  }
+
+  // Notes and cues, band notes first, then each instrument; then lyrics.
+  const texts = (
+    pick: (line: Line) => line is NoteLine | LyricsLine,
+    kinds: readonly [
+      "note-added" | "lyrics-added",
+      "note-removed" | "lyrics-removed",
+      "note-changed" | "lyrics-changed",
+    ],
+    instrument: string | null,
+  ) => {
+    const textA = linesA.filter(pick);
+    const textB = linesB.filter(pick);
+    const steps = align(
+      textA,
+      textB,
+      (x, y) => collapse(x.text) === collapse(y.text),
+      (x, y) => textSimilarity(x.text, y.text),
+    );
+    for (const step of steps) {
+      const before =
+        step.a === null
+          ? null
+          : { section: placeA, line: step.a + 1, value: textA[step.a] as NoteLine | LyricsLine };
+      const after =
+        step.b === null
+          ? null
+          : { section: placeB, line: step.b + 1, value: textB[step.b] as NoteLine | LyricsLine };
+      if (before && after && collapse(before.value.text) === collapse(after.value.text)) continue;
+      const kind = !before ? kinds[0] : !after ? kinds[1] : kinds[2];
+      out.push({ kind, instrument, before, after });
+    }
+  };
+  for (const instrument of streamIds(linesA, linesB, "note")) {
+    texts(
+      (line): line is NoteLine => line.kind === "note" && line.instrument === instrument,
+      ["note-added", "note-removed", "note-changed"],
+      instrument,
+    );
+  }
+  texts(
+    (line): line is LyricsLine => line.kind === "lyrics",
+    ["lyrics-added", "lyrics-removed", "lyrics-changed"],
+    null,
+  );
+}
+
+function diffBars(
+  a: Side,
+  b: Side,
+  lineA: { section: SectionPlace; line: number; value: BarsLine },
+  lineB: { section: SectionPlace; line: number; value: BarsLine },
+  instrument: string | null,
+  out: Draft[],
+): void {
+  const barsA = lineA.value.bars;
+  const barsB = lineB.value.bars;
+  const steps = align(
+    barsA,
+    barsB,
+    (x, y) => a.barKeys.get(x) === b.barKeys.get(y),
+    (x, y) => dice(barChords(x), barChords(y)),
+  );
+  for (const step of steps) {
+    const before =
+      step.a === null
+        ? null
+        : {
+            section: lineA.section,
+            line: lineA.line,
+            bar: step.a + 1,
+            value: barsA[step.a] as Bar,
+          };
+    const after =
+      step.b === null
+        ? null
+        : {
+            section: lineB.section,
+            line: lineB.line,
+            bar: step.b + 1,
+            value: barsB[step.b] as Bar,
+          };
+    if (before && after) {
+      if (a.barKeys.get(before.value) === b.barKeys.get(after.value)) continue;
+      out.push({ kind: "bar-changed", instrument, before, after });
+    } else {
+      out.push({ kind: before ? "bar-removed" : "bar-added", instrument, before, after });
+    }
+  }
+}
+
+function diffHeader(a: Side, b: Side, sections: Map<number, number>, out: Draft[]): void {
+  const docA = a.doc;
+  const docB = b.doc;
+  if ((docA.title ?? null) !== (docB.title ?? null)) {
+    out.push({
+      kind: "title",
+      before: docA.titleSpan ? { value: docA.title, span: docA.titleSpan } : null,
+      after: docB.titleSpan ? { value: docB.title, span: docB.titleSpan } : null,
+    });
+  }
+  // Header entries: by key and by which entry of that key it is.
+  const pairs = new Map<number, number>();
+  const groupsB = groupBy(docB.meta, (entry) => entry.key);
+  for (const [key, listA] of groupBy(docA.meta, (entry) => entry.key)) {
+    const listB = groupsB.get(key) ?? [];
+    listA.forEach((x, i) => {
+      const y = listB[i];
+      if (y !== undefined) pairs.set(x, y);
+    });
+  }
+  for (const { before, after } of inNewOrder(pairs, docA.meta.length, docB.meta.length)) {
+    const x = before === null ? null : (docA.meta[before] as MetaEntry);
+    const y = after === null ? null : (docB.meta[after] as MetaEntry);
+    if (x && y && metaMeaning(x, docA) === metaMeaning(y, docB)) continue;
+    // `notation:` written or dropped where it does not change how the file is read is no change.
+    if ((x ?? y)?.key === "notation" && docA.notation === docB.notation) continue;
+    out.push({ kind: "meta", key: (x ?? y)?.key ?? "", before: x, after: y });
+  }
+  diffForms(a.doc, b.doc, sections, out);
+  diffLines(a, b, null, null, docA.headerLines, docB.headerLines, out);
+}
+
+/**
+ * Forms by name (case-insensitive). A removed and an added form with the same entries are one
+ * renamed form. Entries are the same when they name paired sections with the same repeat.
+ */
+function diffForms(
+  docA: SongDoc,
+  docB: SongDoc,
+  sections: Map<number, number>,
+  out: Draft[],
+): void {
+  const sameEntry = (x: FormEntry, y: FormEntry) =>
+    x.repeat === y.repeat &&
+    (x.section === null || y.section === null
+      ? x.section === y.section && nameKey(collapse(x.text)) === nameKey(collapse(y.text))
+      : sections.get(x.section) === y.section);
+  const sameEntries = (x: SongForm, y: SongForm) =>
+    x.entries.length === y.entries.length &&
+    x.entries.every((entry, i) => sameEntry(entry, y.entries[i] as FormEntry));
+  const pairs = new Map<number, number>();
+  const byName = new Map<string, number>();
+  docB.forms.forEach((form, j) => {
+    if (!byName.has(nameKey(form.name))) byName.set(nameKey(form.name), j);
+  });
+  const pairedB = new Set<number>();
+  docA.forms.forEach((form, i) => {
+    const j = byName.get(nameKey(form.name));
+    if (j !== undefined && !pairedB.has(j)) {
+      pairs.set(i, j);
+      pairedB.add(j);
+    }
+  });
+  docB.forms.forEach((form, j) => {
+    if (pairedB.has(j)) return;
+    const i = docA.forms.findIndex((old, k) => !pairs.has(k) && sameEntries(old, form));
+    if (i !== -1) {
+      pairs.set(i, j);
+      pairedB.add(j);
+    }
+  });
+  for (const { before: i, after: j } of inNewOrder(pairs, docA.forms.length, docB.forms.length)) {
+    const before = i === null ? null : { index: i, value: docA.forms[i] as SongForm };
+    const after = j === null ? null : { index: j, value: docB.forms[j] as SongForm };
+    if (!before || !after) {
+      out.push({ kind: before ? "form-removed" : "form-added", before, after });
+      continue;
+    }
+    if (before.value.name !== after.value.name) {
+      out.push({ kind: "form-renamed", before, after });
+    }
+    if (!sameEntries(before.value, after.value)) {
+      out.push({ kind: "form-changed", before, after });
+    }
+  }
+}
+
+function summarize(changes: SongChange[]): DiffSummary {
+  const summary: DiffSummary = {
+    total: changes.length,
+    header: 0,
+    forms: 0,
+    sections: 0,
+    lines: 0,
+    bars: 0,
+    notes: 0,
+    lyrics: 0,
+  };
+  for (const change of changes) {
+    const group = change.kind.split("-")[0];
+    if (group === "title" || group === "meta") summary.header++;
+    else if (group === "form") summary.forms++;
+    else if (group === "section") summary.sections++;
+    else if (group === "line") summary.lines++;
+    else if (group === "bar") summary.bars++;
+    else if (group === "note") summary.notes++;
+    else summary.lyrics++;
+  }
+  return summary;
+}
+
+/**
+ * Compares two versions of a song in musical terms: what a musician would call a change.
+ *
+ * It compares what is written in each file — the documents — not the resolved songs: an empty
+ * `## Chorus` that plays an earlier chorus is compared as empty, so editing the first chorus is
+ * one change, not one per repetition. Resolve both documents (`diff.before`, `diff.after`) with
+ * `resolveSong` to compare what is played.
+ *
+ * Meaning, not spelling: spacing, alignment, comments, instrument synonyms, the naming a chord
+ * is written in (`Hm` in H-notation is `Bm`) and how a bar's durations are written
+ * (`| A E |` = `| A** E** |` = `| A . E . |`) are no change. Durations are compared as fractions
+ * of the bar, so a new time signature alone does not change every bar. `identical` tells whether
+ * the texts are the same byte for byte.
+ *
+ * Sections are matched as personal-note anchors identify them: by name (case-insensitive) and
+ * by which section of that name it is. When the count of a name differs, its sections are
+ * aligned by content. A removed and an added section are one renamed section when their content
+ * is the same, or when they are of the same known type and follow the same matched section.
+ * Bar lines (base and each `@instrument` apart), bars, notes and lyrics lines are matched with
+ * `align`, so that inserting one bar or line does not mark the later ones as changed.
+ * Never throws.
+ */
+export function diffSongs(before: string, after: string, options: ParseOptions = {}): SongDiff {
+  const a = makeSide(parse(before, options).doc);
+  const b = makeSide(parse(after, options).doc);
+  const pairs = matchSections(a, b);
+  const changes: SongChange[] = [];
+  const header: Draft[] = [];
+  diffHeader(a, b, pairs, header);
+  for (const change of header) changes.push({ ...change, sectionPair: null } as SongChange);
+
+  const moved = movedSections(pairs);
+  const sections = inNewOrder(pairs, a.doc.sections.length, b.doc.sections.length);
+  sections.forEach(({ before: x, after: y }, sectionPair) => {
+    const found: Draft[] = [];
+    diffSection(a, b, x, y, moved, found);
+    for (const change of found) changes.push({ ...change, sectionPair } as SongChange);
+  });
+
+  return {
+    identical: before === after,
+    changes,
+    summary: summarize(changes),
+    sections,
+    before: a.doc,
+    after: b.doc,
+  };
+}
+
+function diffSection(
+  a: Side,
+  b: Side,
+  x: number | null,
+  y: number | null,
+  moved: Set<number>,
+  changes: Draft[],
+): void {
+  {
+    const placeA = x === null ? null : (a.places[x] as SectionPlace);
+    const placeB = y === null ? null : (b.places[y] as SectionPlace);
+    if (!placeA || !placeB) {
+      changes.push({
+        kind: placeA ? "section-removed" : "section-added",
+        before: placeA,
+        after: placeB,
+      });
+      return;
+    }
+    const section = (
+      kind: "section-moved" | "section-renamed" | "section-repeat" | "section-tag" | "section-ref",
+    ) => changes.push({ kind, before: placeA, after: placeB });
+    if (moved.has(placeA.index)) section("section-moved");
+    if (placeA.name !== placeB.name) section("section-renamed");
+    if (placeA.repeat !== placeB.repeat) section("section-repeat");
+    if (placeA.tag !== placeB.tag) section("section-tag");
+    if (
+      nameKey(placeA.ref ?? "") !== nameKey(placeB.ref ?? "") ||
+      (placeA.ref === null) !== (placeB.ref === null)
+    ) {
+      section("section-ref");
+    }
+    const linesA = (a.doc.sections[placeA.index] as Section).lines;
+    const linesB = (b.doc.sections[placeB.index] as Section).lines;
+    diffLines(a, b, placeA, placeB, linesA, linesB, changes);
+  }
+}

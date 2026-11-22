@@ -35,6 +35,8 @@ dostoinyi/
 - **Concurrent edits.** Two changes made from the same parent touching *different* bars merge automatically; touching the *same* bar → shown as a conflict for the arranger to pick (same UX as review).
 - **Alternatives to evaluate:** a CRDT (Automerge / Yjs) persisted to files; or real git (e.g. isomorphic-git) inside the shared folder — but syncing `.git` internals through a cloud drive is fragile.
 
+Built already: `diffSongs(before, after)` in `@takt/format` (2026-11-22) gives the bar-level diff of two texts — header, sections, bar lines and bars per instrument, notes and lyrics — with places such as "Verse 1, line 2, bar 3". The direction chosen since is to store snapshots of the text and compute the diff on demand, not to log operations.
+
 ## UX principles
 
 - No git words in the UI: "changes", "suggestions", "restore", "compare" — not commit / PR / merge / rebase.
