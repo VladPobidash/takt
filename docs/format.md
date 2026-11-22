@@ -12,6 +12,8 @@ artist: Elevation Worship — Worthy
 key: D
 tempo: 135
 time: 4/4
+form коротка: Intro, Verse 1, Chorus, Verse 2, Chorus, Bridge x2
+form без програшу: Intro x2, Verse 1, Chorus, Verse 2 x2, Chorus, Bridge x4
 
 ## Intro x2
 | Hm** D** | G** A** |
@@ -39,7 +41,7 @@ time: 4/4
 @cajon > first 2 times — hand only
 ```
 
-(`яма` is the band's word for a dynamic dip — tags are free text.)
+(`яма` is the band's word for a dynamic dip — tags are free text. The `form` lines are two named versions of the song, see "Versions".)
 
 ## Header
 
@@ -54,6 +56,7 @@ time: 4/4
 | `capo` | suggested capo for guitar |
 | `notation` | `H` or `B` (see "Chords") |
 | `link` | link to a recording |
+| `form <name>` | a named version of the song (see "Versions"); may be written more than once |
 
 ## Sections
 
@@ -65,6 +68,31 @@ time: 4/4
 - Repeats are shown folded (`×4`), never unrolled; the form timeline is sized by bars × repeats.
 - **Section type** (color and abbreviation) is detected from the name, in English and Ukrainian: intro/вступ, verse/куплет, pre-chorus/передприспів, chorus/приспів, bridge/брідж, interlude/програш, instrumental, outro/кінцівка.
 - **Numbers** may stand after the name or before it, as in the band's charts: `## Chorus 2`, `## 3 Verse`, `## 1, 2 Verse`, `## 1 Bridge`. They become part of the short label on the form timeline (`C2`, `V3`, `V1,2`, `B1`). "Interludio" is read as an interlude.
+
+## Versions (`form`)
+
+A song has a main version — its sections in the order of the file — and may have named versions for places where the band plays it differently: without the interlude, the bridge fewer times. A version is not a copy: it is a **form**, an order of the same sections with their repeats. The chords are written once, so a corrected chord is corrected in every version. In the app they are called "Versions" / «Версії». Decided in [ADR 0013](decisions/0013-song-forms.md).
+
+```
+form коротка: Intro, Verse 1, Chorus, Verse 2, Chorus, Bridge x2
+form без програшу: Intro x2, Verse 1, Chorus, Verse 2 x2, Chorus, Bridge x4
+```
+
+- A header line, before the first section. The **name** is everything between `form ` and the first `:` — several words, any language. Two forms with the same name (letter case ignored): the first one counts.
+- **Entries** are separated by commas and name sections as their headers do, without tag and repeat (`## Bridge [яма] x4` is `Bridge`), without letter case. A section left out is not played. A section may be named twice.
+- **Repeats:** `Bridge x2`, `2x` or `(2x)` replaces the section's own repeat; without one the section keeps its own.
+- **Names with commas** (`## 1, 2 Verse x2`) are written as they are: the parser joins the pieces back into the longest name the file has, so `Intro, 1, 2 Verse x2, Chorus` is three entries. The spacing around the comma does not matter (`1,2 Verse`).
+- **Several sections with one name:** the first `Chorus` of the form is the first `## Chorus` of the file, the second is the second, and so on (the last one once the file has no more). `Chorus #2` names the second one wherever it stands.
+- **Reuse follows the file:** a section left out of a version still lends its bars to the sections that reuse it.
+- A name the file does not have is skipped and shown as a warning in the editor. A version cannot have different chords — that is a separately named section in the file.
+
+With the sections of [examples/vdiachnist.takt](../examples/vdiachnist.takt):
+
+```
+form коротка: Intro, 1, 2 Verse x1, Chorus, Interludio, 3 Verse, Chorus 2, Interludio #2, Chorus 3 x2
+```
+
+`1, 2 Verse x1` plays once instead of the twice its header says, the bridges and the instrumental are left out, and `Interludio #2` is the second interlude, the one with `F#sus` (a plain second `Interludio` would name it too).
 
 ## Bar line
 
@@ -166,7 +194,10 @@ The last `## Chorus` plays the chorus's bars and shows its words.
 date: 2026-10-31
 - dostoinyi-ty-odyn | key: D
 - mohutnii-boh | key: E | > no intro
+- vdiachnist | form: коротка
 ```
+
+`form:` picks a version of the song for this setlist. If the song has no version of that name, the main version is played and the app says so.
 
 ## ChordPro grid compatibility
 

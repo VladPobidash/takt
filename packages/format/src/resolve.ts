@@ -1,3 +1,4 @@
+import { findForm, playableForms } from "./forms.ts";
 import { readHeader } from "./header.ts";
 import { isVocal } from "./instruments.ts";
 import { LEADING_NUMBERS, sectionType } from "./section-type.ts";
@@ -48,7 +49,8 @@ function toLine(line: BarsLine, source: ResolvedLine["source"]): ResolvedLine {
 /**
  * Resolves a document into the song one instrument sees: reused sections get their bars,
  * the instrument's own lines replace the base lines with the same ordinal number,
- * and every section gets its type, abbreviation and bar count.
+ * and every section gets its type, abbreviation and bar count. With `form`, the sections
+ * come in that version's order with its repeats (ADR 0013).
  */
 export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): ResolvedSong {
   const instrument = options.instrument ?? null;
@@ -63,7 +65,7 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
   const occurrences = new Map<SectionType, number>();
   const instruments: string[] = [];
 
-  const sections = doc.sections.map((section, index): ResolvedSection => {
+  const all = doc.sections.map((section, index): ResolvedSection => {
     for (const line of section.lines) {
       if ((line.kind === "bars" || line.kind === "note") && line.instrument !== null) {
         if (!instruments.includes(line.instrument)) instruments.push(line.instrument);
@@ -102,6 +104,7 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
     occurrences.set(type, occurrence);
     return {
       index,
+      docIndex: index,
       name: section.name,
       type,
       abbr: abbreviation(section.name, type, occurrence),
@@ -119,6 +122,17 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
       bars: lines.reduce((sum, line) => sum + line.bars.length * line.repeat, 0),
     };
   });
+
+  // A version picks and orders sections that are already resolved: reuse follows the file.
+  const chosen = options.form ? findForm(doc, options.form) : null;
+  const steps = chosen?.entries.filter((entry) => entry.section !== null) ?? [];
+  const sections: ResolvedSection[] =
+    steps.length === 0
+      ? all
+      : steps.map((entry, position) => {
+          const section = all[entry.section as number] as ResolvedSection;
+          return { ...section, index: position, repeat: entry.repeat ?? section.repeat };
+        });
 
   const form: FormItem[] = sections.map((section, index) => ({
     section: index,
@@ -140,6 +154,8 @@ export function resolveSong(doc: SongDoc, options: ResolveOptions = {}): Resolve
     instruments,
     sections,
     form,
+    forms: playableForms(doc),
+    formName: steps.length === 0 ? null : (chosen as { name: string }).name,
   };
 }
 

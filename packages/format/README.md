@@ -24,11 +24,12 @@ transposeText(text, 2); // the same file two semitones up; only chords and `key:
 | Function | What it does |
 | --- | --- |
 | `parse(text, options?)` | `.takt` text → document + diagnostics |
-| `resolveSong(doc, { instrument })` | document → the song one instrument sees: reuse expanded, parts laid over the base, section types, form |
+| `resolveSong(doc, { instrument, form })` | document → the song one instrument sees: reuse expanded, parts laid over the base, section types, form; with `form`, a named version's order and repeats ([ADR 0013](../../docs/decisions/0013-song-forms.md)) |
 | `parseChord`, `formatChord`, `formatNote` | chord text ↔ chord, in H-notation or English naming |
 | `transposeChord`, `transposeKey`, `prefersFlats` | transposition; sharps or flats by the target key |
 | `capoShape`, `suggestCapos` | guitar shapes with a capo; capo positions with easy shapes |
 | `transposeText(text, semitones)` | rewrite a file in another key without touching its formatting |
+| `setForm`, `renameForm`, `removeForm`, `formatFormEntries`, `findForm`, `cleanFormName` | add, change, rename and delete `form` lines (named versions) without touching the rest of the file |
 | `parseSetlist`, `formatSetlist` | `.taktset` setlists |
 
 Tests are written first: `pnpm --filter @takt/format test`. Cases come from "Parser test cases" in the format spec and from [`examples/`](../../examples/).
