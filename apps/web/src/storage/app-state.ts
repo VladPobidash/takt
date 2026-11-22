@@ -67,6 +67,23 @@ export interface AppState {
   settings: Settings;
 }
 
+/**
+ * The text of a bundle's setlist with its entries pointed at the ids the bundle's songs have on
+ * this device. A setlist whose songs kept their ids is returned exactly as it was written.
+ */
+function retargetSongs(text: string, placed: ReadonlyMap<string, string>): string {
+  const { setlist } = parseSetlist(text);
+  if (setlist.entries.every((entry) => (placed.get(entry.song) ?? entry.song) === entry.song))
+    return text;
+  return formatSetlist({
+    ...setlist,
+    entries: setlist.entries.map((entry) => ({
+      ...entry,
+      song: placed.get(entry.song) ?? entry.song,
+    })),
+  });
+}
+
 export function defaultSettings(preferredLanguages: readonly string[]): Settings {
   const language = detectLanguage(preferredLanguages);
   return {
@@ -201,32 +218,42 @@ export class AppData {
   /**
    * Adds the songs of a bundle. A song that is already here with the same text is left alone;
    * one with the same id but another text is stored next to it under a numbered id — importing
-   * never overwrites what is on the device.
+   * never overwrites what is on the device. The bundle's setlists and notes follow its songs
+   * to the ids they have here.
    */
   async importBundle(
     bundle: Bundle,
     now = Date.now(),
   ): Promise<{ added: number; unchanged: number }> {
-    const texts = new Set(this.state.songs.map((song) => song.text));
-    const fresh = bundle.songs.filter((song) => !texts.has(song.text));
-    await this.importSongs(
+    // Where each song of the bundle lives on this device: an identical song that is already
+    // here, under whatever id it has, or the id the new copy is stored under.
+    const here = new Map(this.state.songs.map((song) => [song.text, song.id]));
+    const fresh = bundle.songs.filter((song) => !here.has(song.text));
+    const added = await this.importSongs(
       fresh.map((song) => ({ name: song.id, text: song.text })),
       now,
     );
+    const placed = new Map<string, string>();
+    for (const song of bundle.songs) {
+      const id = here.get(song.text) ?? added[fresh.indexOf(song)]?.id;
+      if (id !== undefined) placed.set(song.id, id);
+    }
+
     const known = new Set(this.state.setlists.map((setlist) => setlist.text));
     const taken = new Set(this.state.setlists.map((setlist) => setlist.id));
     for (const setlist of bundle.setlists) {
-      if (known.has(setlist.text)) continue;
+      const text = retargetSongs(setlist.text, placed);
+      if (known.has(text)) continue;
       const id = uniqueId(slugify(setlist.id), taken);
       taken.add(id);
-      await this.saveSetlist({ id, text: setlist.text, updatedAt: now });
+      await this.saveSetlist({ id, text, updatedAt: now });
     }
-    // Notes of a backup come back for songs that are here under the same id and have none yet.
+    // Notes of a backup come back for the songs they belong to, where those have none yet.
     if (bundle.notes) {
-      const ids = new Set(this.state.songs.map((song) => song.id));
       const notes = { ...this.state.personalNotes };
       for (const [song, songNotes] of Object.entries(bundle.notes)) {
-        if (ids.has(song) && !notes[song]) notes[song] = songNotes;
+        const id = placed.get(song);
+        if (id !== undefined && !notes[id]) notes[id] = songNotes;
       }
       await this.saveNotes(notes);
     }

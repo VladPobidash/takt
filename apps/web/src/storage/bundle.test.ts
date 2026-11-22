@@ -69,6 +69,55 @@ describe("AppData.importBundle", () => {
     expect(await data.importBundle(bundle)).toEqual({ added: 0, unchanged: 3 });
   });
 
+  test("a setlist of the bundle plays the bundle's songs, also where their ids were taken", async () => {
+    const data = await AppData.load(createMemoryStore(), { preferredLanguages: ["en"] });
+    // The device already has another song under the id the bundle uses, and one identical
+    // song under another id.
+    await data.importSongs([
+      { name: "worthy", text: "# Worthy, chords only\n" },
+      { name: "old-name", text: "# Always\n| C# |\n" },
+    ]);
+    const bundle = createBundle(
+      {
+        songs: [
+          { id: "worthy", text: "# Worthy\nWith the words\n", updatedAt: 1 },
+          { id: "always", text: "# Always\n| C# |\n", updatedAt: 1 },
+          { id: "new-song", text: "# New\n", updatedAt: 1 },
+        ],
+        setlists: [
+          {
+            id: "night",
+            text: "# Night\ndate: 2026-12-12\n- worthy | key: D | form: short | > no intro\n- always\n- new-song\n- not-in-the-bundle\n",
+            updatedAt: 1,
+          },
+        ],
+        notes: { worthy: { "chorus#1": "breathe" } },
+      },
+      NOW,
+    );
+
+    expect(await data.importBundle(bundle)).toEqual({ added: 2, unchanged: 1 });
+    const setlist = data.getState().setlists.find((s) => s.id === "night");
+    expect(setlist?.text).toBe(
+      "# Night\ndate: 2026-12-12\n- worthy-2 | key: D | form: short | > no intro\n- old-name\n- new-song\n- not-in-the-bundle\n",
+    );
+    // Notes follow the song to the id it was stored under.
+    expect(data.getState().personalNotes).toEqual({ "worthy-2": { "chorus#1": "breathe" } });
+
+    // The same bundle again adds nothing: no second copy of the songs or of the setlist.
+    expect(await data.importBundle(bundle)).toEqual({ added: 0, unchanged: 3 });
+    expect(data.getState().setlists.map((s) => s.id)).toEqual(["night"]);
+    expect(data.getState().songs).toHaveLength(4);
+  });
+
+  test("a setlist whose songs keep their ids is stored as it was written", async () => {
+    const data = await AppData.load(createMemoryStore(), { preferredLanguages: ["en"] });
+    const text = "# Night\n\n-   a-song   |  key: D\n";
+    const bundle = createBundle({ songs, setlists: [{ id: "night", text, updatedAt: 1 }] }, NOW);
+    await data.importBundle(bundle);
+    expect(data.getState().setlists[0]?.text).toBe(text);
+  });
+
   test("a full backup restores an empty device", async () => {
     const first = await AppData.load(createMemoryStore(), { preferredLanguages: ["en"] });
     await first.importSongs([{ name: "a-song", text: "# A\n" }]);
