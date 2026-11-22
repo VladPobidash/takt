@@ -1,20 +1,13 @@
-import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vitest/config";
 
-function appVersion(): string {
-  const date = new Date().toISOString().slice(0, 10);
-  // Railway builds without a .git folder and passes the commit in the environment.
-  const fromHost = process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7);
-  if (fromHost) return `${fromHost} · ${date}`;
-  try {
-    return `${execSync("git rev-parse --short HEAD", { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim()} · ${date}`;
-  } catch {
-    return date;
-  }
-}
+/** The version shown in Settings is the one in this package's `package.json` (ADR 0014). */
+const { version } = JSON.parse(
+  readFileSync(new URL("./package.json", import.meta.url), "utf8"),
+) as { version: string };
 
 export default defineConfig({
   plugins: [
@@ -55,7 +48,10 @@ export default defineConfig({
       },
     }),
   ],
-  define: { __APP_VERSION__: JSON.stringify(appVersion()) },
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __APP_BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   server: { host: true },
   // Playwright owns e2e/; Vitest runs the unit tests next to the sources.
   test: { include: ["src/**/*.test.{ts,tsx}"] },

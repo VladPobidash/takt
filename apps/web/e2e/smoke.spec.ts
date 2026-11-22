@@ -253,6 +253,19 @@ test.describe("auto-scroll", () => {
 test.describe("settings", () => {
   test.use({ locale: "en-US" });
 
+  test("the app's version is shown and a newer one can be asked for", async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto("/settings");
+    await expect(page.getByText(/^Takt v0\.\d+\.\d+ · \d{4}-\d{2}-\d{2}$/)).toBeVisible();
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await page.getByRole("button", { name: "Check for updates" }).click();
+    await expect(page.getByText("You have the latest version.")).toBeVisible();
+    await page.screenshot({ path: test.info().outputPath("settings-version.png"), fullPage: true });
+    // The "could not check" answer is covered by unit tests: the browser's offline emulation
+    // does not reach the request for a new service worker.
+    expect(errors).toEqual([]);
+  });
+
   test("language and instrument are chosen from searchable lists", async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto("/settings");
@@ -575,6 +588,7 @@ test.describe("editor", () => {
     await page.screenshot({ path: test.info().outputPath("editor-preview.png") });
 
     await page.getByRole("button", { name: "Done" }).click();
+    await expect(page).toHaveURL(/\/songs\/[^/]+$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Morning");
     await page.reload();
     await expect(page.getByRole("region", { name: "Chorus" })).toBeVisible();
@@ -703,6 +717,8 @@ test.describe("versions of a song", () => {
     const text = page.getByRole("textbox", { name: "Song text" });
     await text.fill((await text.inputValue()).replace("form без програшу:", "form довга:"));
     await page.getByRole("button", { name: "Done" }).click();
+    // The editor closes once the text is stored; only then is a reload safe.
+    await expect(page).toHaveURL(/\/songs\/[^/]+$/);
     await page.goto(inSetlist);
     await expect(page.getByRole("status").first()).toContainText(
       "This song has no version “без програшу”",

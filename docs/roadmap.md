@@ -15,6 +15,8 @@ Each Saturday service is a test: afterwards we write down what got in the way. D
 
 The stretch features — auto-scroll with the metronome, the three-level view options, personal notes — were also built on 19 November.
 
+Added on 22 November, asked for by the author for the band's singers and for playing a song differently from place to place: lyrics on screen, a vocal view with voice parts, named versions of a song ([ADR 0013](decisions/0013-song-forms.md)), and a version number with "Check for updates" in Settings ([ADR 0014](decisions/0014-app-version.md)).
+
 After the worship night: cloud sync, live session, tap-based editor, native wrapper, [change history and review](ideas/change-history.md).
 
 ## Open questions

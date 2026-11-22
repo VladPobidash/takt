@@ -99,7 +99,7 @@ export const en = {
   "settings.chordSize.m": "Medium",
   "settings.chordSize.l": "Large",
   "settings.chordSize.l.hint": "For a phone on a music stand",
-  "settings.version": "Version",
+  "settings.app": "App",
 
   "library.new": "New song",
   "library.newTitle": "New song",
@@ -248,6 +248,10 @@ export const en = {
 
   "update.available": "A new version of Takt is ready.",
   "update.apply": "Update now",
+  "update.check": "Check for updates",
+  "update.checking": "Checking…",
+  "update.current": "You have the latest version.",
+  "update.failed": "Could not check. Check the connection and try again.",
 } as const;
 
 export type MessageKey = keyof typeof en;

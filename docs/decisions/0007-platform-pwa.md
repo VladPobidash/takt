@@ -24,7 +24,7 @@ Facts checked on 2026-11-19:
 
 - **PWA only** until after the worship night. A native wrapper stays an option for later (real files, cloud folders).
 - The service worker (`vite-plugin-pwa`, Workbox) **precaches the whole app**: HTML, JavaScript, CSS, the Onest font files, icons. After the first visit the app starts from the cache; nothing on the playing path makes a network request.
-- **Updates never interrupt playing.** A new version is downloaded in the background and waits. The app shows "Update available" only on the library and settings screens; it is applied when the user taps it, or on the next cold start. No automatic reload, never on the song or service screens.
+- **Updates never interrupt playing.** A new version is downloaded in the background and waits. The app shows "Update available" only on the library and settings screens; it is applied when the user taps it, or on the next cold start. No automatic reload, never on the song or service screens. Since [ADR 0014](0014-app-version.md) Settings also has "Check for updates", which asks the server at once; what it finds waits for the same tap.
 - The app asks for persistent storage (`navigator.storage.persist()`) the first time something is saved.
 - The screen is kept awake with the Screen Wake Lock API while a song is open. Where it is refused, the app says so and suggests the system setting.
 - Recommended minimum for stage use on Apple devices: **iOS / iPadOS 18.4**, installed to the Home Screen.
