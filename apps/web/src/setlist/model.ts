@@ -98,6 +98,30 @@ export function setEntryForm(setlist: Setlist, index: number, form: string | nul
   );
 }
 
+const sameForm = (a: string, b: string) =>
+  a.replace(/\s+/g, " ").trim().toLowerCase() === b.replace(/\s+/g, " ").trim().toLowerCase();
+
+/**
+ * Points the entries of one song that play version `from` at `to` — after a rename — or, with
+ * null, back at the main version — after a delete. Null when no entry changes.
+ */
+export function retargetForm(
+  setlist: Setlist,
+  song: string,
+  from: string,
+  to: string | null,
+): Setlist | null {
+  let changed = false;
+  const entries = setlist.entries.map((entry) => {
+    const form = entryForm(entry);
+    if (entry.song !== song || form === null || !sameForm(form, from)) return entry;
+    changed = true;
+    const { form: _old, ...options } = entry.options;
+    return { ...entry, options: to ? { ...options, form: to } : options };
+  });
+  return changed ? withEntries(setlist, entries) : null;
+}
+
 export function setMeta(setlist: Setlist, key: string, value: string): Setlist {
   const entry = { key, value, span: NO_SPAN, valueSpan: NO_SPAN };
   const exists = setlist.meta.some((m) => m.key === key);

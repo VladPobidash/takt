@@ -176,6 +176,12 @@ export function ViewOptionsSheet(props: {
         >
           {t("view.editSong")}
         </Link>
+        <Link
+          href={`/songs/${encodeURIComponent(props.songId)}/versions`}
+          className="mt-2 flex h-11 items-center justify-center rounded-control bg-surface text-[15px] font-bold"
+        >
+          {t("versions.edit")}
+        </Link>
       </div>
     </dialog>
   );
