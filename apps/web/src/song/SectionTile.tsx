@@ -28,9 +28,12 @@ export function SectionTile({
   options,
   now = false,
   personal,
+  lyrics = false,
 }: {
   section: ResolvedSection;
   options: BarGridOptions;
+  /** Show the words under the bars. Compact mode never shows them: the song must fit one screen. */
+  lyrics?: boolean;
   /** Auto-scroll is playing this section: it gets an outline, never the chords or beats. */
   now?: boolean;
   /** Personal notes of this section; leave out where notes cannot be edited (editor preview). */
@@ -176,6 +179,15 @@ export function SectionTile({
       {notes}
       {sectionChip}
       {lines}
+      {lyrics && section.lyrics.length > 0 && (
+        // Quiet and dense: one paragraph per written line, smaller than the chords.
+        <div className="mt-2 text-[14px] font-medium leading-[1.35] break-words">
+          {section.lyrics.map((text, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: a lyrics line has no identity of its own
+            <p key={index}>{text}</p>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

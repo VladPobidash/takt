@@ -87,6 +87,27 @@ test.describe("view options", () => {
     await sheet.getByRole("switch", { name: /Band notes/ }).uncheck();
     await expect(page.getByRole("region", { name: "Verse 1" })).not.toContainText("keys only");
   });
+
+  test("lyrics stand under the bars, can be hidden, and never show in compact mode", async ({
+    page,
+  }) => {
+    await page.goto("/songs/silent-night");
+    const verse = page.getByRole("region", { name: "Verse 1" });
+    await expect(verse).toContainText("Silent night, holy night");
+    await expect(verse).toContainText("Sleep in heavenly peace");
+    await page.screenshot({ path: test.info().outputPath("lyrics.png") });
+
+    await page.getByRole("button", { name: "Compact mode" }).click();
+    await expect(verse).not.toContainText("Silent night");
+    await page.getByRole("button", { name: "Compact mode" }).click();
+    await expect(verse).toContainText("Silent night");
+
+    await page.getByRole("button", { name: "View options" }).click();
+    const sheet = page.getByRole("dialog", { name: "View options" });
+    await sheet.getByRole("switch", { name: /Lyrics/ }).uncheck();
+    await expect(verse).not.toContainText("Silent night");
+    await expect(verse).toContainText("first line: guitar and voice only");
+  });
 });
 
 test.describe("personal notes", () => {

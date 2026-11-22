@@ -211,6 +211,7 @@ export const uk: Messages = {
   "view.reset": "Скинути",
   "view.bandNotes": "Нотатки гурту",
   "view.instrumentNotes": "Нотатки для мого інструмента",
+  "view.lyrics": "Слова пісні",
   "view.personalNotes": "Мої особисті нотатки",
   "view.editSong": "Редагувати пісню",
 

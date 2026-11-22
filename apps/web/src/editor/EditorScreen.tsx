@@ -219,7 +219,12 @@ export function EditorScreen({ id }: { id: string }) {
         >
           <div className="flex flex-col gap-1.5">
             {song.sections.map((section) => (
-              <SectionTile key={section.index} section={section} options={options} />
+              <SectionTile
+                key={section.index}
+                section={section}
+                options={options}
+                lyrics={settings.lyrics}
+              />
             ))}
           </div>
           <button

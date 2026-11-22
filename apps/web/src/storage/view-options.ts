@@ -6,6 +6,8 @@ export interface ViewOptions {
   bandNotes: boolean;
   /** Cues written for the instrument being viewed. */
   instrumentNotes: boolean;
+  /** The words of each section, under its bars (never in compact mode). */
+  lyrics: boolean;
   personalNotes: boolean;
   /** Open in compact mode. */
   compact: boolean;
@@ -17,6 +19,7 @@ export const VIEW_OPTION_KEYS: ViewOptionKey[] = [
   "soundingChords",
   "bandNotes",
   "instrumentNotes",
+  "lyrics",
   "personalNotes",
   "compact",
 ];
@@ -25,6 +28,7 @@ export const DEFAULT_VIEW_OPTIONS: ViewOptions = {
   soundingChords: true,
   bandNotes: true,
   instrumentNotes: true,
+  lyrics: true,
   personalNotes: true,
   compact: false,
 };

@@ -178,6 +178,7 @@ export const en = {
   "view.reset": "Reset",
   "view.bandNotes": "Band notes",
   "view.instrumentNotes": "Notes for my instrument",
+  "view.lyrics": "Lyrics",
   "view.personalNotes": "My personal notes",
   "view.editSong": "Edit the song",
 

@@ -17,6 +17,7 @@ const LABELS: Record<ViewOptionKey, MessageKey> = {
   soundingChords: "settings.soundingChords",
   bandNotes: "view.bandNotes",
   instrumentNotes: "view.instrumentNotes",
+  lyrics: "view.lyrics",
   personalNotes: "view.personalNotes",
   compact: "settings.compact",
 };
