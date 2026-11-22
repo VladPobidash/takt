@@ -21,6 +21,8 @@ artist: Elevation Worship — Worthy
 key: D
 tempo: 135
 time: 4/4
+form коротка: Intro, Verse 1, Chorus, Verse 2, Chorus, Bridge x2
+form без програшу: Intro x2, Verse 1, Chorus, Verse 2 x2, Chorus, Bridge x4
 
 ## Intro x2
 | Hm** D** | G** A** |

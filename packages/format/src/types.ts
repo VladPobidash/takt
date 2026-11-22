@@ -24,6 +24,9 @@ export type DiagnosticCode =
   | "invalid-notation"
   | "invalid-key"
   | "unknown-section-ref"
+  | "unknown-form-section"
+  | "duplicate-form"
+  | "empty-form"
   | "empty-section"
   | "unknown-chord"
   | "ambiguous-b"
@@ -159,6 +162,29 @@ export interface Section {
   lines: Line[];
 }
 
+/** One entry of a form line: a section of the file, with an optional repeat. */
+export interface FormEntry {
+  /** The entry as written: `Bridge x2`, `Chorus #2`. */
+  text: string;
+  /** Index of the section in `SongDoc.sections`; null when the file has no such section. */
+  section: number | null;
+  /** Repeat written in the entry, null to keep the section's own. */
+  repeat: number | null;
+  span: Span;
+}
+
+/** A named version of the song (ADR 0013): `form коротка: Intro, Verse 1, Chorus x2`. */
+export interface SongForm {
+  /** The name as written, spaces collapsed. */
+  name: string;
+  entries: FormEntry[];
+  /** Span of the whole line. */
+  span: Span;
+  nameSpan: Span;
+  /** Span of the list after the colon; empty when nothing is written. */
+  listSpan: Span;
+}
+
 /** The document: a tree that mirrors the file. */
 export interface SongDoc {
   title: string | null;
@@ -171,6 +197,8 @@ export interface SongDoc {
   notationSource: "header" | "inferred" | "default";
   time: TimeSignature;
   sections: Section[];
+  /** Named versions, in file order (ADR 0013). */
+  forms: SongForm[];
 }
 
 export interface ParseOptions {
@@ -211,15 +239,17 @@ export interface ResolvedNote {
 }
 
 export interface ResolvedSection {
-  /** Index of the section in the document. */
+  /** Position in `ResolvedSong.sections`: the play order. For the main version it equals `docIndex`. */
   index: number;
+  /** Index of the section in the document. A section a version plays twice appears twice. */
+  docIndex: number;
   name: string;
   type: SectionType;
   /** Short label for the form timeline: `V1`, `C2`, `Inst`. */
   abbr: string;
   tag: string | null;
   repeat: number;
-  /** Index of the section whose bars are reused, null if the bars are its own. */
+  /** Index in the document of the section whose bars are reused, null if the bars are its own. */
   reusedFrom: number | null;
   lines: ResolvedLine[];
   notes: ResolvedNote[];
@@ -249,8 +279,13 @@ export interface ResolvedSong {
   notation: Notation;
   /** Instruments that have lines of their own in the file, in order of appearance. */
   instruments: string[];
+  /** The sections in play order: the file's for the main version, the form's for a named one. */
   sections: ResolvedSection[];
   form: FormItem[];
+  /** Names of the song's named versions that have something to play, in file order. */
+  forms: string[];
+  /** The version resolved, as the file writes its name; null for the main version. */
+  formName: string | null;
 }
 
 export interface ResolveOptions {
@@ -261,4 +296,9 @@ export interface ResolveOptions {
    * kept; null or missing keeps every singer's cue (`@vocals`, `@soprano`, `@alto`, `@tenor`).
    */
   voice?: VoicePart | null;
+  /**
+   * Name of a version (`form` line) to resolve, matched without letter case. Null, missing,
+   * unknown or a form with nothing to play: the main version.
+   */
+  form?: string | null;
 }

@@ -117,6 +117,11 @@ export const en = {
   "diagnostic.invalid-notation": "“{value}” is not a note naming. Write H or B.",
   "diagnostic.invalid-key": "“{value}” is not a key. Write it like D, Hm or F#.",
   "diagnostic.unknown-section-ref": "There is no section called “{name}” to reuse.",
+  "diagnostic.unknown-form-section":
+    "Version “{form}”: there is no section called “{name}”. It is left out.",
+  "diagnostic.duplicate-form":
+    "There is already a version called “{name}”. Only the first one is used.",
+  "diagnostic.empty-form": "Version “{name}” has no sections.",
   "diagnostic.empty-section": "This section has no bars and nothing to reuse.",
   "diagnostic.unknown-chord": "“{text}” is not a chord. It is shown as written.",
   "diagnostic.ambiguous-b":

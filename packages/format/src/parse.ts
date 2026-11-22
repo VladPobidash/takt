@@ -1,5 +1,6 @@
 import { extractRepeat, parseBars } from "./bars.ts";
 import { parseChord } from "./chord.ts";
+import { checkForms, readFormEntries, readFormLine } from "./forms.ts";
 import { DEFAULT_TIME, readHeader, readNotation, readTime } from "./header.ts";
 import { normalizeInstrument } from "./instruments.ts";
 import { baseBars, sourceIndex } from "./sections.ts";
@@ -14,6 +15,7 @@ import type {
   Pos,
   Section,
   SongDoc,
+  SongForm,
   Span,
 } from "./types.ts";
 
@@ -141,6 +143,8 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
   const headerLines: Line[] = [];
   const sections: Section[] = [];
   let section: Section | null = null;
+  /** Form lines: their entries are matched once every section name is known. */
+  const formLines: { form: SongForm; list: string; at: Pos }[] = [];
 
   const readLine = (line: SourceLine): Line => {
     const whole = spanOf(line);
@@ -202,6 +206,22 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
       title = (titleMatch[1] as string).trim() || null;
       continue;
     }
+    const formLine = titleMatch ? null : readFormLine(line.text);
+    if (formLine) {
+      const listSpan = spanOf(line, formLine.listFrom, formLine.listTo);
+      formLines.push({
+        form: {
+          name: formLine.name,
+          entries: [],
+          span: spanOf(line),
+          nameSpan: spanOf(line, formLine.nameFrom, formLine.nameTo),
+          listSpan,
+        },
+        list: line.text.slice(formLine.listFrom, formLine.listTo),
+        at: listSpan.start,
+      });
+      continue;
+    }
     const entry = titleMatch ? null : META.exec(line.text);
     if (entry && !line.text.includes("|")) {
       const value = (entry[2] as string).trim();
@@ -234,10 +254,15 @@ export function parse(text: string, options: ParseOptions = {}): ParseResult {
   }
   readHeader(meta, notation, diagnostics);
   checkSections(sections, diagnostics);
+  const forms = formLines.map(({ form, list, at }) => {
+    form.entries = readFormEntries(list, at, sections, form.name, diagnostics);
+    return form;
+  });
+  checkForms(forms, diagnostics);
 
   diagnostics.sort((a, b) => a.span.start.offset - b.span.start.offset);
   return {
-    doc: { title, titleSpan, meta, headerLines, notation, notationSource, time, sections },
+    doc: { title, titleSpan, meta, headerLines, notation, notationSource, time, sections, forms },
     diagnostics,
   };
 }

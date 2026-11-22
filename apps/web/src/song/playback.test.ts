@@ -16,6 +16,19 @@ time: 4/4
 const timeline = buildTimeline(song);
 
 describe("buildTimeline", () => {
+  test("a named version is played in its order, with its repeats, without knowing about forms", () => {
+    const short = resolveSong(
+      parse("# T\nform short: Chorus x1, Intro\n## Intro x2\n| D |\n## Chorus = Intro\n").doc,
+      { form: "short" },
+    );
+    expect(buildTimeline(short).steps.map((s) => `${s.section}:${s.pass}/${s.passes}`)).toEqual([
+      "0:1/1",
+      "1:1/2",
+      "1:2/2",
+    ]);
+    expect(short.sections.map((s) => s.index)).toEqual([0, 1]);
+  });
+
   test("unrolls section repeats, line repeats and reused sections", () => {
     expect(
       timeline.steps.map((s) => `${s.section}:${s.pass}/${s.passes}:${s.bar}/${s.bars}`),

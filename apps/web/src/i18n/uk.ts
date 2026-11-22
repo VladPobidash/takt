@@ -143,6 +143,9 @@ export const uk: Messages = {
   "diagnostic.invalid-notation": "«{value}» — не система назв. Вкажіть H або B.",
   "diagnostic.invalid-key": "«{value}» — не тональність. Пишіть як D, Hm або F#.",
   "diagnostic.unknown-section-ref": "Немає секції «{name}», яку можна повторити.",
+  "diagnostic.unknown-form-section": "Версія «{form}»: немає секції «{name}». Її пропущено.",
+  "diagnostic.duplicate-form": "Версія «{name}» вже є. Використовується лише перша.",
+  "diagnostic.empty-form": "У версії «{name}» немає секцій.",
   "diagnostic.empty-section": "У цій секції немає тактів і нічого повторити.",
   "diagnostic.unknown-chord": "«{text}» — не акорд. Показується як написано.",
   "diagnostic.ambiguous-b":
