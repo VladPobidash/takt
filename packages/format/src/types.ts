@@ -302,3 +302,164 @@ export interface ResolveOptions {
    */
   form?: string | null;
 }
+
+/** A section of one version of the song, as a change refers to it. */
+export interface SectionPlace {
+  /** Index of the section in `doc.sections`. */
+  index: number;
+  name: string;
+  /**
+   * 1 for the first section with this name (case-insensitive), 2 for the second, … — the way a
+   * personal note's anchor identifies a section.
+   */
+  occurrence: number;
+  tag: string | null;
+  repeat: number | null;
+  ref: string | null;
+  /** Span of the `##` header line. */
+  span: Span;
+}
+
+/** A bar line of one version. */
+export interface LinePlace {
+  section: SectionPlace;
+  /** 1-based number among the section's bar lines of the same instrument (or of the base). */
+  line: number;
+  value: BarsLine;
+}
+
+/** A bar of one version: "line 2, bar 3". */
+export interface BarPlace {
+  section: SectionPlace;
+  /** 1-based number among the section's bar lines of the same instrument (or of the base). */
+  line: number;
+  /** 1-based number of the bar in its line. */
+  bar: number;
+  value: Bar;
+}
+
+/** A note, an instrument cue or a lyrics line of one version. */
+export interface TextPlace {
+  /** Null for a line written in the header, before the first section. */
+  section: SectionPlace | null;
+  /** 1-based number among the notes of the same instrument (or band notes, or lyrics lines) there. */
+  line: number;
+  value: NoteLine | LyricsLine;
+}
+
+/** `# Title` changed. */
+export interface TitleChange {
+  kind: "title";
+  before: { value: string | null; span: Span } | null;
+  after: { value: string | null; span: Span } | null;
+}
+
+/** A `key: value` header line added (`before` null), removed (`after` null) or changed. */
+export interface MetaChange {
+  kind: "meta";
+  /** Lowercased key: `key`, `tempo`, `time`, `capo`, `artist`, `notation`, `link` or any other. */
+  key: string;
+  before: MetaEntry | null;
+  after: MetaEntry | null;
+}
+
+export interface SectionChange {
+  /**
+   * `section-moved`: its place among the other sections changed (`index`).
+   * `section-renamed`, `section-repeat`, `section-tag`, `section-ref`: compare `name`, `repeat`,
+   * `tag` or `ref` of `before` and `after`.
+   */
+  kind:
+    | "section-added"
+    | "section-removed"
+    | "section-moved"
+    | "section-renamed"
+    | "section-repeat"
+    | "section-tag"
+    | "section-ref";
+  /** Null when the section was added. */
+  before: SectionPlace | null;
+  /** Null when the section was removed. */
+  after: SectionPlace | null;
+}
+
+export interface LineChange {
+  /** `line-label`, `line-cue`, `line-repeat`: compare `label`, `cue` or `repeat` of the two values. */
+  kind: "line-added" | "line-removed" | "line-label" | "line-cue" | "line-repeat";
+  /** Normalised instrument id of the line, null for the base harmony. */
+  instrument: string | null;
+  before: LinePlace | null;
+  after: LinePlace | null;
+}
+
+export interface BarChange {
+  kind: "bar-added" | "bar-removed" | "bar-changed";
+  /** Normalised instrument id of the line, null for the base harmony. */
+  instrument: string | null;
+  before: BarPlace | null;
+  after: BarPlace | null;
+}
+
+export interface TextChange {
+  kind:
+    | "note-added"
+    | "note-removed"
+    | "note-changed"
+    | "lyrics-added"
+    | "lyrics-removed"
+    | "lyrics-changed";
+  /** For notes: the instrument a cue is for, null for a band note. Always null for lyrics. */
+  instrument: string | null;
+  before: TextPlace | null;
+  after: TextPlace | null;
+}
+
+export type SongChange =
+  | TitleChange
+  | MetaChange
+  | SectionChange
+  | LineChange
+  | BarChange
+  | TextChange;
+
+export type SongChangeKind = SongChange["kind"];
+
+/** Counts for a label such as "3 changes". */
+export interface DiffSummary {
+  /** Every change: `changes.length`. */
+  total: number;
+  /** `title` and `meta`. */
+  header: number;
+  /** `section-*`. */
+  sections: number;
+  /** `line-*`. */
+  lines: number;
+  /** `bar-*`. */
+  bars: number;
+  /** `note-*`. */
+  notes: number;
+  /** `lyrics-*`. */
+  lyrics: number;
+}
+
+/** Which section of the older version is which section of the newer one. */
+export interface SectionPair {
+  /** Index in `before.sections`, null for an added section. */
+  before: number | null;
+  /** Index in `after.sections`, null for a removed section. */
+  after: number | null;
+}
+
+/** What changed between two versions of a song, in musical terms. */
+export interface SongDiff {
+  /** The two texts are the same byte for byte. No changes and not identical means "only reformatted". */
+  identical: boolean;
+  /** Changes in the order of the newer version; a removed section comes where it used to be. */
+  changes: SongChange[];
+  summary: DiffSummary;
+  /** Every section of both versions, paired, in the order of `changes`. */
+  sections: SectionPair[];
+  /** The two documents the places in `changes` refer to. */
+  before: SongDoc;
+  after: SongDoc;
+}
