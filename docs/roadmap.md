@@ -21,7 +21,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 
 ## Open questions
 
-- [ ] Product name and file extension (`.takt` is a working name).
+- [x] Product name and file extension: the product is **vtakt** (<https://vtakt.me>), the format and its files stay `.takt` ([ADR 0015](decisions/0015-product-name.md)).
 - [x] 6/8 time: one asterisk is an eighth note (6 per bar); `tempo` counts the dotted-quarter pulse ([ADR 0005](decisions/0005-format-library.md)). The band's first 6/8 song, «Вдячність» at 78 BPM, is entered that way; to confirm by ear with auto-scroll.
 - [x] Empty bar `| |` and `%` are different: keep the last chord vs play the previous bar again ([ADR 0005](decisions/0005-format-library.md)).
 - [ ] How to write small keys parts: text, note names, mini-tab? (v0: plain-text cues, `@keys > …`.)

@@ -1,6 +1,6 @@
-# Takt — Product Brief
+# vtakt — Product Brief
 
-Takt (working name) is a tool for instrumentalists: one arrangement, a dedicated view for every instrument. Open plain-text format, data stays on the device, open source. The first real-world test is a worship night on 12 December 2026; until then, weekly Saturday services serve as smaller tests.
+vtakt («в такт», "in time"; first called Takt — the format keeps the name `.takt`) is a tool for instrumentalists: one arrangement, a dedicated view for every instrument. Open plain-text format, data stays on the device, open source. The first real-world test is a worship night on 12 December 2026; until then, weekly Saturday services serve as smaller tests.
 
 Related: [`.takt` format v0](format.md) · [roadmap & open questions](roadmap.md) · [design brief](design/brief.md) · [decisions (ADR)](decisions/)
 

@@ -4,7 +4,7 @@ Guidance for Claude Code working in this repository.
 
 ## What this is
 
-Takt — bar-based chord charts for instrumentalists: one arrangement, a view for every instrument (guitar with capo, bass, keys, drums). Lyrics are optional. Open source (Apache-2.0), built first for the author's own band; a worship night on 2026-12-12 is the first real test, with weekly Saturday services before it as smaller tests.
+vtakt («в такт», "in time"; <https://vtakt.me>) — bar-based chord charts for instrumentalists: one arrangement, a view for every instrument (guitar with capo, bass, keys, drums). Lyrics are optional. Open source (Apache-2.0), built first for the author's own band; a worship night on 2026-12-12 is the first real test, with weekly Saturday services before it as smaller tests.
 
 ## Read before working
 
@@ -36,6 +36,7 @@ Takt — bar-based chord charts for instrumentalists: one arrangement, a view fo
 
 ## Conventions
 
+- **Names ([ADR 0015](docs/decisions/0015-product-name.md)):** the product people see is **vtakt**, written in lower case like the domain. The format and its files stay `.takt` / `.taktset` / `.taktbundle`, and the repository, packages (`@takt/*`), the IndexedDB database and the Railway project keep the name `takt`. Do not rename those in passing.
 - Everything in the repo is in English: docs, code, identifiers, comments, commit messages. UI strings: UA + EN. Song content (titles, cues, lyrics) can be in any language. The author may talk to you in Ukrainian — reply in his language, but write repo content in English.
 - Architecture-level choices → new ADR (`docs/decisions/NNNN-name.md`, template in `docs/decisions/README.md`).
 - Format changes → update `docs/format.md` in the same change, with an example.

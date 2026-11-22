@@ -19,8 +19,8 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ["apple-touch-icon.png"],
       manifest: {
-        name: "Takt",
-        short_name: "Takt",
+        name: "vtakt",
+        short_name: "vtakt",
         description: "Bar-based chord charts: one arrangement, a view for every instrument.",
         lang: "en",
         start_url: "/",

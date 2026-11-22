@@ -1,8 +1,8 @@
-# Takt
+# vtakt
 
 **Bar-based chord charts for instrumentalists. One arrangement — a view for every instrument.**
 
-Takt is for musicians who play from chords, not sheet music: a busker with a guitar, a four-piece band, a church team with ten instruments and an eight-song set. You write a song once as bars with chord durations; the guitarist sees capo shapes, the bassist sees their passing chords, the keys player sees their part — on a phone or a laptop, offline.
+vtakt («в такт» — Ukrainian for "in time") is for musicians who play from chords, not sheet music: a busker with a guitar, a four-piece band, a church team with ten instruments and an eight-song set. You write a song once as bars with chord durations; the guitarist sees capo shapes, the bassist sees their passing chords, the keys player sees their part — on a phone or a laptop, offline.
 
 ```
 ## Verse 1
