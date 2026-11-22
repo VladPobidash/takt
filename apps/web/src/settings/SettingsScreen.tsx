@@ -49,7 +49,7 @@ function AppVersion() {
   return (
     <Group title={t("settings.app")}>
       <p className="mb-2 text-[15px] font-semibold">
-        Takt v{__APP_VERSION__}
+        vtakt v{__APP_VERSION__}
         <span className="font-medium text-muted"> · {__APP_BUILD_DATE__}</span>
       </p>
       <button

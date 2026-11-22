@@ -1,6 +1,6 @@
 # Design system — "Swiss Blocks" (v0)
 
-The visual language of Takt. Chosen on 2026-10-25 after comparing five directions (see [Exploration history](#exploration-history)). Decision record: [ADR 0002](../decisions/0002-visual-direction.md).
+The visual language of vtakt. Chosen on 2026-10-25 after comparing five directions (see [Exploration history](#exploration-history)). Decision record: [ADR 0002](../decisions/0002-visual-direction.md).
 
 **Status:** MVP design v1 accepted on 2026-10-26 — screens and sources in [mvp-v1/](mvp-v1/README.md). This document stays the source of truth for tokens and rules.
 

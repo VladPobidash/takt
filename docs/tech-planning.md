@@ -136,7 +136,7 @@ From [roadmap → Open questions](roadmap.md#open-questions). The first song is 
 - [x] Repeats shown as `×4`, unrolled only by the timeline and the metronome.
 - [ ] Lyrics: block under the section or aligned to bars (MVP: probably neither is needed).
 - [x] Default H/B notation: decided by the file, then by the device setting.
-- [ ] Product name and file extension.
+- [x] Product name and file extension: vtakt, `.takt` ([ADR 0015](decisions/0015-product-name.md)).
 
 ## Suggested order
 

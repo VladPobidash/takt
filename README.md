@@ -1,8 +1,8 @@
-# Takt
+# vtakt
 
 **Bar-based chord charts for instrumentalists. One arrangement — a view for every instrument.**
 
-Takt is for musicians who play from chords, not sheet music: a busker with a guitar, a four-piece band, a church team with ten instruments and an eight-song set. You write a song once as bars with chord durations; the guitarist sees capo shapes, the bassist sees their passing chords, the keys player sees their part — on a phone or a laptop, offline.
+vtakt («в такт» — Ukrainian for "in time") is for musicians who play from chords, not sheet music: a busker with a guitar, a four-piece band, a church team with ten instruments and an eight-song set. You write a song once as bars with chord durations; the guitarist sees capo shapes, the bassist sees their passing chords, the keys player sees their part — on a phone or a laptop, offline.
 
 ```
 ## Verse 1
@@ -10,7 +10,7 @@ Takt is for musicians who play from chords, not sheet music: a busker with a gui
 @bass | D | A | F#** G** | A |
 ```
 
-> **Try it:** <https://web-production-e41cbcc9.up.railway.app> — open it on a phone and add it to the home screen.
+> **Try it:** <https://vtakt.me> — open it on a phone and add it to the home screen.
 >
 > Status: **pre-alpha.** The format library works; the app shows songs per instrument (capo, transposition, H/B naming) and imports `.takt` files. Songs can be written and edited in the app with a live preview and warnings. Setlists put songs in order with a key and a note for the night. Songs and backups are exported as files. It installs as a PWA and works offline. First real-world test: a worship night on 12 December 2026.
 

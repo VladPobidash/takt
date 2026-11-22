@@ -256,7 +256,7 @@ test.describe("settings", () => {
   test("the app's version is shown and a newer one can be asked for", async ({ page }) => {
     const errors = watchErrors(page);
     await page.goto("/settings");
-    await expect(page.getByText(/^Takt v0\.\d+\.\d+ · \d{4}-\d{2}-\d{2}$/)).toBeVisible();
+    await expect(page.getByText(/^vtakt v0\.\d+\.\d+ · \d{4}-\d{2}-\d{2}$/)).toBeVisible();
     await page.evaluate(() => navigator.serviceWorker.ready);
     await page.getByRole("button", { name: "Check for updates" }).click();
     await expect(page.getByText("You have the latest version.")).toBeVisible();
@@ -849,7 +849,7 @@ test.describe("install and screen hints", () => {
 
   test("the library explains how to install until the hint is dismissed", async ({ page }) => {
     await page.goto("/library");
-    const hint = page.getByRole("complementary", { name: "Install Takt" });
+    const hint = page.getByRole("complementary", { name: "Install vtakt" });
     await expect(hint).toContainText("without a network");
     await hint.getByRole("button", { name: "Not now" }).click();
     await expect(hint).toHaveCount(0);

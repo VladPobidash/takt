@@ -8,7 +8,7 @@ Each Saturday service is a test: afterwards we write down what got in the way. D
 
 1. **24–26 October.** ✅ Repository and docs. ✅ Design system and MVP design v1 — accepted 26.10 ([screens](design/mvp-v1/README.md)).
 2. **Stage 1 — by 22 November. Foundations and the format library.** ✅ Done on 19 November: the first example is a public-domain song, the band's own songs follow. Technical decisions ([questions](tech-planning.md)) → ADRs; repository scaffold and CI; first real song written in `.takt` by hand; parser, beat resolution, chords, transposition and capo, test-first on real lines from the PDF.
-3. **Stage 2 — by 28 November. A song on a phone.** ✅ Done on 19 November except for checks on real phones: the app is live at <https://web-production-e41cbcc9.up.railway.app>. Song view (grid, durations, form timeline), instrument views and capo, transposition, H/B, library with file import, offline (PWA), EN + UA, deploy. First demo to the band at the Saturday service.
+3. **Stage 2 — by 28 November. A song on a phone.** ✅ Done on 19 November except for checks on real phones: the app is live at <https://vtakt.me> (first at <https://web-production-e41cbcc9.up.railway.app>). Song view (grid, durations, form timeline), instrument views and capo, transposition, H/B, library with file import, offline (PWA), EN + UA, deploy. First demo to the band at the Saturday service.
 4. **Stage 3 — by 5 December. A whole service.** ✅ Features done on 19 November: the editor, export and backup, the service map, previous / next, compact mode and the tablet and laptop layout. Entering the band's songs and checks on real devices remain. Service map, previous / next with a pedal, stage mode, editor, export and backup, settings, compact mode, tablet and laptop layout. All worship-night songs entered; each member has added their part.
 5. **5 December.** Dress rehearsal at a service, then bug fixes only.
 6. **12 December.** Worship night.
@@ -21,7 +21,7 @@ After the worship night: cloud sync, live session, tap-based editor, native wrap
 
 ## Open questions
 
-- [ ] Product name and file extension (`.takt` is a working name).
+- [x] Product name and file extension: the product is **vtakt** (<https://vtakt.me>), the format and its files stay `.takt` ([ADR 0015](decisions/0015-product-name.md)).
 - [x] 6/8 time: one asterisk is an eighth note (6 per bar); `tempo` counts the dotted-quarter pulse ([ADR 0005](decisions/0005-format-library.md)). The band's first 6/8 song, «Вдячність» at 78 BPM, is entered that way; to confirm by ear with auto-scroll.
 - [x] Empty bar `| |` and `%` are different: keep the last chord vs play the previous bar again ([ADR 0005](decisions/0005-format-library.md)).
 - [ ] How to write small keys parts: text, note names, mini-tab? (v0: plain-text cues, `@keys > …`.)
