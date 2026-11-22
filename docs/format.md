@@ -113,9 +113,21 @@ A line prefixed with `@instrument`:
 
 - `@bass | … |` — in the bass view, replaces the section's base line with the same ordinal number: the first `@bass` bar line replaces the first base line, the second replaces the second. Sections without `@bass` lines show the base. A part holds only the sections that differ, not a copy of the song.
 - `@keys > …` — a cue visible only to keys players.
-- Names are free-form, with synonyms: guitar/гітара, bass/бас, keys/клавіші/піано, drums/барабани/cajon/кахон (drums and cajón share one view).
+- Names are free-form, with synonyms: guitar/гітара, bass/бас, keys/клавіші/піано, drums/барабани/cajon/кахон (drums and cajón share one view), vocals/vocal/voice/вокал/голос, soprano/сопрано, alto/альт, tenor/тенор.
+- **Voice parts.** Singers have one view, the vocal view: sections, lyrics and cues, no chords. `@vocals > …` is a cue for every singer; `@soprano > …`, `@alto > …`, `@tenor > …` are for one part. A singer who has chosen a part on their device sees `@vocals` and their own part; with no part chosen, every vocal cue is shown. `@bass` and `@бас` are always the bass guitar, never a voice. Instrument views do not show the singers' cues.
 - Keys parts and drum rhythms have no notation of their own in v0: write them as cues (`@keys > …`, `@drums > …`).
 - Capo is not a part, it is a view parameter.
+
+```
+## Chorus x2
+| G | D | Em | C |
+@vocals > second time: a cappella
+@soprano > melody, up the octave the second time
+@альт > third below the melody
+Glory to God in the highest
+```
+
+The alto sees "second time: a cappella" and "third below the melody"; the soprano sees the first two cues; the bass player sees none of them.
 
 ## Notes and lyrics
 

@@ -1,3 +1,4 @@
+import { VOICE_PARTS } from "@takt/format";
 import type { ReactNode } from "react";
 import { useApp } from "../app-context.tsx";
 import type { MessageKey } from "../i18n/en.ts";
@@ -15,6 +16,7 @@ const INSTRUMENTS: { id: InstrumentChoice; label: MessageKey }[] = [
   { id: "bass", label: "instrument.bass" },
   { id: "keys", label: "instrument.keys" },
   { id: "drums", label: "instrument.drums" },
+  { id: "vocals", label: "instrument.vocals" },
 ];
 const THEMES: { id: Theme; label: MessageKey; hint?: MessageKey }[] = [
   { id: "system", label: "settings.theme.system" },
@@ -130,6 +132,25 @@ export function SettingsScreen() {
             emptyText={t("library.nothingFound")}
           />
           <p className="mt-1 text-[13px] font-medium text-muted">{t("settings.instrumentHint")}</p>
+        </Group>
+        <Group title={t("settings.voicePart")}>
+          <RadioRow
+            name="voice-part"
+            checked={settings.voicePart === null}
+            onChange={() => set("voicePart", null)}
+            label={t("settings.voicePart.all")}
+            hint={t("settings.voicePart.all.hint")}
+          />
+          {VOICE_PARTS.map((part) => (
+            <RadioRow
+              key={part}
+              name="voice-part"
+              checked={settings.voicePart === part}
+              onChange={() => set("voicePart", part)}
+              label={t(`voice.${part}`)}
+            />
+          ))}
+          <p className="mt-1 text-[13px] font-medium text-muted">{t("settings.voicePart.hint")}</p>
         </Group>
         <Group title={t("settings.notation")}>
           {(["H", "B"] as const).map((notation) => (

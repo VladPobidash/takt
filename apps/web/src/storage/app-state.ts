@@ -1,3 +1,4 @@
+import type { VoicePart } from "@takt/format";
 import { useSyncExternalStore } from "react";
 import { detectLanguage, type Language } from "../i18n/index.ts";
 import { type Bundle, createBundle } from "./bundle.ts";
@@ -13,7 +14,7 @@ import {
 
 export type Theme = "system" | "light" | "dark";
 export type ChordSize = "s" | "m" | "l";
-export type InstrumentChoice = "harmony" | "guitar" | "bass" | "keys" | "drums";
+export type InstrumentChoice = "harmony" | "guitar" | "bass" | "keys" | "drums" | "vocals";
 
 /** Device settings (ADR 0008): stored locally, never in `.takt` files. */
 /** Device settings (ADR 0008); the view options here are the "everywhere" level of the cascade. */
@@ -23,6 +24,8 @@ export interface Settings extends ViewOptions {
   notation: "H" | "B";
   theme: Theme;
   instrument: InstrumentChoice;
+  /** The singer's part in the vocal view; null shows every singer's cues. */
+  voicePart: VoicePart | null;
   /** Size of chord names on the song screen. */
   chordSize: ChordSize;
   /** When the last full backup was exported from this device (ms since the epoch), null if never. */
@@ -64,6 +67,7 @@ export function defaultSettings(preferredLanguages: readonly string[]): Settings
     notation: language === "uk" ? "H" : "B",
     theme: "system",
     instrument: "harmony",
+    voicePart: null,
     chordSize: "m",
     ...DEFAULT_VIEW_OPTIONS,
     lastBackupAt: null,

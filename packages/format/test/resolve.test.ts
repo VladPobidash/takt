@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { formatKey } from "../src/index.ts";
+import { formatKey, normalizeInstrument } from "../src/index.ts";
 import { parse } from "../src/parse.ts";
 import { resolveSong, sectionType } from "../src/resolve.ts";
 import type { ResolvedLine, ResolvedSong } from "../src/types.ts";
@@ -134,10 +134,33 @@ describe("examples/silent-night.takt", () => {
     expect(chords(guitar.sections[1]?.lines[0])).toEqual(["B", "-", "F7", "B"]);
     expect(guitar.sections[0]?.notes.map((n) => n.instrument)).toEqual(["guitar"]);
     expect(guitar.sections[1]?.lyrics).toHaveLength(6);
-    expect(guitar.sections[2]?.lyrics).toEqual([]);
+    expect(guitar.sections[2]?.lyrics[1]).toBe("Shepherds quake at the sight");
     expect(guitar.sections[2]?.notes).toEqual([]);
     expect(song(text, "drums").sections[2]?.notes.map((n) => n.text)).toEqual([
       "brushes, start here",
+    ]);
+  });
+
+  test("the soprano and the alto each read their own cues", () => {
+    const cues = (voice: "soprano" | "alto") =>
+      resolveSong(parse(text).doc, { instrument: "vocals", voice }).sections.map((s) =>
+        s.notes.filter((n) => n.instrument !== null).map((n) => n.text),
+      );
+    expect(cues("soprano")).toEqual([
+      [],
+      ["in unison, the melody"],
+      [],
+      [],
+      ["descant on the last line"],
+      [],
+    ]);
+    expect(cues("alto")).toEqual([
+      [],
+      ["in unison, the melody"],
+      ["a third below the melody from line 3"],
+      [],
+      ["hold the last note with the soprano"],
+      [],
     ]);
   });
 
@@ -160,6 +183,83 @@ describe("parts", () => {
 
   test("a line repeat counts in the section's bars", () => {
     expect(song("# T\n## A\n| D | A | (2x)\n| G |\n").sections[0]?.bars).toBe(5);
+  });
+});
+
+describe("voice parts", () => {
+  const text = [
+    "# T",
+    "## Verse",
+    "| D | A |",
+    "> all in",
+    "@vocals > breathe after line 2",
+    "@soprano > melody",
+    "@Альт > third below",
+    "@tenor > hum",
+    "@bass > root notes",
+    "@keys > pads",
+    "Silent night, holy night",
+  ].join("\n");
+  const cues = (resolved: ResolvedSong) =>
+    resolved.sections[0]?.notes.map((note) => `${note.instrument ?? "band"}: ${note.text}`);
+
+  test("singers' names and their Ukrainian synonyms; бас stays the bass guitar", () => {
+    expect(
+      [
+        "Vocals",
+        "vocal",
+        "voice",
+        "вокал",
+        "голос",
+        "Сопрано",
+        "alto",
+        "альт",
+        "тенор",
+        "Tenor",
+      ].map(normalizeInstrument),
+    ).toEqual([
+      "vocals",
+      "vocals",
+      "vocals",
+      "vocals",
+      "vocals",
+      "soprano",
+      "alto",
+      "alto",
+      "tenor",
+      "tenor",
+    ]);
+    expect(normalizeInstrument("бас")).toBe("bass");
+    expect(normalizeInstrument("bass")).toBe("bass");
+  });
+
+  test("with no part chosen a singer sees every vocal cue and no instrument's", () => {
+    expect(cues(resolveSong(parse(text).doc, { instrument: "vocals" }))).toEqual([
+      "band: all in",
+      "vocals: breathe after line 2",
+      "soprano: melody",
+      "alto: third below",
+      "tenor: hum",
+    ]);
+  });
+
+  test("with a part chosen a singer sees the cues for all singers and for that part", () => {
+    expect(cues(resolveSong(parse(text).doc, { instrument: "vocals", voice: "alto" }))).toEqual([
+      "band: all in",
+      "vocals: breathe after line 2",
+      "alto: third below",
+    ]);
+  });
+
+  test("instruments do not see the singers' cues", () => {
+    expect(cues(song(text, "bass"))).toEqual(["band: all in", "bass: root notes"]);
+    expect(cues(song(text))).toEqual(["band: all in"]);
+  });
+
+  test("the vocal view keeps the section's bars, so it knows how long the section is", () => {
+    const vocals = resolveSong(parse(text).doc, { instrument: "vocals" });
+    expect(vocals.sections[0]?.bars).toBe(2);
+    expect(vocals.sections[0]?.lyrics).toEqual(["Silent night, holy night"]);
   });
 });
 

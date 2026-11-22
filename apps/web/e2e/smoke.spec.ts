@@ -110,6 +110,47 @@ test.describe("view options", () => {
   });
 });
 
+test.describe("vocal view", () => {
+  test.use({ locale: "en-US", colorScheme: "light" });
+
+  test("singers see sections, lengths, cues and words, no chords; a part narrows the cues", async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto("/songs/silent-night");
+    await page.getByRole("tab", { name: "Vocals" }).click();
+    await expect(page.locator("[data-bar]")).toHaveCount(0);
+    const verse1 = page.getByRole("region", { name: "Verse 1" });
+    await expect(verse1).toContainText("12 bars");
+    await expect(verse1).toContainText("Silent night, holy night");
+    await expect(verse1).toContainText("Vocals: in unison, the melody");
+    await expect(verse1).not.toContainText("enter in line 2");
+    await expect(page.getByRole("region", { name: "Interlude" })).toContainText("4 bars");
+    const verse3 = page.getByRole("region", { name: "Verse 3" });
+    await expect(verse3).toContainText("Soprano: descant on the last line");
+    await expect(verse3).toContainText("Alto: hold the last note");
+    await expect(page.getByRole("region", { name: "Outro" })).toContainText("2 bars×2");
+    await page.screenshot({ path: test.info().outputPath("vocals.png") });
+
+    // A personal note on a whole section still works without bars.
+    await verse1.getByRole("button", { name: "Verse 1" }).click();
+    const dialog = page.getByRole("dialog", { name: "Verse 1 · the whole section" });
+    await dialog.getByRole("textbox", { name: "Personal note" }).fill("breathe before line 3");
+    await dialog.getByRole("button", { name: "Save" }).click();
+    await expect(verse1.getByRole("button", { name: "breathe before line 3" })).toBeVisible();
+
+    // The alto singer chooses their part on this device.
+    await page.goto("/settings");
+    await page.getByRole("radio", { name: "Alto" }).check();
+    await page.goto("/songs/silent-night");
+    await page.getByRole("tab", { name: "Vocals" }).click();
+    await expect(verse3).toContainText("Alto: hold the last note");
+    await expect(verse3).not.toContainText("descant");
+    await expect(verse1).toContainText("Vocals: in unison, the melody");
+    expect(errors).toEqual([]);
+  });
+});
+
 test.describe("personal notes", () => {
   test.use({ locale: "en-US", colorScheme: "light" });
 

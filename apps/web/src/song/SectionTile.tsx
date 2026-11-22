@@ -8,6 +8,10 @@ const INSTRUMENT_LABEL: Record<string, MessageKey> = {
   bass: "instrument.bass",
   keys: "instrument.keys",
   drums: "instrument.drums",
+  vocals: "instrument.vocals",
+  soprano: "voice.soprano",
+  alto: "voice.alto",
+  tenor: "voice.tenor",
 };
 
 export interface SectionNotes {
@@ -29,11 +33,17 @@ export function SectionTile({
   now = false,
   personal,
   lyrics = false,
+  vocal = false,
 }: {
   section: ResolvedSection;
   options: BarGridOptions;
   /** Show the words under the bars. Compact mode never shows them: the song must fit one screen. */
   lyrics?: boolean;
+  /**
+   * The vocal view: no chords and no bar grid. The section says how long it is in bars instead
+   * (a singer must know how long an interlude lasts), and the words are the main text.
+   */
+  vocal?: boolean;
   /** Auto-scroll is playing this section: it gets an outline, never the chords or beats. */
   now?: boolean;
   /** Personal notes of this section; leave out where notes cannot be edited (editor preview). */
@@ -80,7 +90,12 @@ export function SectionTile({
   );
   // Compact: every section has the columns of the whole song, so a bar has one width everywhere
   // and bar lines meet across sections.
-  const lines = options.compact ? (
+  const length = vocal && section.bars > 0 && (
+    <span className="shrink-0 text-[13px] font-bold">
+      {t("song.bars", { count: section.bars })}
+    </span>
+  );
+  const lines = vocal ? null : options.compact ? (
     <div
       className="grid gap-y-0.5"
       style={{ gridTemplateColumns: `repeat(${options.columns ?? 4}, minmax(0, 1fr))` }}
@@ -131,6 +146,7 @@ export function SectionTile({
           )}
         </div>
         <div className="min-w-0 flex-1">
+          {length && <p className="leading-[calc(24px*var(--compact-scale,1))]">{length}</p>}
           {lines}
           {notes}
           {sectionChip}
@@ -172,8 +188,13 @@ export function SectionTile({
             {t("song.now")}
           </span>
         )}
-        {section.repeat > 1 && (
-          <span className="ml-auto shrink-0 text-[16px] font-extrabold">×{section.repeat}</span>
+        {(length || section.repeat > 1) && (
+          <span className="ml-auto flex shrink-0 items-baseline gap-2">
+            {length}
+            {section.repeat > 1 && (
+              <span className="text-[16px] font-extrabold">×{section.repeat}</span>
+            )}
+          </span>
         )}
       </header>
       {notes}
@@ -181,7 +202,13 @@ export function SectionTile({
       {lines}
       {lyrics && section.lyrics.length > 0 && (
         // Quiet and dense: one paragraph per written line, smaller than the chords.
-        <div className="mt-2 text-[14px] font-medium leading-[1.35] break-words">
+        <div
+          className={`break-words ${
+            vocal
+              ? "text-[17px] font-semibold leading-[1.4]"
+              : "mt-2 text-[14px] font-medium leading-[1.35]"
+          }`}
+        >
           {section.lyrics.map((text, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: a lyrics line has no identity of its own
             <p key={index}>{text}</p>

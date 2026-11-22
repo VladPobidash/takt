@@ -33,6 +33,7 @@ const TABS: { id: InstrumentChoice; label: MessageKey }[] = [
   { id: "bass", label: "instrument.bass" },
   { id: "keys", label: "instrument.keys" },
   { id: "drums", label: "instrument.drums" },
+  { id: "vocals", label: "instrument.vocals" },
 ];
 const MAX_CAPO = 11;
 
@@ -118,8 +119,13 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   );
   const song = useMemo(
     () =>
-      doc ? resolveSong(doc, { instrument: instrument === "harmony" ? null : instrument }) : null,
-    [doc, instrument],
+      doc
+        ? resolveSong(doc, {
+            instrument: instrument === "harmony" ? null : instrument,
+            voice: instrument === "vocals" ? settings.voicePart : null,
+          })
+        : null,
+    [doc, instrument, settings.voicePart],
   );
 
   const playback = usePlayback(song);
@@ -185,6 +191,7 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
   };
 
   const guitar = instrument === "guitar";
+  const vocal = instrument === "vocals";
   const capo = guitar ? (capoChoice ?? song.capo ?? 0) : 0;
   const display = songDisplay(song, { notation: settings.notation, transpose, capo });
   const options = {
@@ -365,7 +372,9 @@ export function SongScreen({ id, context }: { id: string; context?: SetlistConte
               options={options}
               now={section.index === nowSection}
               personal={personalFor(section.index)}
-              lyrics={view.lyrics}
+              // The words are what the vocal view is for: the option hides them in chord views only.
+              lyrics={vocal || view.lyrics}
+              vocal={vocal}
             />
           ))}
         </div>
